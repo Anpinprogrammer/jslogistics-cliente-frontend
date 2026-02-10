@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ordersAPI } from '../services/api';
 import { Order } from '../types';
-import { formatCOP, formatDateTime, serviceLabel, statusLabel } from '../utils/format';
+import { formatDateTime, serviceLabel } from '../utils/format'; //formatCOP, statusLabel 
 import { StatusBadge, Spinner, Alert } from '../components/ui';
 
 const Track: React.FC = () => {

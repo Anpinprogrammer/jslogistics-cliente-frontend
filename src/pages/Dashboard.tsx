@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { financeAPI, ordersAPI } from '../services/api';
 import { FinanceSummary, Order } from '../types';
-import { formatCOP, formatDateTime, statusLabel, serviceLabel } from '../utils/format';
+import { formatCOP, formatDateTime} from '../utils/format'; // statusLabel, serviceLabel 
 import { StatCard, Spinner, StatusBadge } from '../components/ui';
 
 const Dashboard: React.FC = () => {

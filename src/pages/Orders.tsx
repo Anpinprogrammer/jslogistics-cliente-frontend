@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ordersAPI } from '../services/api';
 import { Order, OrderStatus, CreateOrderPayload } from '../types';
-import { formatCOP, formatDate, statusLabel, serviceLabel } from '../utils/format';
+import { formatCOP, formatDate, serviceLabel } from '../utils/format'; //statusLabel
 import { StatusBadge, Spinner, EmptyState, Alert, SectionHeader } from '../components/ui';
 
 // ── Orders List ─────────────────────────────────────────────────────────────
