@@ -123,7 +123,7 @@ const Home: React.FC = () => {
 
         {/* Scroll indicator */}
         <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-silver-600 animate-bounce">
-          <span className="text-xs font-mono tracking-widest">SCROLL</span>
+          <span className="text-xs font-mono tracking-widest">VER MAS</span>
           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path d="M19 9l-7 7-7-7" />
           </svg>
