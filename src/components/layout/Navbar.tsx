@@ -131,7 +131,7 @@ const Navbar: React.FC = () => {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden dark:bg-steel-950/98 dark:border-t dark:border-steel-800 bg-white border-t border-gray-200 px-4 py-4 space-y-1 backdrop-blur-md">
+        <div className="md:hidden dark:bg-steel-950/98 dark:border-t dark:border-steel-800 bg-white border-t border-gray-200 px-4 py-4 space-y-1 backdrop-blur-md mx-3 rounded-lg">
           {navLinks.map(({ to, label }) => (
             <Link key={to} to={to} className="block px-4 py-3 text-sm font-600 dark:text-silver-300 dark:hover:text-white dark:hover:bg-steel-800 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg">
               {label}
