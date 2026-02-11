@@ -37,10 +37,13 @@ const Register: React.FC = () => {
       <div className="relative w-full max-w-2xl animate-fade-up">
         <div className="text-center mb-8">
           <div className="inline-flex w-14 h-14 rounded-2xl bg-steel-gradient border border-steel-600 items-center justify-center mb-4">
-            <svg viewBox="0 0 24 24" className="w-7 h-7 text-accent-400" fill="none" stroke="currentColor" strokeWidth="2">
+            {/**
+             * <svg viewBox="0 0 24 24" className="w-7 h-7 text-accent-400" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z" />
               <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16" />
             </svg>
+             */}
+            <img src="/img/logo.png" alt="" />
           </div>
           <h1 className="font-display font-700 text-2xl text-white">Registro empresarial</h1>
           <p className="text-sm text-silver-500 mt-1">Crea la cuenta de tu empresa en JS Logistics</p>
