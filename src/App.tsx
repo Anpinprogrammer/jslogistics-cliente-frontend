@@ -22,11 +22,19 @@ const OrderDetailWrapper: React.FC = () => {
 function ScrollToHash() {
   const location = useLocation();
 
+  
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   useEffect(() => {
     if (location.hash) {
       const element = document.querySelector(location.hash);
       if (element) {
         element.scrollIntoView({ behavior: "smooth" });
+
+        // 🔥 Quitar el hash de la URL después del scroll
+        window.history.replaceState(null, "", location.pathname);
       }
     }
   }, [location]);
