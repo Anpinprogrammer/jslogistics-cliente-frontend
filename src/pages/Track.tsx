@@ -88,12 +88,12 @@ const Track: React.FC = () => {
               <div className="grid sm:grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="text-silver-600 mb-0.5">De</p>
-                  <p className="font-600 text-silver-200">{order.senderCompany}</p>
+                  <p className="font-600 dark:text-silver-200 text-gray-500">{order.senderCompany}</p>
                   <p className="text-silver-400">{order.senderAddress}</p>
                 </div>
                 <div>
                   <p className="text-silver-600 mb-0.5">Para</p>
-                  <p className="font-600 text-silver-200">{order.recipientName}</p>
+                  <p className="font-600 dark:text-silver-200 text-gray-500">{order.recipientName}</p>
                   <p className="text-silver-400">{order.recipientAddress}</p>
                 </div>
               </div>
@@ -103,17 +103,17 @@ const Track: React.FC = () => {
             <div className="grid sm:grid-cols-3 gap-4">
               <div className="card p-4 text-center">
                 <p className="text-xs font-mono text-silver-600 mb-1.5">SERVICIO</p>
-                <p className="font-display font-700 text-white">{serviceLabel[order.serviceType]?.split(' ')[0]}</p>
+                <p className="font-display font-700 dark:text-white text-gray-400">{serviceLabel[order.serviceType]?.split(' ')[0]}</p>
               </div>
               <div className="card p-4 text-center">
                 <p className="text-xs font-mono text-silver-600 mb-1.5">CREADO</p>
-                <p className="font-600 text-silver-200 text-sm">{formatDateTime(order.createdAt)}</p>
+                <p className="font-600 dark:text-silver-200 text-gray-400 text-sm">{formatDateTime(order.createdAt)}</p>
               </div>
               <div className="card p-4 text-center">
                 <p className="text-xs font-mono text-silver-600 mb-1.5">
                   {order.deliveredAt ? 'ENTREGADO' : 'ENTREGA EST.'}
                 </p>
-                <p className="font-600 text-silver-200 text-sm">
+                <p className="font-600 dark:text-silver-200 text-gray-400 text-sm">
                   {formatDateTime(order.deliveredAt || order.estimatedDelivery)}
                 </p>
               </div>
@@ -121,7 +121,7 @@ const Track: React.FC = () => {
 
             {/* Timeline */}
             <div className="card p-6">
-              <h3 className="font-display font-600 text-white mb-6">Seguimiento del envío</h3>
+              <h3 className="font-display font-600 dark:text-white text-gray-600 mb-6">Seguimiento del envío</h3>
               <div>
                 {order.timeline.map((ev, idx) => (
                   <div key={idx} className="flex gap-4">
@@ -131,7 +131,7 @@ const Track: React.FC = () => {
                           ? idx === order.timeline.findLastIndex(t => t.completed)
                             ? 'bg-accent-500/30 border-accent-500 text-accent-400 shadow-accent'
                             : 'bg-accent-500/20 border-accent-500/60 text-accent-400'
-                          : 'bg-steel-800 border-steel-700 text-steel-600'
+                          : 'dark:bg-steel-800 bg-steel-500 dark:border-steel-700 border-steel-400 text-steel-600'
                       }`}>
                         {ev.completed
                           ? <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>
@@ -143,7 +143,7 @@ const Track: React.FC = () => {
                       )}
                     </div>
                     <div className={`pb-6 ${idx === order.timeline.length - 1 ? 'pb-0' : ''}`}>
-                      <p className={`font-600 text-sm ${ev.completed ? 'text-silver-100' : 'text-steel-600'}`}>
+                      <p className={`font-600 text-sm ${ev.completed ? 'dark:text-silver-100 text-gray-400' : 'text-steel-600'}`}>
                         {ev.event}
                       </p>
                       <p className={`text-xs mt-0.5 ${ev.completed ? 'text-silver-500' : 'text-steel-700'}`}>{ev.location}</p>
