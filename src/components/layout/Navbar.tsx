@@ -19,6 +19,14 @@ const Navbar: React.FC = () => {
 
   useEffect(() => { setMobileOpen(false); }, [location.pathname]);
 
+  const handleLogoClick = () => {
+    navigate("/");
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
   const handleLogout = () => { logout(); navigate('/'); };
 
   const navLinks = isAuthenticated
@@ -43,7 +51,7 @@ const Navbar: React.FC = () => {
     }`}>
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-3 group">
+        <div onClick={handleLogoClick} className="flex items-center gap-3 group cursor-pointer">
           <div className="w-9 h-9 rounded-lg bg-steel-gradient dark:bg-steel-gradient flex items-center justify-center dark:border dark:border-steel-600 border border-steel-200 shadow-steel group-hover:border-accent-500 transition-colors">
             {/**
              * <svg viewBox="0 0 24 24" className="w-5 h-5 text-accent-400" fill="none" stroke="currentColor" strokeWidth="2">
@@ -58,7 +66,7 @@ const Navbar: React.FC = () => {
             <span className="font-display font-800 text-lg dark:text-white text-steel-700 tracking-wide">JS</span>
             <span className="font-display font-400 text-lg dark:text-silver-400 text-steel-500 tracking-wider"> LOGISTICS</span>
           </div>
-        </Link>
+        </div>
 
         {/* Desktop nav links */}
         <div className="hidden md:flex items-center gap-1">
@@ -131,9 +139,9 @@ const Navbar: React.FC = () => {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden dark:bg-steel-950/98 dark:border-t dark:border-steel-800 bg-white border-t border-gray-200 px-4 py-4 space-y-1 backdrop-blur-md mx-3 rounded-lg">
+        <div className="md:hidden bg-steel-800 dark:border-t dark:border-steel-800 dark:bg-white border-t border-gray-200 px-4 py-4 space-y-1 backdrop-blur-md mx-3 rounded-lg">
           {navLinks.map(({ to, label }) => (
-            <Link key={to} to={to} className="block px-4 py-3 text-sm font-600 dark:text-silver-300 dark:hover:text-white dark:hover:bg-steel-800 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg">
+            <Link key={to} to={to} className="block px-4 py-3 text-sm font-600 dark:text-silver-800 dark:hover:text-white dark:hover:bg-steel-800 text-white hover:text-gray-900 hover:bg-gray-100 rounded-lg">
               {label}
             </Link>
           ))}

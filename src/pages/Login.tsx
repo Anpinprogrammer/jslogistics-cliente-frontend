@@ -54,7 +54,7 @@ const Login: React.FC = () => {
         </div>
 
         <div className="card p-8">
-          <h2 className="font-display font-700 text-xl text-white mb-1">Iniciar sesión</h2>
+          <h2 className="font-display font-700 text-xl dark:text-white text-gray-600 mb-1">Iniciar sesión</h2>
           <p className="text-sm text-silver-500 mb-6">Ingresa con las credenciales de tu empresa</p>
 
           {/* Demo hint */}

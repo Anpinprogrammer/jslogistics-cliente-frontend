@@ -33,7 +33,7 @@ const Dashboard: React.FC = () => {
         {/* Header */}
         <div className="mb-8 animate-fade-up">
           <p className="text-xs font-mono text-accent-400 uppercase tracking-widest mb-1">Panel principal</p>
-          <h1 className="font-display font-800 text-3xl sm:text-4xl text-white">
+          <h1 className="font-display font-800 text-3xl sm:text-4xl dark:text-white text-gray-600">
             Bienvenido, {user?.name?.split(' ')[0]}
           </h1>
           <p className="text-silver-500 text-sm mt-1">{user?.company}</p>
@@ -120,7 +120,7 @@ const Dashboard: React.FC = () => {
               </svg>
             </div>
             <div>
-              <p className="font-display font-600 text-white">Crear nuevo pedido</p>
+              <p className="font-display font-600 dark:text-white text-gray-600">Crear nuevo pedido</p>
               <p className="text-sm text-silver-500">Registra un envío para tu cliente</p>
             </div>
             <svg className="w-5 h-5 text-steel-500 ml-auto group-hover:text-accent-400 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -135,7 +135,7 @@ const Dashboard: React.FC = () => {
               </svg>
             </div>
             <div>
-              <p className="font-display font-600 text-white">Rastrear envío</p>
+              <p className="font-display font-600 dark:text-white text-gray-600">Rastrear envío</p>
               <p className="text-sm text-silver-500">Busca por número de rastreo</p>
             </div>
             <svg className="w-5 h-5 text-steel-500 ml-auto group-hover:text-accent-400 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -148,7 +148,7 @@ const Dashboard: React.FC = () => {
         <div className="card animate-fade-up animate-delay-300">
           <div className="p-5 border-b border-steel-800 flex items-center justify-between">
             <div>
-              <h2 className="font-display font-600 text-white">Pedidos recientes</h2>
+              <h2 className="font-display font-600 dark:text-white text-gray-600">Pedidos recientes</h2>
               <p className="text-xs text-silver-500 mt-0.5">Últimos {orders.length} pedidos</p>
             </div>
             <Link to="/orders" className="btn-ghost btn-sm">Ver todos</Link>
@@ -166,7 +166,7 @@ const Dashboard: React.FC = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <p className="font-mono text-sm text-silver-200 truncate">{o.trackingNumber}</p>
+                      <p className="font-mono text-sm dark:text-silver-200 text-gray-600 truncate">{o.trackingNumber}</p>
                       <StatusBadge status={o.status} />
                     </div>
                     <p className="text-xs text-silver-500 truncate">
@@ -174,7 +174,7 @@ const Dashboard: React.FC = () => {
                     </p>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <p className="text-sm font-600 text-silver-200">{formatCOP(o.shippingCostCOP)}</p>
+                    <p className="text-sm font-600 dark:text-silver-200 text-gray-600">{formatCOP(o.shippingCostCOP)}</p>
                     <p className="text-xs text-silver-600">{formatDateTime(o.createdAt)}</p>
                   </div>
                   <svg className="w-4 h-4 text-steel-600 group-hover:text-accent-400 transition-colors flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">

@@ -47,7 +47,7 @@ export const OrdersList: React.FC = () => {
                 className={`px-4 py-2 rounded-lg text-sm font-600 transition-all ${
                   filter === key
                     ? 'bg-accent-500/20 text-accent-400 border border-accent-500/40'
-                    : 'bg-steel-800/40 text-silver-400 border border-steel-700 hover:border-steel-600 hover:text-silver-200'
+                    : 'bg-steel-800/40 dark:text-silver-400 text-white border border-steel-700 hover:border-steel-600 hover:text-silver-200'
                 }`}
               >
                 {label} <span className="ml-1.5 opacity-60 font-mono text-xs">{count}</span>
@@ -69,7 +69,7 @@ export const OrdersList: React.FC = () => {
             {/* Table header */}
             <div className="hidden sm:grid grid-cols-[1fr_1.5fr_1fr_120px_100px_48px] gap-4 px-5 py-3 border-b border-steel-800 bg-steel-900/50">
               {['Rastreo', 'Destinatario', 'Servicio', 'Costo', 'Estado', ''].map(h => (
-                <p key={h} className="text-xs font-mono text-silver-600 uppercase tracking-wider">{h}</p>
+                <p key={h} className="text-xs font-mono dark:text-silver-600 text-white uppercase tracking-wider">{h}</p>
               ))}
             </div>
             <div className="divide-y divide-steel-800">
@@ -77,21 +77,21 @@ export const OrdersList: React.FC = () => {
                 <Link key={o.id} to={`/orders/${o.id}`}
                   className="grid sm:grid-cols-[1fr_1.5fr_1fr_120px_100px_48px] gap-4 px-5 py-4 hover:bg-steel-800/30 transition-colors items-center group">
                   <div>
-                    <p className="font-mono text-sm text-silver-200">{o.trackingNumber}</p>
+                    <p className="font-mono text-sm dark:text-silver-200 text-gray-400">{o.trackingNumber}</p>
                     <p className="text-xs text-silver-600">{formatDate(o.createdAt)}</p>
                   </div>
                   <div>
-                    <p className="text-sm font-600 text-silver-200 truncate">{o.recipientName}</p>
+                    <p className="text-sm font-600 dark:text-silver-200 text-gray-500 truncate">{o.recipientName}</p>
                     <p className="text-xs text-silver-500 truncate">{o.recipientCity}</p>
                   </div>
                   <p className="text-sm text-silver-400 hidden sm:block">{serviceLabel[o.serviceType]?.split(' ')[0]}</p>
-                  <p className="text-sm font-600 text-silver-200 hidden sm:block">{formatCOP(o.shippingCostCOP)}</p>
+                  <p className="text-sm font-600 dark:text-silver-200 text-gray-400 hidden sm:block">{formatCOP(o.shippingCostCOP)}</p>
                   <div className="hidden sm:block"><StatusBadge status={o.status} /></div>
                   <svg className="w-4 h-4 text-steel-600 group-hover:text-accent-400 transition-colors hidden sm:block" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" /></svg>
                   {/* Mobile summary */}
                   <div className="sm:hidden col-span-full flex items-center justify-between">
                     <StatusBadge status={o.status} />
-                    <p className="font-600 text-silver-200 text-sm">{formatCOP(o.shippingCostCOP)}</p>
+                    <p className="font-600 dark:text-silver-200 text-gray-400 text-sm">{formatCOP(o.shippingCostCOP)}</p>
                   </div>
                 </Link>
               ))}
@@ -131,7 +131,7 @@ export const OrderDetail: React.FC<{ id: string }> = ({ id }) => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <p className="font-mono text-lg text-accent-400">{order.trackingNumber}</p>
-              <h1 className="font-display font-700 text-3xl text-white">Detalle del pedido</h1>
+              <h1 className="font-display font-700 text-3xl dark:text-white text-gray-600">Detalle del pedido</h1>
             </div>
             <StatusBadge status={order.status} />
           </div>
@@ -141,7 +141,7 @@ export const OrderDetail: React.FC<{ id: string }> = ({ id }) => {
           {/* Timeline */}
           <div className="lg:col-span-2 space-y-5">
             <div className="card p-5">
-              <h3 className="font-display font-600 text-white mb-5">Seguimiento</h3>
+              <h3 className="font-display font-600 dark:text-white text-gray-600 mb-5">Seguimiento</h3>
               <div className="space-y-0">
                 {order.timeline.map((event, idx) => (
                   <div key={idx} className="flex gap-4">
@@ -149,7 +149,7 @@ export const OrderDetail: React.FC<{ id: string }> = ({ id }) => {
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 flex-shrink-0 ${
                         event.completed
                           ? 'bg-accent-500/20 border-accent-500 text-accent-400'
-                          : 'bg-steel-800 border-steel-700 text-steel-500'
+                          : 'dark:bg-steel-800 bg-steel-500 dark:border-steel-700 border-steel-400 dark:text-steel-500 text-white'
                       }`}>
                         {event.completed
                           ? <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>
@@ -161,7 +161,7 @@ export const OrderDetail: React.FC<{ id: string }> = ({ id }) => {
                       )}
                     </div>
                     <div className={`pb-5 ${idx === order.timeline.length - 1 ? 'pb-0' : ''}`}>
-                      <p className={`font-600 text-sm ${event.completed ? 'text-silver-200' : 'text-silver-600'}`}>{event.event}</p>
+                      <p className={`font-600 text-sm ${event.completed ? 'dark:text-silver-200 text-gray-400' : 'text-silver-600'}`}>{event.event}</p>
                       <p className="text-xs text-silver-600 mt-0.5">{event.location}</p>
                       {event.timestamp && <p className="text-xs text-silver-500 mt-0.5 font-mono">{formatDate(event.timestamp)}</p>}
                     </div>
@@ -174,14 +174,14 @@ export const OrderDetail: React.FC<{ id: string }> = ({ id }) => {
             <div className="grid sm:grid-cols-2 gap-5">
               <div className="card p-5">
                 <p className="text-xs font-mono text-silver-600 uppercase tracking-wider mb-3">Remitente</p>
-                <p className="font-600 text-white">{order.senderCompany}</p>
+                <p className="font-600 dark:text-white text-gray-500">{order.senderCompany}</p>
                 <p className="text-sm text-silver-400 mt-1">{order.senderContact}</p>
                 <p className="text-sm text-silver-500 mt-0.5">{order.senderPhone}</p>
                 <p className="text-sm text-silver-500 mt-1 leading-relaxed">{order.senderAddress}</p>
               </div>
               <div className="card p-5">
                 <p className="text-xs font-mono text-silver-600 uppercase tracking-wider mb-3">Destinatario</p>
-                <p className="font-600 text-white">{order.recipientName}</p>
+                <p className="font-600 dark:text-white text-gray-500">{order.recipientName}</p>
                 <p className="text-sm text-silver-400 mt-1">{order.recipientContact}</p>
                 <p className="text-sm text-silver-500 mt-0.5">{order.recipientPhone}</p>
                 <p className="text-sm text-silver-500 mt-1 leading-relaxed">{order.recipientAddress}</p>
@@ -196,15 +196,15 @@ export const OrderDetail: React.FC<{ id: string }> = ({ id }) => {
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-silver-500">Servicio</span>
-                  <span className="text-silver-200 font-600">{serviceLabel[order.serviceType]?.split(' ')[0]}</span>
+                  <span className="dark:text-silver-200 text-gray-400 font-600">{serviceLabel[order.serviceType]?.split(' ')[0]}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-silver-500">Peso</span>
-                  <span className="text-silver-200 font-600">{order.weightKg} kg</span>
+                  <span className="dark:text-silver-200 text-gray-400 font-600">{order.weightKg} kg</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-silver-500">Valor declarado</span>
-                  <span className="text-silver-200">{formatCOP(order.declaredValueCOP)}</span>
+                  <span className="dark:text-silver-200 text-ragy-400">{formatCOP(order.declaredValueCOP)}</span>
                 </div>
                 <div className="border-t border-steel-800 pt-3 flex justify-between">
                   <span className="text-silver-400 font-600">Costo de envío</span>
@@ -347,7 +347,7 @@ export const CreateOrder: React.FC = () => {
                     }`}>
                       <input type="radio" name="serviceType" value={s} checked={form.serviceType === s} onChange={handleChange} className="mt-0.5 accent-sky-500" />
                       <div>
-                        <p className="text-sm font-600 text-silver-200">{serviceLabel[s]}</p>
+                        <p className="text-sm font-600 dark:text-silver-200 text-gray-400">{serviceLabel[s]}</p>
                       </div>
                     </label>
                   ))}

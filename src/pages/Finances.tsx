@@ -88,7 +88,7 @@ const Finances: React.FC = () => {
             <div>
               <p className="text-xs font-mono text-silver-600 uppercase tracking-wider mb-2">Línea de crédito</p>
               <div className="flex items-baseline gap-3">
-                <p className="font-display font-700 text-2xl text-white">{formatCOP(summary?.availableCredit ?? 0)}</p>
+                <p className="font-display font-700 text-2xl dark:text-white text-gray-600">{formatCOP(summary?.availableCredit ?? 0)}</p>
                 <p className="text-sm text-silver-500">disponible de {formatCOP(summary?.creditLimit ?? 0)}</p>
               </div>
             </div>
@@ -113,7 +113,7 @@ const Finances: React.FC = () => {
         <div className="card overflow-hidden">
           <div className="px-5 py-4 border-b border-steel-800 flex items-center justify-between">
             <div>
-              <h2 className="font-display font-600 text-white">Historial de movimientos</h2>
+              <h2 className="font-display font-600 dark:text-white text-gray-600">Historial de movimientos</h2>
               <p className="text-xs text-silver-500 mt-0.5">{transactions.length} transacciones</p>
             </div>
           </div>
@@ -121,7 +121,7 @@ const Finances: React.FC = () => {
           {/* Table header */}
           <div className="hidden sm:grid grid-cols-[2fr_1fr_1fr_100px] gap-4 px-5 py-3 border-b border-steel-800 bg-steel-900/50">
             {['Descripción', 'Fecha', 'Monto', 'Estado'].map(h => (
-              <p key={h} className="text-xs font-mono text-silver-600 uppercase tracking-wider">{h}</p>
+              <p key={h} className="text-xs font-mono dark:text-silver-600 text-white uppercase tracking-wider">{h}</p>
             ))}
           </div>
 
@@ -141,13 +141,13 @@ const Finances: React.FC = () => {
                       }
                     </div>
                     <div>
-                      <p className="text-sm font-600 text-silver-200">{tx.description}</p>
+                      <p className="text-sm font-600 dark:text-silver-200 text-gray-500">{tx.description}</p>
                       <p className="text-xs text-silver-600 sm:hidden">{formatDateTime(tx.date)}</p>
                     </div>
                   </div>
                   <p className="text-xs text-silver-500 hidden sm:block">{formatDateTime(tx.date)}</p>
                   <p className={`font-display font-700 text-base ${
-                    tx.type === 'payment' ? 'text-emerald-400' : 'text-silver-200'
+                    tx.type === 'payment' ? 'text-emerald-400' : 'dark:text-silver-200 text-gray-400'
                   }`}>
                     {tx.type === 'payment' ? '+' : '-'}{formatCOP(tx.amount)}
                   </p>
@@ -166,7 +166,7 @@ const Finances: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="card w-full max-w-md p-7 animate-fade-up">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="font-display font-700 text-xl text-white">Registrar pago</h2>
+              <h2 className="font-display font-700 text-xl dark:text-white text-gray-600">Registrar pago</h2>
               <button onClick={() => setShowPayment(false)} className="text-silver-500 hover:text-white">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
               </button>

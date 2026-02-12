@@ -92,9 +92,9 @@ const Home: React.FC = () => {
         />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 text-center">
-          <div className="inline-flex items-center gap-2 bg-accent-500/10 border border-accent-500/30 rounded-full px-4 py-1.5 mb-8 animate-fade-up">
-            <span className="w-1.5 h-1.5 bg-accent-400 rounded-full animate-pulse-slow" />
-            <span className="text-xs font-mono text-accent-400 tracking-wider">PLATAFORMA LOGÍSTICA EMPRESARIAL</span>
+          <div className="inline-flex items-center gap-2 dark:bg-accent-500/10 bg-gray-300 border dark:border-accent-500/30 border-white rounded-full px-4 py-1.5 mb-8 animate-fade-up">
+            <span className="w-1.5 h-1.5 dark:bg-accent-400 bg-white rounded-full animate-pulse-slow" />
+            <span className="text-xs font-mono dark:text-accent-400 text-white tracking-wider">PLATAFORMA LOGÍSTICA EMPRESARIAL</span>
           </div>
 
           <h1 className="font-display font-800 text-5xl sm:text-7xl lg:text-8xl text-white leading-[0.95] tracking-tight mb-6 animate-fade-up animate-delay-100">
@@ -106,7 +106,7 @@ const Home: React.FC = () => {
             </span>
           </h1>
 
-          <p className="text-silver-400 text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed animate-fade-up animate-delay-200">
+          <p className="dark:text-silver-400 text-gray-600 text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed animate-fade-up animate-delay-200">
             Conectamos empresas colombianas con sus clientes finales a través de una plataforma de envíos confiable, rastreable y financieramente transparente.
           </p>
 
@@ -135,7 +135,7 @@ const Home: React.FC = () => {
         <div className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-8">
           {stats.map(({ value, label }) => (
             <div key={label} className="text-center">
-              <p className="font-display font-800 text-3xl sm:text-4xl text-accent-400 mb-1">{value}</p>
+              <p className="font-display font-800 text-3xl sm:text-4xl dark:text-accent-400 text-steel-800 mb-1">{value}</p>
               <p className="text-xs font-mono text-silver-500 uppercase tracking-widest">{label}</p>
             </div>
           ))}
@@ -148,7 +148,7 @@ const Home: React.FC = () => {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
               <p className="text-xs font-mono text-accent-400 uppercase tracking-widest mb-3">Quiénes somos</p>
-              <h2 className="font-display font-700 text-4xl sm:text-5xl text-white leading-tight mb-6">
+              <h2 className="font-display font-700 text-4xl sm:text-5xl dark:text-white text-gray-600 leading-tight mb-6">
                 La infraestructura logística que tu empresa necesita
               </h2>
               <div className="divider mb-6" />
@@ -175,7 +175,7 @@ const Home: React.FC = () => {
               ].map(({ icon, title, desc }) => (
                 <div key={title} className="card p-5">
                   <div className="text-2xl mb-3">{icon}</div>
-                  <p className="font-display font-600 text-white text-sm mb-1">{title}</p>
+                  <p className="font-display font-600 dark:text-white text-gray-600 text-sm mb-1">{title}</p>
                   <p className="text-xs text-silver-500 leading-relaxed">{desc}</p>
                 </div>
               ))}
@@ -202,7 +202,7 @@ const Home: React.FC = () => {
                   </div>
                   <span className="text-xs font-mono text-steel-500 uppercase tracking-wider">{tag}</span>
                 </div>
-                <h3 className="font-display font-600 text-lg text-white mb-2">{title}</h3>
+                <h3 className="font-display font-600 text-lg dark:text-white text-gray-600 mb-2">{title}</h3>
                 <p className="text-sm text-silver-500 leading-relaxed">{desc}</p>
               </div>
             ))}
@@ -215,7 +215,7 @@ const Home: React.FC = () => {
         <div className="container">
           <div className="text-center mb-14">
             <p className="text-xs font-mono text-accent-400 uppercase tracking-widest mb-3">Proceso</p>
-            <h2 className="font-display font-700 text-4xl sm:text-5xl text-white">¿Cómo funciona?</h2>
+            <h2 className="font-display font-700 text-4xl sm:text-5xl dark:text-white text-gray-600">¿Cómo funciona?</h2>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 relative">
@@ -232,7 +232,7 @@ const Home: React.FC = () => {
                 <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-steel-800 border border-steel-700 flex items-center justify-center">
                   <span className="font-display font-800 text-xl text-accent-400">{step}</span>
                 </div>
-                <p className="font-display font-600 text-white mb-2">{title}</p>
+                <p className="font-display font-600 dark:text-white text-gray-600 mb-2">{title}</p>
                 <p className="text-sm text-silver-500 leading-relaxed">{desc}</p>
               </div>
             ))}
@@ -254,7 +254,7 @@ const Home: React.FC = () => {
               <h2 className="font-display font-800 text-4xl sm:text-6xl text-white mb-5">
                 Lista tu empresa.<br />Envía con confianza.
               </h2>
-              <p className="text-silver-400 max-w-lg mx-auto mb-8">
+              <p className="dark:text-silver-400 text-gray-600 max-w-lg mx-auto mb-8">
                 Accede al portal empresarial, crea tu primer pedido y experimenta la diferencia de una logística transparente.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -294,7 +294,7 @@ const Home: React.FC = () => {
 
             {/* Contact form */}
             <div className="card p-6 sm:p-8">
-              <h3 className="font-display font-700 text-xl text-white mb-6">Envíanos un mensaje</h3>
+              <h3 className="font-display font-700 text-xl dark:text-white text-gray-600 mb-6">Envíanos un mensaje</h3>
               <form className="space-y-4" onSubmit={e => { e.preventDefault(); alert('Mensaje enviado. Te contactaremos pronto.'); }}>
                 <div className="form-grid">
                   <div className="form-group">

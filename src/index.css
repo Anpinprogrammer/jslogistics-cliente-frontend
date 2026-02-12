@@ -70,8 +70,8 @@
     @apply btn px-6 py-2.5 active:scale-95
            dark:bg-transparent dark:text-silver-300 dark:border dark:border-steel-600 
            dark:hover:border-accent-500 dark:hover:text-accent-400
-           bg-transparent text-steel-600 border-2 border-steel-300 
-           hover:border-accent-500 hover:text-accent-500;
+           bg-transparent text-steel-600 border-2 border-steel-600 
+           hover:border-steel-600 hover:text-white hover:bg-steel-600;
   }
   
   .btn-danger {

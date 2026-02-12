@@ -43,11 +43,11 @@ const Track: React.FC = () => {
       <div className="max-w-3xl mx-auto relative">
         {/* Header */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 bg-steel-800/60 border border-steel-700 rounded-full px-4 py-1.5 mb-5">
-            <span className="w-1.5 h-1.5 bg-accent-400 rounded-full" />
-            <span className="text-xs font-mono text-silver-400 tracking-wider">RASTREO PÚBLICO</span>
+          <div className="inline-flex items-center gap-2 dark:bg-steel-800/60 bg-gray-300 border dark:border-steel-700 border-white rounded-full px-4 py-1.5 mb-5">
+            <span className="w-1.5 h-1.5 dark:bg-accent-400 bg-white rounded-full" />
+            <span className="text-xs font-mono dark:text-silver-400 text-white tracking-wider">RASTREO PÚBLICO</span>
           </div>
-          <h1 className="font-display font-800 text-4xl sm:text-5xl text-white mb-3">Rastrear envío</h1>
+          <h1 className="font-display font-800 text-4xl sm:text-5xl dark:text-white text-gray-500 mb-3">Rastrear envío</h1>
           <p className="text-silver-400">Ingresa el número de rastreo para ver el estado de tu paquete</p>
         </div>
 

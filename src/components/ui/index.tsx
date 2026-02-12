@@ -40,7 +40,7 @@ export const StatCard: React.FC<StatCardProps> = ({ label, value, sub, accent, i
 // ── SectionHeader ─────────────────────────────────────────────────────────────
 export const SectionHeader: React.FC<{ title: string; subtitle?: string }> = ({ title, subtitle }) => (
   <div className="mb-10">
-    <h2 className="text-3xl sm:text-4xl font-display font-700 text-white mb-2">{title}</h2>
+    <h2 className="text-3xl sm:text-4xl font-display font-700 dark:text-white text-gray-600 mb-2">{title}</h2>
     {subtitle && <p className="text-silver-400 text-sm max-w-xl">{subtitle}</p>}
     <div className="divider mt-3" />
   </div>

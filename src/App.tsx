@@ -1,5 +1,5 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, useParams } from 'react-router-dom';
+import { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, useParams, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
@@ -19,12 +19,28 @@ const OrderDetailWrapper: React.FC = () => {
   return <OrderDetail id={id || ''} />;
 };
 
+function ScrollToHash() {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash) {
+      const element = document.querySelector(location.hash);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  }, [location]);
+
+  return null;
+}
+
 const App: React.FC = () => (
   <AuthProvider>
     <BrowserRouter>
       <div className="flex flex-col min-h-screen">
         <Navbar />
         <main className="flex-grow">
+          <ScrollToHash />
           <Routes>
             {/* Public */}
             <Route path="/" element={<Home />} />

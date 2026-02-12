@@ -50,7 +50,7 @@ const Register: React.FC = () => {
         </div>
 
         <div className="card p-8">
-          <h2 className="font-display font-700 text-xl text-white mb-6">Datos de la empresa</h2>
+          <h2 className="font-display font-700 text-xl dark:text-white text-gray-600  mb-6">Datos de la empresa</h2>
           {error && <div className="mb-5"><Alert type="error" message={error} /></div>}
 
           <form onSubmit={handleSubmit}>
