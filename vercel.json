@@ -1,0 +1,8 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "installCommand": "npm ci",
+  "buildCommand": "if [ \"$VERCEL_ENV\" = \"preview\" ]; then npm run build:demo; else npm run build; fi",
+  "outputDirectory": "dist",
+  "rewrites": [{ "source": "/((?!api/|assets/|img/).*)", "destination": "/index.html" }]
+}

@@ -30,6 +30,12 @@ Con `VITE_PERMITIR_CAMBIO_PORTAL=true` aparece un botón flotante para pasar de 
 El CSS del portal clásico es una copia de `js-logistics/app/css/estilos.css`. `postcss.config.js` encierra todas sus reglas
 dentro de `.clasico`, así que no choca con Tailwind ni con la landing.
 
+## Despliegue en Vercel
+
+`vercel.json` fija Vite, la carpeta `dist` y la regla de SPA (toda ruta va a `index.html`).
+Las vistas previas de cada PR (`VERCEL_ENV=preview`) se construyen en **modo demo**, con datos de prueba y el botón para
+cambiar de portal, así se le pueden mostrar al dueño sin backend. Producción usa el modo normal y llama a `/api`.
+
 ## Estructura
 
 ```text
