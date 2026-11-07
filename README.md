@@ -49,9 +49,15 @@ src/
   components/   piezas de la landing (Navbar, Footer, ui)
 ```
 
+## Para quien cambie el código (personas o agentes de IA)
+
+Lee [AGENTS.md](AGENTS.md) (convenciones y reglas) y [ARCHITECTURE.md](ARCHITECTURE.md) (cómo está armado y por qué).
+El contrato de la API está en `js-logistics/backend/README.md`: cualquier cambio de API se hace primero allá.
+
 ## Lo que falta del backend
 
-- `GET /api/clientes/:id/movimientos`: mientras no exista, la cuenta muestra solo los pedidos.
-- `GET /api/pedidos/:guia/archivos` (`{ archivos: [{ tipo, url }] }`, URL firmadas de Storage): mientras no exista, no hay fotos.
 - Saldos calculados en el servidor: por ahora el portal descarga los pedidos del cliente y calcula el saldo con `lib/negocio.ts`.
+- Subida de fotos y firmas a Storage: la lectura (`GET /api/pedidos/:guia/archivos`) ya existe; si el backend desplegado aún no la tiene, el portal muestra el pedido sin fotos.
+- Tiempo real (SSE): mientras tanto, los pedidos se refrescan cada 60 segundos.
 - `/register` y `/track` siguen siendo las páginas de la landing original y no tienen endpoint todavía.
+- Reescritura de `/api` en `vercel.json` hacia el servicio de Render, cuando exista.
