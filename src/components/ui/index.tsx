@@ -72,9 +72,9 @@ export const EmptyState: React.FC<{ message: string; sub?: string; action?: Reac
 // ── Alert ─────────────────────────────────────────────────────────────────────
 export const Alert: React.FC<{ type: 'error' | 'success' | 'info'; message: string }> = ({ type, message }) => {
   const styles = {
-    error:   'bg-red-900/20 border-danger/40 text-red-300',
-    success: 'bg-emerald-900/20 border-emerald-600/40 text-emerald-300',
-    info:    'bg-steel-800/60 border-steel-600 text-silver-300',
+    error:   'dark:bg-red-900/20 dark:border-danger/40 dark:text-red-300 bg-red-50 border-red-200 text-red-700',
+    success: 'dark:bg-emerald-900/20 dark:border-emerald-600/40 dark:text-emerald-300 bg-emerald-50 border-emerald-200 text-emerald-700',
+    info:    'dark:bg-steel-800/60 dark:border-steel-600 dark:text-silver-300 bg-steel-50 border-steel-200 text-steel-700',
   };
   return (
     <div className={`border rounded-lg px-4 py-3 text-sm font-body ${styles[type]}`}>

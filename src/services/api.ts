@@ -1,22 +1,19 @@
 import axios from 'axios';
 import { AuthResponse, CreateOrderPayload, FinanceSummary, Order, Transaction, User } from '../types';
 
-const BASE = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+/*
+ * API anterior de este repo, que solo usan Registro y Rastreo (páginas de la landing).
+ * El portal del cliente usa src/api/. La sesión ahora va en una cookie httpOnly: nada de tokens en localStorage.
+ */
+const BASE = import.meta.env.VITE_API_URL || '/api';
 
-const api = axios.create({ baseURL: BASE });
-
-// Attach JWT to every request
-api.interceptors.request.use((cfg) => {
-  const token = localStorage.getItem('jsl_token');
-  if (token) cfg.headers.Authorization = `Bearer ${token}`;
-  return cfg;
-});
+const api = axios.create({ baseURL: BASE, withCredentials: true, headers: { 'X-JSL': '1' } });
 
 // Bubble up error messages cleanly
 api.interceptors.response.use(
   (r) => r,
   (err) => {
-    const msg = err.response?.data?.error || err.message || 'Error de conexión';
+    const msg = err.response?.data?.error?.message || err.response?.data?.error || err.message || 'Error de conexión';
     return Promise.reject(new Error(msg));
   }
 );

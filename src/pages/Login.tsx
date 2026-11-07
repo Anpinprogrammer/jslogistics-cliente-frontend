@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { portadaDe, useSesion } from '../auth/AuthProvider';
+import { DEMO } from '../api/http';
 import { Alert, Spinner } from '../components/ui';
 
 const Login: React.FC = () => {
-  const { login } = useAuth();
+  const { ingresar } = useSesion();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = (location.state as any)?.from || '/dashboard';
+  const from = (location.state as { from?: string } | null)?.from;
 
   const [form, setForm] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
@@ -21,8 +22,9 @@ const Login: React.FC = () => {
     setError('');
     setLoading(true);
     try {
-      await login(form.email, form.password);
-      navigate(from, { replace: true });
+      const u = await ingresar(form.email, form.password);
+      const portada = portadaDe(u);
+      navigate(from && from.startsWith(portada) ? from : portada, { replace: true });
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -57,11 +59,12 @@ const Login: React.FC = () => {
           <h2 className="font-display font-700 text-xl dark:text-white text-gray-600 mb-1">Iniciar sesión</h2>
           <p className="text-sm text-silver-500 mb-6">Ingresa con las credenciales de tu empresa</p>
 
-          {/* Demo hint */}
-          <div className="bg-steel-800/60 border border-steel-700 rounded-lg p-3 mb-6">
-            <p className="text-xs font-mono text-silver-500 mb-1.5">DEMO · Credenciales de prueba:</p>
-            <p className="text-xs text-silver-400">carlos@techparts.co · <span className="font-mono">password123</span></p>
-          </div>
+          {DEMO && (
+            <div className="bg-steel-800/60 border border-steel-700 rounded-lg p-3 mb-6">
+              <p className="text-xs font-mono text-silver-500 mb-1.5">DEMO · Credenciales de prueba:</p>
+              <p className="text-xs text-silver-400">cliente@demo.co · <span className="font-mono">demo1234</span></p>
+            </div>
+          )}
 
           {error && <div className="mb-4"><Alert type="error" message={error} /></div>}
 
