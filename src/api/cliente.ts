@@ -4,8 +4,8 @@
  *
  * Estado del backend (rama del backend, backend/README.md):
  * - Listo: GET /pedidos (el cliente solo ve los suyos), GET /pedidos/:guia, POST /pedidos/:guia/cambio-recibido, GET /clientes/:id.
- * - Pendiente, propuesto: GET /clientes/:id/movimientos y GET /pedidos/:guia/archivos (fotos firmadas de Storage).
- *   Mientras no existan, el portal muestra la cuenta sin movimientos y los pedidos sin fotos.
+ * - Listo también: GET /clientes/:id/movimientos y GET /pedidos/:guia/archivos (fotos firmadas de Storage, vencen en 1 hora).
+ *   Si el backend desplegado aún no los tiene, un 404 se toma como lista vacía.
  * - Pendiente: saldos calculados en el servidor. Mientras tanto se calculan aquí con lib/negocio.ts, igual que la app actual.
  */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -57,7 +57,7 @@ export function useMovimientosCliente() {
     enabled: !!id,
     queryFn: () =>
       DEMO ? demo.movimientos()
-        : opcional(() => api<{ movimientos: Movimiento[] }>(`/clientes/${id}/movimientos`).then(r => r.movimientos), []),
+        : opcional(() => api<{ movimientos: Movimiento[] }>(`/clientes/${id}/movimientos?limite=1000`).then(r => r.movimientos), []),
   });
 }
 
