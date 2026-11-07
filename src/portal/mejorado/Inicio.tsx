@@ -40,7 +40,7 @@ export default function Inicio({ d }: { d: DatosCliente }) {
           icon={ico('<path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>')} /></Link>
       </div>
 
-      <div className="grid lg:grid-cols-12 gap-4 mb-4 animate-fade-up animate-delay-200">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-4 animate-fade-up animate-delay-200">
         <Tarjeta titulo="Efectividad" sub="Últimos 30 días" className="lg:col-span-4">
           <Dona entregados={r.entMes} devueltos={r.devMes} />
         </Tarjeta>
@@ -49,7 +49,7 @@ export default function Inicio({ d }: { d: DatosCliente }) {
         </Tarjeta>
       </div>
 
-      <div className="grid lg:grid-cols-12 gap-4 animate-fade-up animate-delay-300">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 animate-fade-up animate-delay-300">
         <Tarjeta titulo="Últimos pedidos" className="lg:col-span-7" accion={<Link to="pedidos" className="btn-ghost btn-sm">Ver todos</Link>}>
           {ultimos.length === 0 ? <p className="text-silver-500 text-sm py-6 text-center">Todavía no tienes envíos.</p> : (
             <div className="divide-y dark:divide-steel-800 divide-gray-100 -mx-2">

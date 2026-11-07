@@ -6,9 +6,12 @@
   *, *::before, *::after { box-sizing: border-box; }
 
   html { 
+    overflow-x: clip; /* red de seguridad: nunca scroll horizontal de la página */
     scroll-behavior: smooth;
     transition: background-color 0.3s ease, color 0.3s ease;
   }
+
+  img, svg, video { max-width: 100%; }
 
   /* Dark mode (default) */
   body {

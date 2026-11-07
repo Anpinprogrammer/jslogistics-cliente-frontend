@@ -44,7 +44,7 @@ export function Miniatura({ src, className = 'w-11 h-11' }: { src?: string | nul
 
 export function Tarjeta({ titulo, sub, accion, children, className = '' }: { titulo: string; sub?: string; accion?: ReactNode; children: ReactNode; className?: string }) {
   return (
-    <section className={`card p-5 flex flex-col ${className}`}>
+    <section className={`card p-5 flex flex-col min-w-0 ${className}`}>
       <div className="flex items-start justify-between gap-3 mb-4">
         <div>
           <h2 className="font-display font-600 text-lg dark:text-white text-gray-700">{titulo}</h2>
