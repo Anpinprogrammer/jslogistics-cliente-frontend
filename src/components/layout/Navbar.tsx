@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useSesion } from '../../auth/AuthProvider';
 import { useTheme } from '../../hooks/useTheme';
 
 const Navbar: React.FC = () => {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { usuario, salir } = useSesion();
+  const isAuthenticated = !!usuario;
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
@@ -27,14 +28,17 @@ const Navbar: React.FC = () => {
     });
   };
 
-  const handleLogout = () => { logout(); navigate('/'); };
+  const handleLogout = () => { salir().then(() => navigate('/')); };
 
   const navLinks = isAuthenticated
     ? [
-        { to: '/dashboard', label: 'Panel' },
-        { to: '/orders', label: 'Pedidos' },
-        { to: '/finances', label: 'Finanzas' },
-        { to: '/track', label: 'Rastrear' },
+        ...(usuario?.rol === 'cliente'
+          ? [
+              { to: '/cliente', label: 'Inicio' },
+              { to: '/cliente/pedidos', label: 'Mis pedidos' },
+              { to: '/cliente/cuenta', label: 'Mi cuenta' },
+            ]
+          : [{ to: '/equipo', label: 'Panel' }]),
       ]
     : [
         { to: '/#nosotros', label: 'Nosotros' },
@@ -115,8 +119,8 @@ const Navbar: React.FC = () => {
           {isAuthenticated ? (
             <>
               <div className="text-right mr-1">
-                <p className="text-sm font-600 dark:text-silver-200 text-gray-800">{user?.name}</p>
-                <p className="text-xs dark:text-silver-500 text-gray-500">{user?.company}</p>
+                <p className="text-sm font-600 dark:text-silver-200 text-gray-800">{usuario?.nombre}</p>
+                <p className="text-xs dark:text-silver-500 text-gray-500">{usuario?.email}</p>
               </div>
               <button onClick={handleLogout} className="btn-ghost btn-sm">Salir</button>
             </>

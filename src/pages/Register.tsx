@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { authAPI } from '../services/api';
 import { Alert, Spinner } from '../components/ui';
 
 const Register: React.FC = () => {
-  const { register } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: '', company: '', email: '', password: '', confirmPassword: '', phone: '', address: '', nit: '' });
   const [loading, setLoading] = useState(false);
@@ -20,8 +19,8 @@ const Register: React.FC = () => {
     setError(''); setLoading(true);
     try {
       const { confirmPassword, ...payload } = form;
-      await register(payload);
-      navigate('/dashboard');
+      await authAPI.register(payload as any);
+      navigate('/login');
     } catch (err: any) {
       setError(err.message);
     } finally {
