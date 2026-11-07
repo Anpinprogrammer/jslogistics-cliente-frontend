@@ -5,12 +5,13 @@ import Inicio from './Inicio';
 import Pedidos from './Pedidos';
 import Pedido from './Pedido';
 import Cuenta from './Cuenta';
+import NavInferior from './NavInferior';
 
 /** Portal del cliente con el diseño de la landing. Usa el Navbar y el Footer del sitio (los pone App). */
 export default function PortalMejorado() {
   const d = useDatosCliente();
   return (
-    <div className="min-h-screen pt-24 pb-12 px-4 sm:px-6">
+    <div className="min-h-screen pt-24 pb-32 md:pb-12 px-4 sm:px-6">
       <div className="max-w-7xl mx-auto">
         {d.error ? <Alert type="error" message={d.error.message} />
           : d.cargando ? <div className="py-32 flex justify-center"><Spinner size="lg" /></div>
@@ -24,6 +25,7 @@ export default function PortalMejorado() {
             </Routes>
           )}
       </div>
+      {d.cliente && <NavInferior d={d} />}
     </div>
   );
 }

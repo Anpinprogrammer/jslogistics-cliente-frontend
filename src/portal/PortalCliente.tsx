@@ -23,9 +23,9 @@ function CambioPortal({ portal, cambiar }: { portal: Portal; cambiar: (p: Portal
     <div role="group" aria-label="Versión del portal"
       style={{ position: 'fixed', zIndex: 80, right: 12, bottom: 'calc(96px + env(safe-area-inset-bottom, 0px))', display: 'flex', alignItems: 'center', gap: 8,
         background: '#0f1f3d', color: '#fff', borderRadius: 999, padding: '6px 6px 6px 14px', boxShadow: '0 6px 24px rgba(0,0,0,.3)', fontFamily: 'system-ui, sans-serif', fontSize: 13 }}>
-      <span>Versión: <b>{portal === 'clasico' ? 'clásica' : 'mejorada'}</b></span>
+      <span>Versión: <b>{portal === 'clasico' ? 'clásica' : 'propuesta'}</b></span>
       <button onClick={() => cambiar(otro)} style={{ border: 0, borderRadius: 999, padding: '6px 12px', background: '#0ea5e9', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>
-        Ver {otro === 'clasico' ? 'clásica' : 'mejorada'}
+        Ver {otro === 'clasico' ? 'clásica' : 'propuesta'}
       </button>
     </div>
   );
