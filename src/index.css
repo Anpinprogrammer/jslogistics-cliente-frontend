@@ -229,3 +229,9 @@
   .animate-delay-400 { animation-delay: 400ms; }
   .animate-delay-500 { animation-delay: 500ms; }
 }
+
+/* Hero: progreso del indicador activo y zoom lento de la foto */
+@keyframes hero-progreso { from { width: 0%; } to { width: 100%; } }
+@keyframes hero-zoom { from { transform: scale(1); } to { transform: scale(1.08); } }
+.hero-progreso { animation-name: hero-progreso; animation-timing-function: linear; animation-fill-mode: forwards; }
+.hero-zoom { animation: hero-zoom 8s ease-out forwards; }

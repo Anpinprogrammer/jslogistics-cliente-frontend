@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSesion } from '../../auth/AuthProvider';
 import { useTheme } from '../../hooks/useTheme';
@@ -19,6 +20,24 @@ const Navbar: React.FC = () => {
   }, []);
 
   useEffect(() => { setMobileOpen(false); }, [location.pathname]);
+
+  // Menú móvil: bloquea el scroll del body, cierra con Escape y lleva el foco al botón de cerrar.
+  const cerrarRef = useRef<HTMLButtonElement>(null);
+  const hamburguesaRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const overflowAnterior = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMobileOpen(false); };
+    document.addEventListener('keydown', onKey);
+    cerrarRef.current?.focus();
+    const hamburguesa = hamburguesaRef.current;
+    return () => {
+      document.body.style.overflow = overflowAnterior;
+      document.removeEventListener('keydown', onKey);
+      hamburguesa?.focus();
+    };
+  }, [mobileOpen]);
 
   const handleLogoClick = () => {
     navigate("/");
@@ -46,6 +65,82 @@ const Navbar: React.FC = () => {
         { to: '/#contacto', label: 'Contacto' },
         { to: '/track', label: 'Rastrear' },
       ];
+
+  const cerrarMenu = () => setMobileOpen(false);
+
+  const menuMovil = (
+    <div id="menu-movil" role="dialog" aria-modal="true" aria-label="Menú de navegación" aria-hidden={!mobileOpen}
+      // @ts-expect-error `inert` aún no está en los tipos de React 18: evita el foco en el menú cerrado.
+      inert={mobileOpen ? undefined : ''}
+      className={`md:hidden fixed inset-0 z-[60] flex h-dvh w-screen flex-col overflow-y-auto bg-[#070B19]/95 backdrop-blur-xl transition-all duration-300 ease-in-out ${
+        mobileOpen ? 'visible translate-y-0 opacity-100' : 'invisible -translate-y-4 opacity-0'
+      }`}>
+      {/* Malla discreta, igual que la portada */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-[0.05]"
+        style={{ backgroundImage: 'linear-gradient(rgba(148,176,207,1) 1px, transparent 1px), linear-gradient(90deg, rgba(148,176,207,1) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
+      <div aria-hidden="true" className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[#0284c7]/25 blur-[100px]" />
+
+      {/* Cabecera */}
+      <div className="relative flex h-16 shrink-0 items-center justify-between px-4"
+        style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+        <Link to="/" onClick={cerrarMenu} className="flex items-center gap-3">
+          {/* Badge claro: el isotipo es azul oscuro y el .webp trae el texto en blanco, por eso se recorta. */}
+          <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-white to-sky-100 p-1 shadow-[0_0_14px_2px_rgba(56,189,248,0.35)]">
+            <span className="relative block h-full w-full overflow-hidden rounded-lg">
+              <img src="/img/icono-96.webp" alt="" width={96} height={96} className="absolute left-[-10%] top-[3%] w-[120%] max-w-none" />
+            </span>
+          </span>
+          <span className="font-display text-lg font-800 uppercase tracking-wide text-white">JS Logistics</span>
+        </Link>
+        <button ref={cerrarRef} type="button" onClick={cerrarMenu} aria-label="Cerrar menú"
+          className="grid min-h-[44px] min-w-[44px] place-items-center rounded-xl text-[#f8fafc] transition-colors hover:bg-white/5 hover:text-sky-400 active:text-sky-400">
+          <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+
+      {/* Enlaces */}
+      <nav aria-label="Menú móvil" className="relative flex-1 px-6 pt-6">
+        <ul>
+          {navLinks.map(({ to, label }) => (
+            <li key={to}>
+              <Link to={to} onClick={cerrarMenu}
+                className={`block py-4 font-body text-2xl font-medium transition-colors active:text-sky-400 ${
+                  location.pathname === to ? 'text-sky-400' : 'text-slate-200 hover:text-sky-400'
+                }`}>
+                {label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+
+        <div className="my-4 border-t border-slate-800/80" />
+
+        <div className="flex flex-col gap-3 pb-8" style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}>
+          <button type="button" onClick={toggleTheme}
+            className="min-h-[48px] w-full rounded-xl border border-slate-700 bg-slate-900/50 py-3 text-center font-medium text-slate-200 transition-colors hover:border-slate-500">
+            {theme === 'dark' ? '☀️ Modo claro' : '🌙 Modo oscuro'}
+          </button>
+          {isAuthenticated ? (
+            <button type="button" onClick={() => { cerrarMenu(); handleLogout(); }}
+              className="min-h-[48px] w-full rounded-xl border border-red-400/40 bg-red-500/10 py-3 text-center font-medium text-red-300 transition-colors hover:bg-red-500/20">
+              Cerrar sesión
+            </button>
+          ) : (
+            <>
+              <Link to="/login" onClick={cerrarMenu}
+                className="min-h-[48px] w-full rounded-xl border border-sky-500/50 py-3 text-center font-medium text-sky-400 transition-colors hover:bg-sky-500/10">
+                Iniciar Sesión
+              </Link>
+              <Link to="/register" onClick={cerrarMenu}
+                className="min-h-[48px] w-full rounded-xl bg-gradient-to-r from-[#0284c7] to-[#38bdf8] py-3.5 text-center font-bold text-white shadow-lg shadow-sky-500/20 transition hover:brightness-110">
+                Registrarse
+              </Link>
+            </>
+          )}
+        </div>
+      </nav>
+    </div>
+  );
 
   return (
     <header className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
@@ -133,37 +228,16 @@ const Navbar: React.FC = () => {
         </div>
 
         {/* Mobile burger */}
-        <button className="md:hidden p-2 dark:text-silver-400 dark:hover:text-white text-gray-600 hover:text-gray-900" onClick={() => setMobileOpen(v => !v)}>
-          {mobileOpen
-            ? <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
-            : <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-          }
+        <button ref={hamburguesaRef} type="button"
+          className="md:hidden grid min-h-[44px] min-w-[44px] place-items-center rounded-lg dark:text-silver-400 dark:hover:text-white text-gray-600 hover:text-gray-900"
+          aria-label="Abrir menú" aria-expanded={mobileOpen} aria-controls="menu-movil"
+          onClick={() => setMobileOpen(true)}>
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
       </nav>
 
-      {/* Mobile menu */}
-      {mobileOpen && (
-        <div className="md:hidden bg-steel-800 dark:border-t dark:border-steel-800 dark:bg-white border-t border-gray-200 px-4 py-4 space-y-1 backdrop-blur-md mx-3 rounded-lg">
-          {navLinks.map(({ to, label }) => (
-            <Link key={to} to={to} className="block px-4 py-3 text-sm font-600 dark:text-silver-800 dark:hover:text-white dark:hover:bg-steel-800 text-white hover:text-gray-900 hover:bg-gray-100 rounded-lg">
-              {label}
-            </Link>
-          ))}
-          <div className="pt-3 dark:border-t dark:border-steel-800 border-t border-gray-200 flex flex-col gap-2">
-            <button onClick={toggleTheme} className="btn-ghost w-full text-center">
-              {theme === 'dark' ? '☀️ Modo claro' : '🌙 Modo oscuro'}
-            </button>
-            {isAuthenticated ? (
-              <button onClick={handleLogout} className="btn-danger w-full">Cerrar sesión</button>
-            ) : (
-              <>
-                <Link to="/login" className="btn-ghost w-full text-center">Iniciar Sesión</Link>
-                <Link to="/register" className="btn-primary w-full text-center">Registrarse</Link>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+      {/* Portal: el header usa backdrop-filter, que atraparía un `fixed` dentro de él */}
+      {createPortal(menuMovil, document.body)}
     </header>
   );
 };
