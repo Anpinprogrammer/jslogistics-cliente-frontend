@@ -235,3 +235,10 @@
 @keyframes hero-zoom { from { transform: scale(1); } to { transform: scale(1.08); } }
 .hero-progreso { animation-name: hero-progreso; animation-timing-function: linear; animation-fill-mode: forwards; }
 .hero-zoom { animation: hero-zoom 8s ease-out forwards; }
+
+/* Login: rutas animadas y nodos que pulsan en el mapa de fondo */
+@keyframes login-ruta { to { stroke-dashoffset: -36; } }
+@keyframes login-pulso { 0% { transform: scale(1); opacity: .8; } 100% { transform: scale(4); opacity: 0; } }
+.login-ruta { animation: login-ruta 3s linear infinite; }
+.login-pulso { transform-box: fill-box; transform-origin: center; animation: login-pulso 2.8s ease-out infinite; }
+@media (prefers-reduced-motion: reduce) { .login-ruta, .login-pulso { animation: none; } }
