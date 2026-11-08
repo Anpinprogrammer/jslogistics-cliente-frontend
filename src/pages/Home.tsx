@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import HeroCarrusel from '../components/HeroCarrusel';
 
 const services = [
   {
@@ -75,59 +76,50 @@ const Home: React.FC = () => {
   return (
     <div className="overflow-x-hidden">
       {/* ── HERO ─────────────────────────────────────────────────────────── */}
-      <section className="relative min-h-screen flex items-center justify-center pt-16 overflow-hidden">
-        {/* Background */}
-        <div className="absolute inset-0 bg-hero-mesh opacity-80" />
-        <div className="absolute inset-0"
-          style={{
-            backgroundImage: 'radial-gradient(ellipse at 50% 0%, rgba(14,165,233,0.1) 0%, transparent 60%)',
-          }}
-        />
-        {/* Animated grid */}
-        <div className="absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage: 'linear-gradient(rgba(148,176,207,1) 1px, transparent 1px), linear-gradient(90deg, rgba(148,176,207,1) 1px, transparent 1px)',
-            backgroundSize: '60px 60px',
-          }}
-        />
+      <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#070B19] pt-16">
+        <HeroCarrusel />
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 text-center">
-          <div className="inline-flex items-center gap-2 dark:bg-accent-500/10 bg-gray-300 border dark:border-accent-500/30 border-white rounded-full px-4 py-1.5 mb-8 animate-fade-up">
-            <span className="w-1.5 h-1.5 dark:bg-accent-400 bg-white rounded-full animate-pulse-slow" />
-            <span className="text-xs font-mono dark:text-accent-400 text-white tracking-wider">PLATAFORMA LOGÍSTICA EMPRESARIAL</span>
+        <div className="relative z-10 mx-auto max-w-7xl px-4 pb-32 text-center sm:px-6">
+          <div className="mb-8 inline-flex animate-fade-up items-center gap-2 rounded-full border border-[#38bdf8]/50 bg-[#070B19]/50 px-4 py-1.5 backdrop-blur-md">
+            <span className="h-1.5 w-1.5 animate-pulse-slow rounded-full bg-[#38bdf8]" />
+            <span className="font-mono text-xs tracking-wider text-[#7dd3fc]">PLATAFORMA LOGÍSTICA EMPRESARIAL</span>
           </div>
 
-          <h1 className="font-display font-800 text-5xl sm:text-7xl lg:text-8xl text-white leading-[0.95] tracking-tight mb-6 animate-fade-up animate-delay-100">
+          <h1 className="animate-fade-up animate-delay-100 mb-6 font-display text-5xl font-800 leading-[0.95] tracking-tight text-white drop-shadow-[0_0_28px_rgba(56,189,248,0.45)] sm:text-7xl lg:text-8xl">
             LOGÍSTICA QUE
             <br />
-            <span className="text-transparent bg-clip-text"
-              style={{ backgroundImage: 'linear-gradient(90deg, #38bdf8, #5487c0, #88aed8)' }}>
+            <span className="bg-clip-text text-transparent"
+              style={{ backgroundImage: 'linear-gradient(90deg, #7dd3fc, #38bdf8, #a5d8ff)' }}>
               MUEVE NEGOCIOS
             </span>
           </h1>
 
-          <p className="dark:text-silver-400 text-gray-600 text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed animate-fade-up animate-delay-200">
+          <p className="animate-fade-up animate-delay-200 mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-slate-200 sm:text-xl">
             Conectamos empresas colombianas con sus clientes finales a través de una plataforma de envíos confiable, rastreable y financieramente transparente.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up animate-delay-300">
-            <Link to="/register" className="btn-primary btn-lg w-full sm:w-auto">
+          <div className="animate-fade-up animate-delay-300 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <Link to="/register"
+              className="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0284c7] to-[#22d3ee] px-8 py-3.5 text-base font-semibold text-white shadow-[0_8px_24px_-8px_rgba(34,211,238,0.6)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_36px_-8px_rgba(34,211,238,0.85)] sm:w-auto">
               Comenzar ahora
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <svg className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
             </Link>
-            <Link to="/track" className="btn-ghost btn-lg w-full sm:w-auto">Rastrear envío</Link>
+            <Link to="/track"
+              className="inline-flex w-full items-center justify-center rounded-xl border border-white/25 bg-white/10 px-8 py-3.5 text-base font-semibold text-white backdrop-blur-md transition duration-200 hover:border-[#38bdf8]/60 hover:bg-white/15 sm:w-auto">
+              Rastrear envío
+            </Link>
           </div>
         </div>
 
         {/* Scroll indicator */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-silver-600 animate-bounce">
-          <span className="text-xs font-mono tracking-widest">VER MAS</span>
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+        <a href="#nosotros" className="absolute bottom-8 left-1/2 z-20 flex -translate-x-1/2 animate-bounce flex-col items-center gap-1 text-slate-300 hover:text-white">
+          <span className="font-mono text-xs tracking-widest">VER MÁS</span>
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M19 9l-7 7-7-7" />
           </svg>
-        </div>
+        </a>
       </section>
 
       {/* ── STATS ─────────────────────────────────────────────────────────── */}

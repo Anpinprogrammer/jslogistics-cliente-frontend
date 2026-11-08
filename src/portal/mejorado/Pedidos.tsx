@@ -38,9 +38,9 @@ export default function Pedidos({ d }: { d: DatosCliente }) {
           opciones={[['todos', 'Todos'], ['ruta', 'En ruta', enRuta], ['ent', 'Entregados'], ['dev', 'Devueltos'], ['cambio', 'Cambios por recibir', cambios]]} />
         <div className="flex flex-col sm:flex-row gap-3">
           <input type="search" value={q} onChange={e => poner('q', e.target.value)} placeholder="Buscar guía o quien recibió" aria-label="Buscar" className="input sm:max-w-sm" />
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button className="btn-steel btn-sm" aria-label="Día anterior" onClick={() => poner('dia', moverDia(dia || hoy(), -1))}>‹</button>
-            <input type="date" value={dia} max={hoy()} onChange={e => poner('dia', e.target.value)} aria-label="Filtrar por día" className="input w-auto" />
+            <input type="date" value={dia} max={hoy()} onChange={e => poner('dia', e.target.value)} aria-label="Filtrar por día" className="input w-auto min-w-0 flex-1 sm:flex-none" />
             <button className="btn-steel btn-sm" aria-label="Día siguiente" disabled={!dia || dia >= hoy()} onClick={() => poner('dia', moverDia(dia, 1))}>›</button>
             <button className="btn-ghost btn-sm" onClick={() => poner('dia', dia ? '' : hoy())}>{dia ? 'Ver todos' : 'Hoy'}</button>
           </div>
