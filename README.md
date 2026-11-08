@@ -34,7 +34,7 @@ dentro de `.clasico`, así que no choca con Tailwind ni con la landing.
 
 `vercel.json` fija Vite, la carpeta `dist` y la regla de SPA (toda ruta va a `index.html`).
 Las vistas previas de cada PR (`VERCEL_ENV=preview`) se construyen en **modo demo**, con datos de prueba y el botón para
-cambiar de portal, así se le pueden mostrar al dueño sin backend. Producción usa el modo normal y llama a `/api`.
+cambiar de portal, así se le pueden mostrar al dueño sin backend. Producción usa el modo normal y llama a `/api`, que Vercel reenvía a `https://js-logistics.onrender.com`.
 
 ## Estructura
 
@@ -60,4 +60,3 @@ El contrato de la API está en `js-logistics/backend/README.md`: cualquier cambi
 - Subida de fotos y firmas a Storage: la lectura (`GET /api/pedidos/:guia/archivos`) ya existe; si el backend desplegado aún no la tiene, el portal muestra el pedido sin fotos.
 - Tiempo real (SSE): mientras tanto, los pedidos se refrescan cada 60 segundos.
 - `/register` y `/track` siguen siendo las páginas de la landing original y no tienen endpoint todavía.
-- Reescritura de `/api` en `vercel.json` hacia el servicio de Render, cuando exista.

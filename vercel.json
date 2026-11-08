@@ -4,5 +4,14 @@
   "installCommand": "npm ci",
   "buildCommand": "if [ \"$VERCEL_ENV\" = \"preview\" ]; then npm run build:demo; else npm run build; fi",
   "outputDirectory": "dist",
-  "rewrites": [{ "source": "/((?!api/|assets/|img/).*)", "destination": "/index.html" }]
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://js-logistics.onrender.com/api/:path*"
+    },
+    {
+      "source": "/((?!api/|assets/|img/).*)",
+      "destination": "/index.html"
+    }
+  ]
 }
