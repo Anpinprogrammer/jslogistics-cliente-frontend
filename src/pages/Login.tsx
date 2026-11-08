@@ -81,12 +81,12 @@ const Login: React.FC = () => {
 
   const etiqueta = 'mb-1.5 block text-xs font-medium uppercase tracking-wider text-slate-400';
   const entrada =
-    'peer w-full rounded-xl border border-slate-700/80 bg-slate-950/60 py-3 pl-11 text-[15px] text-slate-100 placeholder:text-slate-500 ' +
+    'peer w-full rounded-xl border border-slate-700/80 bg-slate-950/60 py-2.5 pl-11 text-base sm:py-3 sm:text-[15px] text-slate-100 placeholder:text-slate-500 ' +
     'transition duration-200 hover:border-slate-500 focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-400 disabled:opacity-60';
   const icono = 'pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 transition-colors peer-focus:text-sky-400';
 
   return (
-    <div className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-[#070B19] px-4 pb-16 pt-28">
+    <div className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-[#070B19] px-4 pb-10 pt-24 sm:pb-16 sm:pt-28">
       {/* Fondo: mapa de conexiones, malla y luces ambientales */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
         <svg className="absolute inset-0 h-full w-full opacity-40" preserveAspectRatio="xMidYMid slice" viewBox="0 0 1000 500" fill="none">
@@ -122,19 +122,19 @@ const Login: React.FC = () => {
         <div className="absolute -bottom-40 -right-28 h-[32rem] w-[32rem] rounded-full bg-[#38bdf8]/20 blur-[130px]" />
       </div>
 
-      <div className="relative w-full max-w-md animate-fade-up">
+      <div className="relative w-full max-w-sm animate-fade-up sm:max-w-md">
         {/* Cabecera */}
-        <div className="mb-8 text-center">
-          <div className="relative mx-auto mb-5 grid h-24 w-24 place-items-center">
+        <div className="mb-5 text-center sm:mb-8">
+          <div className="relative mx-auto mb-3 grid h-16 w-16 place-items-center sm:mb-5 sm:h-24 sm:w-24">
             <span aria-hidden="true" className="absolute -inset-3 rounded-[2rem] bg-[#38bdf8]/50 blur-2xl" />
-            <span className="relative grid h-24 w-24 place-items-center rounded-3xl bg-gradient-to-br from-white to-sky-100 p-2.5 shadow-[0_0_0_1px_rgba(255,255,255,.7),0_0_28px_6px_rgba(56,189,248,.45),0_12px_28px_-6px_rgba(2,132,199,.55),inset_0_1px_0_#fff]">
+            <span className="relative grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-white to-sky-100 p-1.5 sm:h-24 sm:w-24 sm:rounded-3xl sm:p-2.5 shadow-[0_0_0_1px_rgba(255,255,255,.7),0_0_28px_6px_rgba(56,189,248,.45),0_12px_28px_-6px_rgba(2,132,199,.55),inset_0_1px_0_#fff]">
               {/* El .webp trae "LOGISTICS CALI" en blanco (invisible sobre el badge claro): se recorta para mostrar solo el isotipo. */}
               <span className="relative block h-full w-full overflow-hidden rounded-2xl">
                 <img src="/img/icono-96.webp" alt="JS Logistics" width={96} height={96} className="absolute left-[-10%] top-[3%] w-[120%] max-w-none" />
               </span>
             </span>
           </div>
-          <h1 className="font-display text-3xl font-700 text-white">Portal Empresarial</h1>
+          <h1 className="font-display text-2xl font-700 text-white sm:text-3xl">Portal Empresarial</h1>
           <p className="mt-1 text-sm text-[#94a3b8]">JS Logistics – Acceso de clientes</p>
         </div>
 
@@ -142,12 +142,12 @@ const Login: React.FC = () => {
         <div className="relative">
           <div aria-hidden="true" className="absolute -inset-px rounded-[1.4rem] bg-gradient-to-br from-sky-400/70 via-blue-600/30 to-cyan-300/50 opacity-70" />
           <div aria-hidden="true" className="absolute -inset-6 -z-10 rounded-[2.5rem] bg-blue-600/20 blur-3xl" />
-          <div className="relative rounded-3xl bg-slate-900/60 p-7 shadow-[0_24px_80px_-20px_rgba(2,132,199,0.45),0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-xl sm:p-8">
-            <h2 className="font-display text-xl font-700 text-white">Iniciar sesión</h2>
-            <p className="mb-6 mt-1 text-sm text-slate-400">Ingresa con las credenciales de tu empresa</p>
+          <div className="relative rounded-3xl bg-slate-900/60 p-5 shadow-[0_24px_80px_-20px_rgba(2,132,199,0.45),0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-xl sm:p-8">
+            <h2 className="font-display text-lg font-700 text-white sm:text-xl">Iniciar sesión</h2>
+            <p className="mb-4 mt-1 text-sm text-slate-400 sm:mb-6">Ingresa con las credenciales de tu empresa</p>
 
             {DEMO && (
-              <div className="mb-6 rounded-xl border border-sky-500/30 bg-sky-500/10 p-3.5">
+              <div className="mb-4 rounded-xl border border-sky-500/30 bg-sky-500/10 p-3 sm:mb-6 sm:p-3.5">
                 <div className="mb-2.5 flex items-center gap-2">
                   <span className="rounded-md bg-sky-400 px-1.5 py-0.5 font-mono text-[10px] font-bold tracking-wider text-slate-950">DEMO</span>
                   <span className="text-xs text-slate-300">Credenciales de prueba</span>
@@ -169,7 +169,7 @@ const Login: React.FC = () => {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
               <div>
                 <label htmlFor={idCorreo} className={etiqueta}>Correo electrónico</label>
                 <div className="relative">
@@ -192,7 +192,7 @@ const Login: React.FC = () => {
               </div>
 
               <button type="submit" disabled={loading}
-                className="group relative mt-2 flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-[#0284c7] to-[#38bdf8] px-5 py-3.5 font-bold text-white shadow-[0_8px_24px_-8px_rgba(56,189,248,0.6)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_-8px_rgba(56,189,248,0.85)] active:translate-y-0 disabled:cursor-wait disabled:opacity-90 disabled:hover:translate-y-0">
+                className="group relative mt-2 flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-[#0284c7] to-[#38bdf8] px-5 py-3 font-bold sm:py-3.5 text-white shadow-[0_8px_24px_-8px_rgba(56,189,248,0.6)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_-8px_rgba(56,189,248,0.85)] active:translate-y-0 disabled:cursor-wait disabled:opacity-90 disabled:hover:translate-y-0">
                 <span aria-hidden="true" className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
                 {loading ? (
                   <>
@@ -210,7 +210,7 @@ const Login: React.FC = () => {
           </div>
         </div>
 
-        <p className="mt-6 text-center text-sm text-slate-400">
+        <p className="mt-4 text-center text-sm text-slate-400 sm:mt-6">
           ¿Tu empresa aún no tiene acceso?{' '}
           <Link to="/register" className="font-semibold text-sky-400 underline-offset-4 transition-colors hover:text-sky-300 hover:underline">
             Registrarse
