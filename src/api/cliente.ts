@@ -8,8 +8,9 @@
  *   Si el backend desplegado aún no los tiene, un 404 se toma como lista vacía.
  * - Pendiente: saldos calculados en el servidor. Mientras tanto se calculan aquí con lib/negocio.ts, igual que la app actual.
  */
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { Archivo, Cliente, Movimiento, Pedido } from '../types/dominio';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { Archivo, Cliente, Movimiento, PaginaPedidos, Pedido } from '../types/dominio';
+import { cambioPendiente, delDia } from '../lib/negocio';
 import { api, ApiError, DEMO } from './http';
 import { demo } from '../demo/datos';
 import { useSesion } from '../auth/AuthProvider';
@@ -37,6 +38,52 @@ async function opcional<T>(fn: () => Promise<T>, vacio: T): Promise<T> {
 
 export function usePedidosCliente() {
   return useQuery({ queryKey: ['cliente', 'pedidos'], queryFn: todosLosPedidos, refetchInterval: 60_000 });
+}
+
+/** Filtros de la pestaña de pedidos (los mismos en los dos portales). */
+export type FiltroPedidos = 'todos' | 'ruta' | 'ent' | 'dev' | 'cambio';
+export interface ConsultaPedidos { filtro: FiltroPedidos; buscar: string; dia: string; pagina: number; porPagina: number }
+
+/** Lo que el servidor entiende de cada filtro. El servidor filtra, cuenta y corta la página. */
+function parametros({ filtro, buscar, dia, pagina, porPagina }: ConsultaPedidos) {
+  const q = new URLSearchParams({ pagina: String(pagina), porPagina: String(porPagina) });
+  if (filtro === 'ruta') q.set('estado', 'pendiente');
+  else if (filtro === 'ent') q.set('estado', 'entregado');
+  else if (filtro === 'dev') q.set('estado', 'devuelto');
+  else if (filtro === 'cambio') q.set('cambioPendiente', 'true');
+  if (buscar.trim()) q.set('buscar', buscar.trim());
+  if (dia) q.set('dia', dia);
+  return q;
+}
+
+/** La misma página armada en el navegador: solo para el modo demo y para un backend que aún no tenga el paginador. */
+function paginarAqui(todos: Pedido[], { filtro, buscar, dia, pagina, porPagina }: ConsultaPedidos): PaginaPedidos {
+  let ps = [...todos].sort((a, b) => b.n - a.n);
+  if (filtro === 'cambio') ps = ps.filter(cambioPendiente);
+  else if (filtro === 'ruta') ps = ps.filter(p => p.estado === 'pendiente');
+  else if (filtro === 'ent') ps = ps.filter(p => p.estado === 'entregado');
+  else if (filtro === 'dev') ps = ps.filter(p => p.estado === 'devuelto');
+  const q = buscar.trim().toLowerCase();
+  if (q) ps = ps.filter(p => (p.guia + ' ' + (p.destinatario || '')).toLowerCase().includes(q));
+  if (dia) ps = ps.filter(p => delDia(p, dia));
+  const paginas = Math.max(1, Math.ceil(ps.length / porPagina)), actual = Math.min(pagina, paginas);
+  return { pedidos: ps.slice((actual - 1) * porPagina, actual * porPagina), pagina: actual, porPagina, total: ps.length, paginas };
+}
+
+/** Una página de "Mis pedidos". Mientras llega la siguiente se sigue viendo la anterior. */
+export function usePaginaPedidos(c: ConsultaPedidos) {
+  return useQuery({
+    queryKey: ['cliente', 'pedidos', 'pagina', c],
+    placeholderData: keepPreviousData,
+    refetchInterval: 60_000,
+    queryFn: async () => {
+      if (DEMO) return paginarAqui(await demo.pedidos(), c);
+      const r = await api<Partial<PaginaPedidos> & { pedidos: Pedido[] }>(`/pedidos?${parametros(c)}`);
+      // Un backend sin paginador ignora `pagina` y no manda `total`: se pagina aquí con la lista completa.
+      if (typeof r.total !== 'number' || typeof r.paginas !== 'number') return paginarAqui(await todosLosPedidos(), c);
+      return r as PaginaPedidos;
+    },
+  });
 }
 
 export function useFichaCliente() {

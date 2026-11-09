@@ -1,28 +1,25 @@
-import { useMemo } from 'react';
+import { useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { EmptyState } from '../../components/ui';
 import { hoy, hora, moverDia, pesos } from '../../lib/formato';
-import { cambioPendiente, delDia, MOTIVOS } from '../../lib/negocio';
+import { cambioPendiente, MOTIVOS } from '../../lib/negocio';
+import { usePaginaPedidos, type FiltroPedidos } from '../../api/cliente';
+import { usePorPagina } from '../../lib/pantalla';
 import type { DatosCliente } from '../useDatosCliente';
-import { EstadoBadge, Filtros, Miniatura } from './ui';
+import { EstadoBadge, Filtros, Miniatura, Paginador } from './ui';
 
-type Filtro = 'todos' | 'ruta' | 'ent' | 'dev' | 'cambio';
+type Filtro = FiltroPedidos;
 
 export default function Pedidos({ d }: { d: DatosCliente }) {
   const [sp, setSp] = useSearchParams();
   const f = (sp.get('f') as Filtro) || 'todos', q = sp.get('q') || '', dia = sp.get('dia') || '';
-  const poner = (k: string, v: string) => setSp(prev => { const n = new URLSearchParams(prev); v ? n.set(k, v) : n.delete(k); return n; }, { replace: true });
+  const pagina = Math.max(1, Number(sp.get('p')) || 1), porPagina = usePorPagina(), arriba = useRef<HTMLDivElement>(null);
+  // Cambiar un filtro vuelve a la primera página.
+  const poner = (k: string, v: string) => setSp(prev => { const n = new URLSearchParams(prev); v ? n.set(k, v) : n.delete(k); n.delete('p'); return n; }, { replace: true });
+  const ir = (p: number) => { setSp(prev => { const n = new URLSearchParams(prev); p > 1 ? n.set('p', String(p)) : n.delete('p'); return n; }); arriba.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
 
-  const lista = useMemo(() => {
-    let ps = [...d.pedidos].sort((a, b) => b.n - a.n);
-    if (f === 'cambio') ps = ps.filter(cambioPendiente);
-    else if (f === 'ruta') ps = ps.filter(p => p.estado === 'pendiente');
-    else if (f === 'ent') ps = ps.filter(p => p.estado === 'entregado');
-    else if (f === 'dev') ps = ps.filter(p => p.estado === 'devuelto');
-    if (q) ps = ps.filter(p => (p.guia + ' ' + (p.destinatario || '')).toLowerCase().includes(q.toLowerCase()));
-    if (dia) ps = ps.filter(p => delDia(p, dia));
-    return ps;
-  }, [d.pedidos, f, q, dia]);
+  const consulta = usePaginaPedidos({ filtro: f, buscar: q, dia, pagina, porPagina });
+  const pag = consulta.data, lista = pag?.pedidos ?? [];
   const enRuta = d.pedidos.filter(p => p.estado === 'pendiente').length, cambios = d.pedidos.filter(cambioPendiente).length;
 
   return (
@@ -33,7 +30,7 @@ export default function Pedidos({ d }: { d: DatosCliente }) {
         <p className="text-silver-500 text-sm mt-1">Tus envíos con JS Logistics y sus pruebas de entrega.</p>
       </div>
 
-      <div className="space-y-4 mb-6 animate-fade-up animate-delay-100">
+      <div ref={arriba} className="space-y-4 mb-6 animate-fade-up animate-delay-100 scroll-mt-20">
         <Filtros<Filtro> valor={f} alCambiar={v => poner('f', v === 'todos' ? '' : v)}
           opciones={[['todos', 'Todos'], ['ruta', 'En ruta', enRuta], ['ent', 'Entregados'], ['dev', 'Devueltos'], ['cambio', 'Cambios por recibir', cambios]]} />
         <div className="flex flex-col sm:flex-row gap-3">
@@ -45,12 +42,14 @@ export default function Pedidos({ d }: { d: DatosCliente }) {
             <button className="btn-ghost btn-sm" onClick={() => poner('dia', dia ? '' : hoy())}>{dia ? 'Ver todos' : 'Hoy'}</button>
           </div>
         </div>
-        {dia && <p className="text-sm text-silver-500">{lista.length} envío{lista.length === 1 ? '' : 's'} de ese día</p>}
+        {dia && pag && <p className="text-sm text-silver-500">{pag.total} envío{pag.total === 1 ? '' : 's'} de ese día</p>}
       </div>
 
-      {lista.length === 0 ? <EmptyState message="No hay envíos aquí." sub="Prueba con otro filtro o con otro día." /> : (
-        <div className="card divide-y dark:divide-steel-800 divide-gray-100 animate-fade-up animate-delay-200">
-          {lista.slice(0, 300).map(p => (
+      {consulta.isError ? <EmptyState message="No se pudieron traer tus envíos." sub="Revisa tu conexión e intenta de nuevo en un momento." />
+        : !pag ? <div className="card h-64 animate-pulse" aria-busy="true" aria-label="Cargando envíos" />
+        : lista.length === 0 ? <EmptyState message="No hay envíos aquí." sub="Prueba con otro filtro o con otro día." /> : (<>
+        <div className={`card divide-y dark:divide-steel-800 divide-gray-100 animate-fade-up animate-delay-200 transition-opacity ${consulta.isPlaceholderData ? 'opacity-60' : ''}`}>
+          {lista.map(p => (
             <Link key={p.guia} to={p.guia} className="flex items-center gap-4 px-5 py-4 dark:hover:bg-steel-800/30 hover:bg-gray-50 transition-colors group">
               <Miniatura src={p.mini} className="w-12 h-12" />
               <div className="flex-1 min-w-0">
@@ -68,7 +67,8 @@ export default function Pedidos({ d }: { d: DatosCliente }) {
             </Link>
           ))}
         </div>
-      )}
+        <Paginador pagina={pag.pagina} paginas={pag.paginas} total={pag.total} porPagina={pag.porPagina} ir={ir} cargando={consulta.isPlaceholderData} />
+      </>)}
     </>
   );
 }

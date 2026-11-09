@@ -51,6 +51,15 @@ export interface Pedido {
   mini?: string | null;
 }
 
+/** Una página del paginador de pedidos (GET /pedidos?pagina=&porPagina=). */
+export interface PaginaPedidos {
+  pedidos: Pedido[];
+  pagina: number;
+  porPagina: number;
+  total: number;
+  paginas: number;
+}
+
 export type TipoArchivo = 'salida' | 'entrega' | 'firma';
 export interface Archivo {
   tipo: TipoArchivo;
