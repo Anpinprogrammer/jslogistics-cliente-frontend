@@ -4,4 +4,4 @@ Las instrucciones para agentes de este repo están en AGENTS.md, compartidas con
 
 @AGENTS.md
 
-El porqué de la arquitectura está en [ARCHITECTURE.md](ARCHITECTURE.md). El contrato de la API está en `js-logistics/backend/README.md`.
+La memoria del proyecto (decisiones, trampas del entorno y últimos cambios) está en [docs/ESTADO.md](docs/ESTADO.md). El porqué de la arquitectura está en [ARCHITECTURE.md](ARCHITECTURE.md). El contrato de la API está en `js-logistics/backend/README.md`.

@@ -13,6 +13,15 @@ export interface Usuario {
   mensajeroId: string | null;
 }
 
+/** Enlace que llega por correo para activar una cuenta o cambiar la contraseña. */
+export interface EnlaceCorreo {
+  tipo: 'activacion' | 'clave';
+  nombre: string;
+  /** Correo tapado por el servidor, por ejemplo c******@js.co. */
+  email: string;
+  expira: string;
+}
+
 export type EstadoPedido = 'pendiente' | 'entregado' | 'devuelto';
 export type MetodoPago = '' | 'efectivo' | 'transf_js' | 'transf_cliente' | 'devuelto';
 export type Motivo = 'no_contesta' | 'direccion' | 'rechazo' | 'reprogramar' | 'otro';

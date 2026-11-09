@@ -1,6 +1,6 @@
 # Guía para agentes de IA: jslogistics-cliente-frontend
 
-Lee esto completo antes de cambiar algo. Lo mismo vale para Claude Code (que lo carga desde `CLAUDE.md`), Codex, Cursor u otro agente.
+Lee esto completo antes de cambiar algo, y después [docs/ESTADO.md](docs/ESTADO.md): la memoria del proyecto (decisiones, trampas y últimos cambios). Lo mismo vale para Claude Code (que lo carga desde `CLAUDE.md`), Codex, Cursor u otro agente.
 Para entender el porqué de cada decisión, lee [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Qué es este repo
@@ -88,8 +88,10 @@ src/
   portal/mejorado/      portal "propuesta": diseño de la landing con Tailwind
   portal/clasico/       portal "clásico": copia fiel de la vista de cliente de la app actual
   demo/datos.ts         datos inventados para VITE_DEMO=true
-  pages/                landing (Home), Login, Register, Track, Equipo (aviso para cuentas que no son de cliente)
-  components/           Navbar, Footer y ui de la landing
+  pages/                landing (Home), Login, Register, Recuperar, Restablecer, Track y Equipo
+  components/           Navbar (con el menú móvil), Footer, ui, HeroCarrusel y acceso.tsx (marco del login)
+  hooks/useTheme.ts     modo claro/oscuro (clase `dark` en <html>, guardado en localStorage `jsl_theme`)
+  lib/pantalla.ts       cuántos pedidos por página: 8 en celular, 20 en computador
   services/, utils/, types/index.ts   herencia de la landing original (solo Register y Track)
 ```
 
@@ -125,7 +127,8 @@ src/
    - Textos de pantalla en español de Colombia, con tuteo y frases claras para alguien que no es técnico.
    - Nombres del dominio en español (`pedido`, `guia`, `cliente`, `saldo`, `ingresar`).
    - Comentarios en español, solo cuando explican un porqué.
-10. **No cambies la landing sin que lo pidan.** La landing (`pages/Home.tsx` y `components/`) se aprobó tal cual.
+10. **No cambies la landing, el login ni el menú sin que lo pidan.** Su diseño actual (portada con carrusel, menú móvil a pantalla completa, login oscuro) se hizo por pedido explícito del dueño y está descrito en [docs/ESTADO.md](docs/ESTADO.md). Respeta sus decisiones: pantallas siempre oscuras, el logo en badge claro recortado, el menú dibujado con `createPortal`, el intervalo y el desvanecimiento del carrusel.
+11. **Sin desbordes laterales en móvil.** Todo `grid` lleva su columna base (`grid-cols-1`), los textos largos en flex llevan `min-w-0`, y se revisa a 320, 360 y 390 px. Ya hay un `overflow-x: clip` en `html` como red de seguridad, pero no sustituye arreglar la causa.
 
 ## Git y PR
 
@@ -133,3 +136,4 @@ src/
 - Los mensajes de commit van en español y en una línea que diga qué cambia para el usuario, por ejemplo: `Portal propuesto: menú de abajo en el celular`.
 - En el PR, di qué cambió, en cuál portal y cómo se probó. Vercel publica una vista previa en modo demo para cada PR.
 - Si el cambio necesita algo del backend, abre o enlaza primero el cambio en `js-logistics`.
+- Si tomaste una decisión que otro agente debe respetar o dejaste algo pendiente, anótalo en `docs/ESTADO.md` en el mismo PR.

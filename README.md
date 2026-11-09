@@ -12,7 +12,7 @@ npm run dev        # contra el backend local (Vite manda /api a VITE_PROXY_API, 
 npm run build      # revisa los tipos y genera dist/
 ```
 
-Variables en `.env.example`.
+Variables en `.env.example`. Si `npm run dev` da 403 o 404 raros, revisa que el puerto 4000 sea del backend de JS Logistics (ver [docs/ESTADO.md](docs/ESTADO.md#trampas-del-entorno)).
 
 ## Dos portales para el cliente
 
@@ -45,13 +45,14 @@ src/
   lib/          formatos (pesos, horas de Colombia) y reglas de negocio copiadas de app.js
   portal/       config.ts (qué portal), useDatosCliente.ts, mejorado/ y clasico/
   demo/         datos de prueba para VITE_DEMO=true
-  pages/        landing (Home), Login, Registro, Rastreo y la página provisional del equipo
-  components/   piezas de la landing (Navbar, Footer, ui)
+  pages/        landing (Home), Login, Registro, Recuperar, Restablecer, Rastreo y la página provisional del equipo
+  components/   piezas de la landing (Navbar con menú móvil, Footer, ui, HeroCarrusel)
+  hooks/        useTheme (modo claro/oscuro)
 ```
 
 ## Para quien cambie el código (personas o agentes de IA)
 
-Lee [AGENTS.md](AGENTS.md) (convenciones y reglas) y [ARCHITECTURE.md](ARCHITECTURE.md) (cómo está armado y por qué).
+Lee [AGENTS.md](AGENTS.md) (convenciones y reglas), [docs/ESTADO.md](docs/ESTADO.md) (memoria: decisiones, trampas y últimos cambios) y [ARCHITECTURE.md](ARCHITECTURE.md) (cómo está armado y por qué).
 El contrato de la API está en `js-logistics/backend/README.md`: cualquier cambio de API se hace primero allá.
 
 ## Lo que falta del backend

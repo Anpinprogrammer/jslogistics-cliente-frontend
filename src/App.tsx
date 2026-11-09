@@ -16,6 +16,8 @@ const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
 const Track = lazy(() => import('./pages/Track'));
 const Equipo = lazy(() => import('./pages/Equipo'));
+const Recuperar = lazy(() => import('./pages/Recuperar'));
+const Restablecer = lazy(() => import('./pages/Restablecer'));
 const PortalCliente = lazy(() => import('./portal/PortalCliente'));
 
 const queryClient = new QueryClient({
@@ -59,6 +61,9 @@ function Rutas() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/recuperar" element={<Recuperar />} />
+            <Route path="/restablecer" element={<Restablecer />} />
+            <Route path="/activar" element={<Restablecer />} />
             <Route path="/register" element={<Register />} />
             <Route path="/track" element={<Track />} />
             <Route path="/cliente/*" element={<RequireRole roles={['cliente']}><PortalCliente portal={portal} cambiar={cambiar} /></RequireRole>} />
