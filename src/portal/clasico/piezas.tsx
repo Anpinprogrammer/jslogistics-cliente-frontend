@@ -81,3 +81,16 @@ export function Dialogo({ abierto, alCerrar, children }: { abierto: boolean; alC
 export const Cabecera = ({ children, alCerrar }: { children: ReactNode; alCerrar: () => void }) => (
   <header>{children}<button className="cerrar" aria-label="Cerrar" onClick={alCerrar}>×</button></header>
 );
+
+/** Paginador con las clases de la app (botones "sec"). La página la corta el servidor. */
+export function Paginador({ pagina, paginas, total, porPagina, ir, cargando }: { pagina: number; paginas: number; total: number; porPagina: number; ir: (p: number) => void; cargando?: boolean }) {
+  if (paginas <= 1) return null;
+  const desde = (pagina - 1) * porPagina + 1, hasta = Math.min(total, pagina * porPagina);
+  return (
+    <nav className="acciones" aria-label="Páginas de envíos" style={{ justifyContent: 'space-between', alignItems: 'center', flexWrap: 'nowrap', marginTop: 14 }}>
+      <button className="btn sec" style={{ minHeight: 44 }} disabled={pagina <= 1 || cargando} onClick={() => ir(pagina - 1)} aria-label="Página anterior">‹ Anterior</button>
+      <span className="sub" aria-live="polite" style={{ textAlign: 'center', margin: 0 }}>Página <b>{pagina}</b> de {paginas}<br />{desde}–{hasta} de {total}</span>
+      <button className="btn sec" style={{ minHeight: 44 }} disabled={pagina >= paginas || cargando} onClick={() => ir(pagina + 1)} aria-label="Página siguiente">Siguiente ›</button>
+    </nav>
+  );
+}

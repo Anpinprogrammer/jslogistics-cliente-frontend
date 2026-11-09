@@ -3,19 +3,20 @@
  * js-logistics/app/js/app.js), pasada a React sin cambiar lo que se ve: mismo HTML, mismas clases y el mismo
  * estilos.css. Para el dueño que prefiere que sus clientes sigan viendo exactamente lo de siempre.
  */
-import { Fragment, useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import './clasico.css';
 import { useSesion } from '../../auth/AuthProvider';
-import { useConfirmarCambio, usePruebas } from '../../api/cliente';
+import { useConfirmarCambio, usePaginaPedidos, usePruebas, type FiltroPedidos } from '../../api/cliente';
+import { usePorPagina } from '../../lib/pantalla';
 import { fechaLarga, hoy, hora, moverDia, pct, pesos } from '../../lib/formato';
 import {
-  cambioPendiente, cerrado, delDia, EMPRESA, entregasPorDia, filasCuenta, gastoDe, metodoTxt, MOTIVOS, pagoDomi,
+  cambioPendiente, cerrado, EMPRESA, entregasPorDia, filasCuenta, gastoDe, metodoTxt, MOTIVOS, pagoDomi,
   reciboDelDia, resumenCliente, saldoPedido, servicio, textoDomi, textoSaldo, ultimaActividad, type Recibo,
 } from '../../lib/negocio';
 import { useDatosCliente, type DatosCliente } from '../useDatosCliente';
 import { Icono } from './iconos';
-import { Cabecera, Columnas, Dialogo, Dona, EtqCambio, EtqDash, EtqEstado, FiltroDia, Foto } from './piezas';
+import { Cabecera, Columnas, Dialogo, Dona, EtqCambio, EtqDash, EtqEstado, FiltroDia, Foto, Paginador } from './piezas';
 
 const VERDE = 'var(--verde)', ROJO = 'var(--rojo)';
 const LOGO = '/img/clasico/logo.png';
@@ -140,32 +141,33 @@ const lineaPedido = (p: DatosCliente['pedidos'][number]) =>
 /* ---------------------------- Mis pedidos ---------------------------- */
 function Pedidos({ d, abrir }: { d: DatosCliente; abrir: (g: string) => void }) {
   const [sp, setSp] = useSearchParams();
-  const f = sp.get('f') || 'todos';
-  const [buscar, setBuscar] = useState(''), [dia, setDia] = useState('');
+  const f = (sp.get('f') || 'todos') as FiltroPedidos;
+  const [buscar, setBuscarT] = useState(''), [dia, setDiaT] = useState(''), [pagina, setPagina] = useState(1), porPagina = usePorPagina();
+  // Cambiar un filtro vuelve a la primera página.
+  const setBuscar = (v: string) => { setBuscarT(v); setPagina(1); }, setDia = (v: string) => { setDiaT(v); setPagina(1); };
   const cambios = d.pedidos.filter(cambioPendiente);
-  const ps = useMemo(() => {
-    let x = [...d.pedidos].sort((a, b) => b.n - a.n);
-    if (f === 'cambio') x = x.filter(cambioPendiente); else if (f === 'ruta') x = x.filter(p => p.estado === 'pendiente');
-    else if (f === 'ent') x = x.filter(p => p.estado === 'entregado'); else if (f === 'dev') x = x.filter(p => p.estado === 'devuelto');
-    if (buscar) x = x.filter(p => (p.guia + ' ' + (p.destinatario || '')).toLowerCase().includes(buscar.toLowerCase()));
-    if (dia) x = x.filter(p => delDia(p, dia));
-    return x;
-  }, [d.pedidos, f, buscar, dia]);
+  const consulta = usePaginaPedidos({ filtro: f, buscar, dia, pagina, porPagina });
+  const pag = consulta.data, ps = pag?.pedidos ?? [];
+  const ir = (n: number) => { setPagina(n); window.scrollTo({ top: 0, behavior: 'smooth' }); };
   return (
     <>
       <h1>Hola, {d.cliente!.nombre}</h1><p className="sub">Tus envíos con JS Logistics y sus pruebas de entrega.</p>
       {cambios.length > 0 && <div className="aviso alerta">Tienes {cambios.length === 1 ? '1 prenda de cambio' : cambios.length + ' prendas de cambio'} por recibir ({cambios.map(p => p.guia).join(', ')}). Cuando te la entreguen, ábrela y confirma que la recibiste.</div>}
       <div className="filtros">{[['todos', 'Todos'], ['ruta', 'En ruta'], ['ent', 'Entregados'], ['dev', 'Devueltos'], ['cambio', 'Cambios por recibir']].map(([k, t]) => (
-        <button key={k} aria-pressed={f === k} onClick={() => setSp(prev => { const n = new URLSearchParams(prev); n.set('f', k); return n; }, { replace: true })}>{t}</button>
+        <button key={k} aria-pressed={f === k} onClick={() => { setPagina(1); setSp(prev => { const n = new URLSearchParams(prev); n.set('f', k); return n; }, { replace: true }); }}>{t}</button>
       ))}</div>
       <div className="campo"><input type="search" placeholder="Buscar guía o quien recibió" value={buscar} onChange={e => setBuscar(e.target.value)} aria-label="Buscar" /></div>
       <FiltroDia dia={dia} poner={setDia} />
-      {dia && <p className="sub">{ps.length} envío{ps.length === 1 ? '' : 's'} de ese día</p>}
-      {ps.length ? <div className="lista">{ps.slice(0, 300).map(p => (
+      {dia && pag && <p className="sub">{pag.total} envío{pag.total === 1 ? '' : 's'} de ese día</p>}
+      {consulta.isError ? <div className="vacio">No se pudieron traer tus envíos. Revisa tu conexión e intenta de nuevo.</div>
+      : !pag ? <div className="vacio">Cargando envíos…</div>
+      : ps.length ? <><div className="lista" style={consulta.isPlaceholderData ? { opacity: .6 } : undefined}>{ps.map(p => (
         <button key={p.guia} className="fila" onClick={() => abrir(p.guia)}><Foto src={p.mini} />
           <span className="info"><span className="guia">{p.guia}</span> <EtqEstado p={p} /><EtqCambio p={p} /><p>{lineaPedido(p)}</p></span>
           <span className="n" style={{ textAlign: 'right', fontWeight: 700 }}>{p.estado === 'entregado' ? pesos(p.valorCobrado) : ''}</span></button>
-      ))}</div> : <div className="vacio">No hay envíos aquí.</div>}
+      ))}</div>
+      <Paginador pagina={pag.pagina} paginas={pag.paginas} total={pag.total} porPagina={pag.porPagina} ir={ir} cargando={consulta.isPlaceholderData} /></>
+      : <div className="vacio">No hay envíos aquí.</div>}
     </>
   );
 }

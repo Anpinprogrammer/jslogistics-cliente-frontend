@@ -174,3 +174,19 @@ export function Filtros<T extends string>({ opciones, valor, alCambiar }: { opci
     </div>
   );
 }
+
+/** Paginador: la página la corta el servidor; aquí solo se muestra y se pide otra. */
+export function Paginador({ pagina, paginas, total, porPagina, ir, cargando }: { pagina: number; paginas: number; total: number; porPagina: number; ir: (p: number) => void; cargando?: boolean }) {
+  if (paginas <= 1) return null;
+  const desde = (pagina - 1) * porPagina + 1, hasta = Math.min(total, pagina * porPagina);
+  return (
+    <nav aria-label="Páginas de envíos" className="flex items-center justify-between gap-3 mt-4">
+      <button className="btn-steel min-h-[44px] disabled:opacity-40" disabled={pagina <= 1 || cargando} onClick={() => ir(pagina - 1)} aria-label="Página anterior">‹ Anterior</button>
+      <p className="text-sm text-silver-500 text-center" aria-live="polite">
+        Página <span className="font-700 dark:text-silver-200 text-gray-700">{pagina}</span> de {paginas}
+        <span className="hidden sm:inline"> · {desde}–{hasta} de {total}</span>
+      </p>
+      <button className="btn-steel min-h-[44px] disabled:opacity-40" disabled={pagina >= paginas || cargando} onClick={() => ir(pagina + 1)} aria-label="Página siguiente">Siguiente ›</button>
+    </nav>
+  );
+}
