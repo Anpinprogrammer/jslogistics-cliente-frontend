@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from 'react';
 
-/** Fotos del fondo del Hero. Los archivos van en public/img/hero/ (ver LEEME.md). */
+/** Fotos del fondo del Hero. Cada una va en public/img/hero/ en dos tamaños WebP, <foto>-1280.webp y <foto>-1920.webp (ver LEEME.md). */
 const DIAPOSITIVAS = [
-  { src: '/img/hero/camiones.jpg',  alt: 'Camiones de carga circulando por una autopista',      fondo: 'radial-gradient(ellipse at 20% 80%, #0284c7 0%, transparent 55%), #0f1f3d' },
-  { src: '/img/hero/mensajero.jpg', alt: 'Furgoneta de reparto de paquetes',     fondo: 'radial-gradient(ellipse at 80% 30%, #25508e 0%, transparent 55%), #0b1530' },
-  { src: '/img/hero/centro.jpg',    alt: 'Centro de distribución con tecnología logística',  fondo: 'radial-gradient(ellipse at 50% 90%, #0ea5e9 0%, transparent 50%), #0f172a' },
-  { src: '/img/hero/bodega.jpg',    alt: 'Terminal de carga nocturna con grúas de contenedores',    fondo: 'radial-gradient(ellipse at 30% 20%, #1e3f74 0%, transparent 55%), #070B19' },
+  { foto: 'camiones', alt: 'Camiones de carga circulando por una autopista', fondo: 'radial-gradient(ellipse at 20% 80%, #0284c7 0%, transparent 55%), #0f1f3d' },
+  { foto: 'mensajero', alt: 'Furgoneta de reparto de paquetes',     fondo: 'radial-gradient(ellipse at 80% 30%, #25508e 0%, transparent 55%), #0b1530' },
+  { foto: 'centro',   alt: 'Centro de distribución con tecnología logística',  fondo: 'radial-gradient(ellipse at 50% 90%, #0ea5e9 0%, transparent 50%), #0f172a' },
+  { foto: 'bodega',   alt: 'Terminal de carga nocturna con grúas de contenedores',    fondo: 'radial-gradient(ellipse at 30% 20%, #1e3f74 0%, transparent 55%), #070B19' },
 ];
 const INTERVALO_MS = 5500;
 
 const HeroCarrusel: React.FC = () => {
   const [actual, setActual] = useState(0);
   const [fallidas, setFallidas] = useState<Record<number, boolean>>({});
+  // Solo se descargan la foto que se ve y la siguiente; las demás, cuando les va llegando el turno.
+  const [vistas, setVistas] = useState<Record<number, boolean>>({ 0: true });
   const [pausado, setPausado] = useState(false);
   const [sinMovimiento, setSinMovimiento] = useState(false);
 
@@ -25,6 +27,14 @@ const HeroCarrusel: React.FC = () => {
     return () => { mq.removeEventListener('change', alCambiar); document.removeEventListener('visibilitychange', alOcultar); };
   }, []);
 
+  // Al abrir la página, la primera foto va sola; la siguiente se pide un poco después, para no competir con ella.
+  useEffect(() => {
+    setVistas(v => (v[actual] ? v : { ...v, [actual]: true }));
+    const siguiente = (actual + 1) % DIAPOSITIVAS.length;
+    const t = window.setTimeout(() => setVistas(v => (v[siguiente] ? v : { ...v, [siguiente]: true })), actual === 0 ? 2500 : 0);
+    return () => window.clearTimeout(t);
+  }, [actual]);
+
   // `actual` en las dependencias reinicia el temporizador cuando se elige una diapositiva a mano.
   useEffect(() => {
     if (pausado || sinMovimiento) return;
@@ -37,11 +47,12 @@ const HeroCarrusel: React.FC = () => {
       {/* Fotos con desvanecimiento de 1 s */}
       <div className="absolute inset-0" aria-hidden="true">
         {DIAPOSITIVAS.map((d, i) => (
-          <div key={d.src}
+          <div key={d.foto}
             className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${i === actual ? 'opacity-100' : 'opacity-0'}`}
             style={{ background: d.fondo }}>
-            {!fallidas[i] && (
-              <img src={d.src} alt="" loading={i === 0 ? 'eager' : 'lazy'} decoding="async"
+            {vistas[i] && !fallidas[i] && (
+              <img src={`/img/hero/${d.foto}-1920.webp`} srcSet={`/img/hero/${d.foto}-1280.webp 1280w, /img/hero/${d.foto}-1920.webp 1920w`} sizes="100vw"
+                alt="" decoding="async"
                 onError={() => setFallidas(f => ({ ...f, [i]: true }))}
                 className={`absolute inset-0 h-full w-full object-cover ${!sinMovimiento && i === actual ? 'hero-zoom' : ''}`} />
             )}
@@ -66,7 +77,7 @@ const HeroCarrusel: React.FC = () => {
         role="tablist" aria-label="Imágenes del carrusel"
         onMouseEnter={() => setPausado(true)} onMouseLeave={() => setPausado(document.hidden)}>
         {DIAPOSITIVAS.map((d, i) => (
-          <button key={d.src} type="button" role="tab" aria-selected={i === actual} aria-label={`Imagen ${i + 1}: ${d.alt}`}
+          <button key={d.foto} type="button" role="tab" aria-selected={i === actual} aria-label={`Imagen ${i + 1}: ${d.alt}`}
             onClick={() => setActual(i)}
             className={`relative h-1.5 overflow-hidden rounded-full bg-white/25 transition-all duration-500 hover:bg-white/40 ${i === actual ? 'w-12' : 'w-4'}`}>
             {i === actual && (
