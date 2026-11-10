@@ -246,7 +246,8 @@
 @keyframes login-pulso { 0% { transform: scale(1); opacity: .8; } 100% { transform: scale(4); opacity: 0; } }
 .login-ruta { animation: login-ruta 3s linear infinite; }
 .login-pulso { transform-box: fill-box; transform-origin: center; animation: login-pulso 2.8s ease-out infinite; }
-@media (prefers-reduced-motion: reduce) { .login-ruta, .login-pulso { animation: none; } }
+.login-sede { animation: login-pulso 2.2s ease-out infinite; }
+@media (prefers-reduced-motion: reduce) { .login-ruta, .login-pulso, .login-sede { animation: none; } }
 
 /* En el celular, Safari hace zoom al tocar un campo con letra de menos de 16 px, y después la página queda agrandada.
    Con 16 px en todos los campos no hay zoom. Va con !important porque los estilos del portal clásico (.clasico) son más específicos. */

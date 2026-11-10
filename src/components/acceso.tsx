@@ -3,6 +3,7 @@
  * Usa exactamente las clases del Login original: aquí solo se reutiliza el diseño, no se cambia.
  */
 import type { ReactNode } from 'react';
+import { TIERRA } from './mapaMundo';
 
 export const ETIQUETA = 'mb-1.5 block text-xs font-medium uppercase tracking-wider text-slate-400';
 export const ENTRADA =
@@ -23,16 +24,78 @@ export const IcAlerta = () => <svg {...ic} className="mt-0.5 h-5 w-5 shrink-0"><
 export const IcCheck = () => <svg {...ic} className="h-7 w-7"><circle cx="12" cy="12" r="9" /><path d="m8 12.5 2.8 2.8L16.5 9.5" /></svg>;
 export const IcVolver = () => <svg {...ic} className="h-5 w-5"><path d="M19 12H5M11 18l-6-6 6-6" /></svg>;
 
-/* Continentes estilizados (equirrectangular, lienzo 1000×500) y nodos de la red logística. */
-const CONTINENTES = [
-  'M33 67 108 56 194 50 272 56 328 89 347 111 314 128 289 150 275 181 231 178 208 194 244 208 269 225 280 228 258 214 208 194 189 169 175 161 156 139 156 117 125 89 83 83 42 83Z',
-  'M297 33 389 19 444 28 410 67 375 83 340 75Z',
-  'M278 228 328 219 361 250 403 267 392 306 367 325 339 356 317 403 294 389 300 333 306 300 275 264Z',
-  'M475 144 489 117 514 106 528 89 556 56 611 61 694 47 806 36 917 53 1000 61 972 83 944 106 894 122 861 133 839 167 833 189 800 217 789 244 772 228 756 189 722 214 703 194 683 181 658 181 639 167 600 150 572 144 528 128 495 147Z',
-  'M453 192 483 150 528 147 589 164 619 217 642 219 611 258 611 292 589 328 556 347 533 300 525 239 478 239 453 211Z',
-  'M817 311 861 283 894 281 925 322 906 358 822 347Z',
+/* Mapa del fondo: el contorno real está en mapaMundo.ts (lienzo 1000×500). Aquí se ubican las ciudades por longitud y latitud. */
+const punto = (lon: number, lat: number): [number, number] => [
+  Math.round(((lon + 180) / 360) * 10000) / 10,
+  Math.round(((90 - lat) / 180) * 5000) / 10,
 ];
-const NODOS: [number, number][] = [[303, 150], [385, 270], [500, 125], [585, 175], [715, 200], [855, 150], [880, 330]];
+/** Sede principal: Cali, Colombia (3,4516° N, 76,5320° O). */
+const CALI = punto(-76.532, 3.4516);
+const CIUDADES = {
+  mexico: punto(-99.13, 19.43), miami: punto(-80.19, 25.76), nuevaYork: punto(-74.0, 40.71), saoPaulo: punto(-46.63, -23.55),
+  madrid: punto(-3.7, 40.42), dubai: punto(55.27, 25.2), shanghai: punto(121.47, 31.23), sidney: punto(151.21, -33.87),
+};
+/** Arco entre dos puntos, curvado hacia arriba en proporción a la distancia. */
+const arco = ([x1, y1]: [number, number], [x2, y2]: [number, number]) => {
+  const curva = Math.hypot(x2 - x1, y2 - y1) * 0.22;
+  return `M${x1} ${y1}Q${(x1 + x2) / 2} ${(y1 + y2) / 2 - curva} ${x2} ${y2}`;
+};
+const RUTAS = [
+  arco(CIUDADES.mexico, CALI), arco(CALI, CIUDADES.miami), arco(CALI, CIUDADES.nuevaYork), arco(CALI, CIUDADES.saoPaulo), arco(CALI, CIUDADES.madrid),
+  arco(CIUDADES.madrid, CIUDADES.dubai), arco(CIUDADES.dubai, CIUDADES.shanghai), arco(CIUDADES.shanghai, CIUDADES.sidney),
+];
+/* El lienzo visible va de y = −35 a 465 (sin la Antártida, el mundo queda centrado). La sede, en porcentaje de ese lienzo: */
+const VISTA_Y = -35;
+const SEDE = { left: `${CALI[0] / 10}%`, top: `${(CALI[1] - VISTA_Y) / 5}%` };
+
+/**
+ * Mapa del mundo con el pin de la sede. Va anclado a la columna del formulario, no a la pantalla:
+ * en celular el mundo queda detrás de la cabecera, con Cali a la izquierda del logo (la tarjeta tapa el resto de la pantalla);
+ * desde `md` ocupa toda la pantalla, con Cali a la izquierda de la tarjeta.
+ */
+function MapaSede() {
+  return (
+    <div aria-hidden="true"
+      className="pointer-events-none absolute -z-10 aspect-[2/1] w-[120vw] max-w-none left-[calc(50%-62.49vw)] top-[calc(44px-33.05vw)] sm:top-[calc(60px-33.05vw)] md:left-1/2 md:top-1/2 md:w-[max(1500px,100vw)] md:-translate-x-1/2 md:-translate-y-1/2">
+      <svg className="absolute inset-0 h-full w-full opacity-60" viewBox={`0 ${VISTA_Y} 1000 500`} fill="none">
+        <defs>
+          <pattern id="loginPuntos" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1" fill="#38bdf8" fillOpacity=".55" /></pattern>
+          <linearGradient id="loginRuta" x1="0" x2="1">
+            <stop offset="0" stopColor="#0284c7" stopOpacity=".15" /><stop offset=".5" stopColor="#7dd3fc" /><stop offset="1" stopColor="#0284c7" stopOpacity=".15" />
+          </linearGradient>
+          <radialGradient id="loginVineta" cx=".5" cy=".5" r=".72"><stop offset=".55" stopColor="#070B19" stopOpacity="0" /><stop offset="1" stopColor="#070B19" stopOpacity=".95" /></radialGradient>
+        </defs>
+        <path d={TIERRA} fill="#38bdf8" fillOpacity=".1" />
+        <path d={TIERRA} fill="url(#loginPuntos)" stroke="#7dd3fc" strokeOpacity=".55" strokeWidth=".7" strokeLinejoin="round" />
+        <g stroke="url(#loginRuta)" strokeWidth="1" strokeDasharray="3 6" strokeLinecap="round">
+          {RUTAS.map((d, i) => <path key={i} className="login-ruta" d={d} />)}
+        </g>
+        {Object.values(CIUDADES).map(([x, y], i) => (
+          <g key={i}>
+            <circle cx={x} cy={y} r="2.2" fill="#7dd3fc" />
+            <circle className="login-pulso" cx={x} cy={y} r="2.2" stroke="#7dd3fc" strokeWidth=".8" style={{ animationDelay: `${i * 0.6}s` }} />
+          </g>
+        ))}
+        <rect y={VISTA_Y} width="1000" height="500" fill="url(#loginVineta)" />
+      </svg>
+
+      {/* Pin de la sede: la punta queda justo sobre Cali */}
+      <div className="absolute h-0 w-0" style={SEDE}>
+        <span className="login-sede absolute -left-2 -top-2 h-4 w-4 rounded-full border border-[#38bdf8]" />
+        <span className="absolute -left-[3px] -top-[3px] h-1.5 w-1.5 rounded-full bg-white shadow-[0_0_8px_2px_rgba(56,189,248,.9)]" />
+        <svg viewBox="0 0 28 36" className="absolute -left-3.5 -top-9 h-9 w-7 max-w-none drop-shadow-[0_0_10px_rgba(56,189,248,.85)] md:-left-[18px] md:-top-[46px] md:h-[46px] md:w-9">
+          <defs><linearGradient id="loginPin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#7dd3fc" /><stop offset="1" stopColor="#0284c7" /></linearGradient></defs>
+          <path d="M14 35C14 35 3 21.5 3 13a11 11 0 0 1 22 0c0 8.5-11 22-11 22z" fill="url(#loginPin)" stroke="#fff" strokeWidth="1.6" strokeLinejoin="round" />
+          <circle cx="14" cy="13" r="4.2" fill="#fff" />
+        </svg>
+        <p className="absolute left-0 top-2.5 -translate-x-1/2 whitespace-nowrap text-center text-[10px] font-semibold leading-tight text-white [text-shadow:0_1px_6px_#070B19,0_0_2px_#070B19] md:top-3.5 md:text-xs">
+          <span className="block text-[9px] font-medium uppercase tracking-wider text-[#7dd3fc] md:text-[10px]">Sede principal</span>
+          Cali, Colombia
+        </p>
+      </div>
+    </div>
+  );
+}
 
 /** Fondo del login, cabecera con el logo, tarjeta de cristal y un pie opcional. */
 export function MarcoAcceso({
@@ -48,42 +111,17 @@ export function MarcoAcceso({
 }) {
   return (
     <div className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-[#070B19] px-4 pb-10 pt-24 sm:pb-16 sm:pt-28">
-      {/* Fondo: mapa de conexiones, malla y luces ambientales */}
+      {/* Fondo: malla y luces ambientales (el mapa va en MapaSede, anclado a la columna) */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
-        <svg className="absolute inset-0 h-full w-full opacity-40" preserveAspectRatio="xMidYMid slice" viewBox="0 0 1000 500" fill="none">
-          <defs>
-            <pattern id="loginPuntos" width="7" height="7" patternUnits="userSpaceOnUse"><circle cx="3.5" cy="3.5" r="1.1" fill="#38bdf8" fillOpacity=".5" /></pattern>
-            <linearGradient id="loginRuta" x1="0" x2="1">
-              <stop offset="0" stopColor="#0284c7" stopOpacity="0" /><stop offset=".5" stopColor="#38bdf8" /><stop offset="1" stopColor="#0284c7" stopOpacity="0" />
-            </linearGradient>
-            <radialGradient id="loginVineta" cx=".5" cy=".5" r=".75"><stop offset=".3" stopColor="#070B19" stopOpacity="0" /><stop offset="1" stopColor="#070B19" stopOpacity=".9" /></radialGradient>
-          </defs>
-          {CONTINENTES.map((d, i) => <path key={i} d={d} fill="url(#loginPuntos)" stroke="#38bdf8" strokeOpacity=".25" strokeWidth=".8" strokeLinejoin="round" />)}
-          <g stroke="url(#loginRuta)" strokeWidth=".9" strokeDasharray="3 6">
-            <path className="login-ruta" d="M303 150 Q 400 60 500 125" />
-            <path className="login-ruta" d="M500 125 Q 560 100 585 175" />
-            <path className="login-ruta" d="M585 175 Q 650 120 715 200" />
-            <path className="login-ruta" d="M715 200 Q 790 110 855 150" />
-            <path className="login-ruta" d="M855 150 Q 900 230 880 330" />
-            <path className="login-ruta" d="M303 150 Q 300 230 385 270" />
-            <path className="login-ruta" d="M385 270 Q 440 200 500 125" />
-            <path className="login-ruta" d="M585 175 Q 700 330 880 330" />
-          </g>
-          {NODOS.map(([x, y], i) => (
-            <g key={i}>
-              <circle cx={x} cy={y} r="2.4" fill="#38bdf8" />
-              <circle className="login-pulso" cx={x} cy={y} r="2.4" stroke="#38bdf8" strokeWidth=".8" style={{ animationDelay: `${i * 0.6}s` }} />
-            </g>
-          ))}
-          <rect width="1000" height="500" fill="url(#loginVineta)" />
-        </svg>
         <div className="absolute inset-0 opacity-[0.05]"
           style={{ backgroundImage: 'linear-gradient(rgba(148,176,207,1) 1px, transparent 1px), linear-gradient(90deg, rgba(148,176,207,1) 1px, transparent 1px)', backgroundSize: '56px 56px' }} />
         <div className="absolute -left-32 -top-32 h-[28rem] w-[28rem] rounded-full bg-[#0284c7]/30 blur-[120px]" />
         <div className="absolute -bottom-40 -right-28 h-[32rem] w-[32rem] rounded-full bg-[#38bdf8]/20 blur-[130px]" />
       </div>
 
-      <div className="relative w-full max-w-sm animate-fade-up sm:max-w-md">
+      <div className="relative w-full max-w-sm sm:max-w-md">
+        <MapaSede />
+        <div className="animate-fade-up">
         {/* Cabecera */}
         <div className="mb-5 text-center sm:mb-8">
           <div className="relative mx-auto mb-3 grid h-16 w-16 place-items-center sm:mb-5 sm:h-24 sm:w-24">
@@ -109,6 +147,7 @@ export function MarcoAcceso({
         </div>
 
         {pie}
+        </div>
       </div>
     </div>
   );
