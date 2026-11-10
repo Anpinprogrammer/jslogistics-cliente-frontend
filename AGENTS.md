@@ -90,6 +90,7 @@ src/
   demo/datos.ts         datos inventados para VITE_DEMO=true
   pages/                landing (Home), Login, Register, Recuperar, Restablecer, Track y Equipo
   components/           Navbar (con el menú móvil), Footer, ui, HeroCarrusel y acceso.tsx (marco del login)
+  components/intro/     animación de entrada del login (reloj, medidas y escena), la misma de la oficina
   hooks/useTheme.ts     modo claro/oscuro (clase `dark` en <html>, guardado en localStorage `jsl_theme`)
   lib/pantalla.ts       cuántos pedidos por página: 8 en celular, 20 en computador
   services/, utils/, types/index.ts   herencia de la landing original (solo Register y Track)
