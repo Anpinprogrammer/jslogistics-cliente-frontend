@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense, useEffect, useLayoutEffect } from 'react';
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './auth/AuthProvider';
@@ -34,6 +34,16 @@ const queryClient = new QueryClient({
 
 function ScrollToHash() {
   const location = useLocation();
+  useLayoutEffect(() => {
+    if (location.pathname === '/login') {
+      const root = document.documentElement;
+      const anterior = root.style.scrollBehavior;
+      root.style.scrollBehavior = 'auto';
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      const frame = requestAnimationFrame(() => window.scrollTo({ top: 0, left: 0, behavior: 'instant' }));
+      return () => { cancelAnimationFrame(frame); root.style.scrollBehavior = anterior; };
+    }
+  }, [location.pathname, location.key]);
   useEffect(() => { window.scrollTo(0, 0); }, []);
   useEffect(() => {
     if (location.hash) {
