@@ -1,6 +1,5 @@
 /**
- * Lo que necesita el portal del cliente. Los dos portales (mejorado y clásico) usan exactamente estas
- * mismas consultas: solo cambia cómo se ve.
+ * Lo que necesita el portal del cliente: todas sus consultas salen de aquí.
  *
  * Estado del backend (rama del backend, backend/README.md):
  * - Listo: GET /pedidos (el cliente solo ve los suyos), GET /pedidos/:guia, POST /pedidos/:guia/cambio-recibido, GET /clientes/:id.
@@ -40,7 +39,7 @@ export function usePedidosCliente() {
   return useQuery({ queryKey: ['cliente', 'pedidos'], queryFn: todosLosPedidos, refetchInterval: 60_000 });
 }
 
-/** Filtros de la pestaña de pedidos (los mismos en los dos portales). */
+/** Filtros de la pestaña de pedidos. */
 export type FiltroPedidos = 'todos' | 'ruta' | 'ent' | 'dev' | 'cambio';
 export interface ConsultaPedidos { filtro: FiltroPedidos; buscar: string; dia: string; pagina: number; porPagina: number }
 

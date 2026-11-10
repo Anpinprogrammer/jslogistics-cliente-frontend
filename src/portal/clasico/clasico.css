@@ -1,29 +1,40 @@
 :root{
-  --fondo:#EEF2F5; --papel:#FFFFFF; --tinta:#0E1A24; --suave:#66788A; --linea:#E2E8EE;
+  --fondo:#F8FAFC; --papel:#FFFFFF; --tinta:#0F172A; --suave:#64748B; --linea:#E2E8F0;
   --verde:#16794A; --verde-claro:#DDF3E6; --mango:#1F86C9; --mango-claro:#E3F0FA;
   --rojo:#C0392B; --rojo-claro:#FBE4E0; --azul:#115072; --azul-claro:#E2EDF4;
   --amarillo:#8A5A00; --amarillo-claro:#FDF1D3;
   --marca:#1670B0; --marca2:#1F86C9; --noche:#0B0F14; --lateral:#0B0F14; --lateral-suave:#9AA6B2;
-  --hueco:#F6F8FA; --sombra:0 1px 2px rgba(16,24,40,.04),0 6px 20px rgba(16,24,40,.05);
+  --hueco:#F1F5F9; --sombra:0 1px 2px rgba(15,23,42,.04),0 8px 24px rgba(15,23,42,.05);
+  --shell-fondo:#FFFFFF; --shell-tinta:#0F172A; --shell-suave:#64748B; --shell-linea:#E2E8F0;
+  --shell-hover:rgba(15,23,42,.05); --shell-activo-fondo:rgba(31,134,201,.10); --shell-activo-tinta:#1670B0;
+  /* El menú lateral de escritorio siempre va oscuro, como el de la oficina. */
+  --lat-fijo-fondo:#0F172A; --lat-fijo-tinta:#F1F5F9; --lat-fijo-suave:#94A3B8; --lat-fijo-linea:#1E293B;
+  --lat-fijo-hover:rgba(255,255,255,.06); --lat-fijo-activo-fondo:rgba(59,163,230,.16); --lat-fijo-activo-tinta:#3BA3E6;
   --radio:18px;
   color-scheme:light;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --fondo:#090D12; --papel:#121A22; --tinta:#E7EEF4; --suave:#8C9BA8; --linea:#22303C;
+  --fondo:#020617; --papel:#0F172A; --tinta:#F1F5F9; --suave:#94A3B8; --linea:#1E293B;
   --verde:#5CC28C; --verde-claro:#163828; --mango:#3BA3E6; --mango-claro:#12324A;
   --rojo:#F08470; --rojo-claro:#41221C; --azul:#7DB6E3; --azul-claro:#13304A;
   --amarillo:#F2B632; --amarillo-claro:#3A3018;
-  --marca:#1F7FC2; --marca2:#3BA3E6; --noche:#05080B; --lateral:#05080B; --hueco:#0E151C;
-  --sombra:0 1px 2px rgba(0,0,0,.3); color-scheme:dark;}}
+  --marca:#1F7FC2; --marca2:#3BA3E6; --noche:#05080B; --lateral:#05080B; --hueco:#0B1220;
+  --sombra:0 1px 2px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.3);
+  --shell-fondo:#0F172A; --shell-tinta:#F1F5F9; --shell-suave:#94A3B8; --shell-linea:#1E293B;
+  --shell-hover:rgba(255,255,255,.06); --shell-activo-fondo:rgba(59,163,230,.16); --shell-activo-tinta:#3BA3E6;
+  color-scheme:dark;}}
 :root[data-theme="dark"]{
-  --fondo:#090D12; --papel:#121A22; --tinta:#E7EEF4; --suave:#8C9BA8; --linea:#22303C;
+  --fondo:#020617; --papel:#0F172A; --tinta:#F1F5F9; --suave:#94A3B8; --linea:#1E293B;
   --verde:#5CC28C; --verde-claro:#163828; --mango:#3BA3E6; --mango-claro:#12324A;
   --rojo:#F08470; --rojo-claro:#41221C; --azul:#7DB6E3; --azul-claro:#13304A;
   --amarillo:#F2B632; --amarillo-claro:#3A3018;
-  --marca:#1F7FC2; --marca2:#3BA3E6; --noche:#05080B; --lateral:#05080B; --hueco:#0E151C;
-  --sombra:0 1px 2px rgba(0,0,0,.3); color-scheme:dark;}
+  --marca:#1F7FC2; --marca2:#3BA3E6; --noche:#05080B; --lateral:#05080B; --hueco:#0B1220;
+  --sombra:0 1px 2px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.3);
+  --shell-fondo:#0F172A; --shell-tinta:#F1F5F9; --shell-suave:#94A3B8; --shell-linea:#1E293B;
+  --shell-hover:rgba(255,255,255,.06); --shell-activo-fondo:rgba(59,163,230,.16); --shell-activo-tinta:#3BA3E6;
+  color-scheme:dark;}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *,*::before,*::after{box-sizing:border-box}
 body{margin:0;background:var(--fondo);color:var(--tinta);font-family:"Poppins",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
@@ -382,3 +393,124 @@ h1,h2,h3{font-family:inherit;letter-spacing:normal}
 img{display:inline-block}
 svg{display:inline-block}
 dialog[open]{display:block}
+
+/* Listas cortas (últimos pedidos y movimientos): la columna se ajusta al ancho de la tarjeta
+   y el texto largo se recorta con puntos, en vez de estirar la página en el celular. */
+.mini-lista{grid-template-columns:minmax(0,1fr)}
+
+/* ---------- menú lateral de escritorio con el estilo de la oficina ----------
+   Logo con separador, accesos agrupados por sección y el activo con acento azul.
+   En el celular no cambia nada: se siguen usando las pestañas de abajo. */
+@media (min-width:960px){
+  .marca-lat{display:flex;align-items:center;gap:12px;padding:0 8px 18px;margin:0 -14px 14px;padding-left:22px;border-bottom:1px solid rgba(255,255,255,.08);font-size:1rem}
+  .marca-lat img{width:36px;height:36px;border-radius:12px;flex:none;object-fit:contain}
+  .marca-lat-txt{display:flex;flex-direction:column;justify-content:center;min-width:0;line-height:1}
+  .marca-lat-txt b{font-size:1rem;font-weight:700;color:#fff;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .marca-lat-txt small{display:block;margin-top:2px;font-size:10px;font-weight:600;color:var(--lateral-suave);text-transform:uppercase;letter-spacing:.12em;line-height:1.4;opacity:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #navLateral{gap:4px}
+  #navLateral .lat-grupo{display:flex;flex-direction:column;gap:1px}
+  #navLateral .lat-grupo + .lat-grupo{margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.07)}
+  #navLateral .lat-titulo{padding:0 14px 7px;font-size:.72rem;font-weight:600;letter-spacing:.1em;line-height:1.2;text-transform:uppercase;color:#fff;opacity:.45}
+  #navLateral button{min-height:40px;padding:10px 14px;font-size:.9rem;color:#B9C5D0;border-left:3px solid transparent;border-radius:10px}
+  #navLateral button svg{opacity:.9}
+  #navLateral button:hover svg,#navLateral button[aria-current="page"] svg{opacity:1}
+  #navLateral button[aria-current="page"]{background:rgba(59,163,230,.14);color:var(--marca2);border-left-color:var(--marca2)}
+  #navLateral .num{margin-left:auto;min-width:22px;padding:0 7px;border-radius:999px;background:var(--rojo);color:#fff;font-size:.72rem;text-align:center;line-height:20px}
+  .lat-pie{margin-top:auto;padding:12px 14px 0;border-top:1px solid rgba(255,255,255,.08);font-size:.75rem;color:var(--lateral-suave);opacity:1}
+}
+
+/* ---------- tema claro/oscuro del portal y layout fluido en XL/2XL ----------
+   El tema se elige con el botón de la barra superior (`data-theme` en .clasico) y se guarda en
+   localStorage con el mismo hook de la landing. El menú y la barra usan `--shell-*` para pasar de
+   blanco a slate-900 sin tocar los colores de estado. */
+.clasico{transition:background-color .2s ease,color .2s ease}
+body::before{background:var(--shell-fondo)}
+
+.barra{height:76px;padding:0 14px;background:var(--shell-fondo);color:var(--shell-tinta);border-bottom:1px solid var(--shell-linea);transition:background-color .2s ease,color .2s ease,border-color .2s ease}
+.salir{color:var(--shell-tinta);border-color:var(--shell-linea)}
+.salir:hover{background:var(--shell-hover)}
+.marca img,.marca-lat img{box-shadow:0 0 0 1px var(--shell-linea)}
+
+.tema{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;padding:0;flex:none;border-radius:50%;border:1px solid var(--shell-linea);background:var(--shell-fondo);color:var(--shell-suave);cursor:pointer;box-shadow:0 1px 2px rgba(15,23,42,.05);transition:background .15s,color .15s,border-color .15s,transform .1s}
+.tema:hover{background:var(--shell-hover);color:var(--shell-tinta)}
+.tema:active{transform:scale(.95)}
+.tema svg{width:18px;height:18px}
+.tema[data-tema="light"] svg{color:#0284C7}
+.tema[data-tema="dark"] svg{color:#FBBF24}
+
+@media (min-width:960px){
+  .barra{padding:0 28px}
+  .lateral{background:var(--lat-fijo-fondo);color:var(--lat-fijo-tinta);border-right:1px solid var(--lat-fijo-linea);padding-top:env(safe-area-inset-top,0px);transition:width .3s ease,padding .3s ease,background-color .2s ease,color .2s ease,border-color .2s ease}
+  .marca-lat{height:76px;padding:0 14px 0 22px;margin:0 -14px 14px;border-bottom:1px solid var(--shell-linea)}
+  .marca-lat-txt b{color:var(--lat-fijo-tinta)}
+  .marca-lat-txt small{color:var(--lat-fijo-suave)}
+  #navLateral .lat-titulo{color:var(--lat-fijo-suave);opacity:1}
+  #navLateral button{color:var(--lat-fijo-suave)}
+  #navLateral button:hover{background:var(--lat-fijo-hover);color:var(--lat-fijo-tinta)}
+  #navLateral button[aria-current="page"]{background:var(--lat-fijo-activo-fondo);color:var(--lat-fijo-activo-tinta);border-left-color:var(--lat-fijo-activo-tinta)}
+  .lat-pie{border-top-color:var(--lat-fijo-linea);color:var(--lat-fijo-suave)}
+  .lat-pie .plegar{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;padding:10px;border:0;border-radius:10px;background:none;color:var(--lat-fijo-suave);font-size:.75rem;font-weight:500;text-align:left;transition:background .15s,color .15s}
+  .lat-pie .plegar:hover{background:var(--lat-fijo-hover);color:var(--lat-fijo-tinta)}
+  .lat-pie .plegar svg{width:18px;height:18px;flex:none}
+}
+
+/* Tarjetas y métricas: borde y sombra suaves en los dos temas. */
+.tarjeta,.kpi{background:var(--papel);border:1px solid var(--linea);box-shadow:var(--sombra);border-radius:var(--radio);transition:background-color .2s ease,border-color .2s ease,box-shadow .2s ease,color .2s ease,transform .15s ease}
+.kpi{padding:20px}
+button.kpi:hover{border-color:rgba(31,134,201,.45);box-shadow:0 12px 28px rgba(15,23,42,.10);transform:translateY(-2px)}
+:root[data-theme="dark"] button.kpi:hover{border-color:rgba(59,163,230,.45);box-shadow:0 12px 28px rgba(0,0,0,.45)}
+
+/* Tarjeta de saldo: gradiente celeste sutil, legible en claro y oscuro. */
+.kpi.oscuro{background:linear-gradient(135deg,rgba(31,134,201,.14) 0%,rgba(31,134,201,.05) 55%,transparent 100%);color:var(--tinta);border-color:rgba(31,134,201,.30)}
+.kpi.oscuro .lbl,.kpi.oscuro small{color:var(--suave)}
+.kpi.oscuro .lbl svg{background:var(--mango-claro);color:var(--marca)}
+:root[data-theme="dark"] .kpi.oscuro{background:linear-gradient(135deg,rgba(3,105,161,.38) 0%,rgba(15,23,42,.95) 60%,var(--papel) 100%);border-color:rgba(59,163,230,.24)}
+:root[data-theme="dark"] .kpi.oscuro .lbl,:root[data-theme="dark"] .kpi.oscuro small{color:rgba(226,232,240,.72)}
+
+/* Banner de prendas de cambio: ámbar suave, con contraste en ambos temas. */
+.aviso.alerta{background:rgba(245,158,11,.10);border:1px solid rgba(245,158,11,.30);color:#92400E;border-radius:18px;padding:16px;font-size:.9rem;font-weight:500;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+:root[data-theme="dark"] .aviso.alerta{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.30);color:#FCD34D}
+
+/* Badges de estado con borde suave. */
+.etq{border:1px solid transparent;padding:3px 9px}
+.etq.ent{border-color:rgba(22,121,74,.18)}
+.etq.ruta{border-color:rgba(31,134,201,.18)}
+:root[data-theme="dark"] .etq.ent{border-color:rgba(92,194,140,.22)}
+:root[data-theme="dark"] .etq.ruta{border-color:rgba(59,163,230,.25)}
+
+/* Grid fluido: 1 columna en celular, 2 desde 600 px y 4 desde 1024 px. */
+.kpis{grid-template-columns:minmax(0,1fr);gap:16px}
+@media (min-width:600px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:1024px){.kpis{grid-template-columns:repeat(4,minmax(0,1fr))}}
+/* Entre 1024 y 1279 px las cuatro tarjetas quedan justas: se compactan para que el saldo no se corte. */
+@media (min-width:1024px) and (max-width:1279px){
+  .kpi{padding:16px}
+  .kpi b{font-size:1.5rem}
+  .kpi .lbl{font-size:.8rem;gap:6px}
+}
+@media (min-width:1280px){.kpis,.dash{gap:24px}}
+@media (min-width:1280px){.colbar{height:210px}}
+
+/* Contenido a todo el ancho en escritorio; tope de 1600 px solo en monitores muy anchos. */
+@media (min-width:960px){main{padding:24px 32px 56px}}
+@media (min-width:1280px){main{max-width:none;margin-right:0;padding:28px 40px 64px}}
+@media (min-width:1536px){main{padding:32px 48px 72px}}
+@media (min-width:1920px){main{padding-left:max(48px,calc((100vw - 248px - 1600px) / 2));padding-right:max(48px,calc((100vw - 248px - 1600px) / 2))}}
+
+/* Menú colapsado (solo escritorio): ancho mínimo, solo íconos y el nombre en el title. */
+@media (min-width:960px){
+  .lateral{transition:width .3s ease,padding .3s ease,background-color .2s ease,color .2s ease,border-color .2s ease}
+  .barra{transition:margin-left .3s ease,background-color .2s ease,color .2s ease,border-color .2s ease}
+  main{transition:margin-left .3s ease}
+  .clasico.menu-colapsado .lateral{width:76px;padding-left:10px;padding-right:10px}
+  .clasico.menu-colapsado .barra,.clasico.menu-colapsado main{margin-left:76px}
+  .clasico.menu-colapsado .marca-lat{justify-content:center;padding:0;margin:0 -10px 12px;border-bottom:1px solid var(--shell-linea)}
+  .clasico.menu-colapsado .marca-lat-txt{display:none}
+  .clasico.menu-colapsado .lat-titulo{display:none}
+  .clasico.menu-colapsado .lat-grupo + .lat-grupo{margin-top:8px;padding-top:8px}
+  .clasico.menu-colapsado #navLateral button{position:relative;justify-content:center;padding:10px;border-left-width:0}
+  .clasico.menu-colapsado #navLateral button .t{display:none}
+  .clasico.menu-colapsado #navLateral button .num{position:absolute;top:2px;right:2px;margin:0;min-width:16px;padding:0 4px;font-size:.62rem;line-height:15px}
+  .clasico.menu-colapsado .lat-pie{padding:12px 0 0}
+  .clasico.menu-colapsado .lat-pie .plegar{justify-content:center}
+}

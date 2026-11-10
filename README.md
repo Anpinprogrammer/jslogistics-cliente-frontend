@@ -14,18 +14,15 @@ npm run build      # revisa los tipos y genera dist/
 
 Variables en `.env.example`. Si `npm run dev` da 403 o 404 raros, revisa que el puerto 4000 sea del backend de JS Logistics (ver [docs/ESTADO.md](docs/ESTADO.md#trampas-del-entorno)).
 
-## Dos portales para el cliente
+## Portal del cliente
 
-Después de iniciar sesión desde la landing, el cliente ve uno de dos portales. Los dos muestran lo mismo que la app actual
+Después de iniciar sesión desde la landing, el cliente ve el **portal clásico**: la misma vista de la app actual
 (inicio con indicadores, mis pedidos con filtros y pruebas de entrega, confirmar prenda de cambio, mi cuenta con saldo,
-movimientos y recibo de cuadre del día) y usan las mismas consultas; solo cambia el diseño.
-
-| `VITE_PORTAL_CLIENTE` | Qué ve el cliente | Código |
-| --- | --- | --- |
-| `mejorado` (por defecto) | El diseño de la landing (tema steel, tarjetas, modo oscuro) con los datos y funciones de la app actual | `src/portal/mejorado/` |
-| `clasico` | La vista del cliente de la app actual, tal cual: mismo HTML y mismo `estilos.css` | `src/portal/clasico/` |
-
-Con `VITE_PERMITIR_CAMBIO_PORTAL=true` aparece un botón flotante para pasar de uno a otro (la demo lo trae activo).
+movimientos y recibo de cuadre del día). En escritorio el menú lateral sigue el estilo de la app de oficina (logo con
+separador, accesos agrupados por sección y el activo con acento azul); en el celular se usan las pestañas de abajo.
+El dashboard permite cambiar entre **modo claro y oscuro** desde la barra superior, y desde 1280 px aprovecha todo el
+ancho disponible (con un tope de 1600 px en monitores muy anchos). En escritorio el menú lateral **siempre es oscuro**
+(como el de la oficina) y se puede **colapsar a solo íconos** con el botón del pie.
 
 El CSS del portal clásico es una copia de `js-logistics/app/css/estilos.css`. `postcss.config.js` encierra todas sus reglas
 dentro de `.clasico`, así que no choca con Tailwind ni con la landing.
@@ -33,8 +30,8 @@ dentro de `.clasico`, así que no choca con Tailwind ni con la landing.
 ## Despliegue en Vercel
 
 `vercel.json` fija Vite, la carpeta `dist` y la regla de SPA (toda ruta va a `index.html`).
-Las vistas previas de cada PR (`VERCEL_ENV=preview`) se construyen en **modo demo**, con datos de prueba y el botón para
-cambiar de portal, así se le pueden mostrar al dueño sin backend. Producción usa el modo normal y llama a `/api`, que Vercel reenvía a `https://js-logistics.onrender.com`.
+Las vistas previas de cada PR (`VERCEL_ENV=preview`) se construyen en **modo demo**, con datos de prueba, así se le pueden
+mostrar al dueño sin backend. Producción usa el modo normal y llama a `/api`, que Vercel reenvía a `https://js-logistics.onrender.com`.
 
 ## Estructura
 
@@ -43,7 +40,7 @@ src/
   api/          cliente fetch (cookies, X-JSL, errores) y consultas del portal con TanStack Query
   auth/         sesión (/api/auth/yo, ingresar, salir) y protección de rutas por rol
   lib/          formatos (pesos, horas de Colombia) y reglas de negocio copiadas de app.js
-  portal/       config.ts (qué portal), useDatosCliente.ts, mejorado/ y clasico/
+  portal/       useDatosCliente.ts y clasico/ (la vista del cliente)
   demo/         datos de prueba para VITE_DEMO=true
   pages/        landing (Home), Login, Registro, Recuperar, Restablecer, Rastreo y la página provisional del equipo
   components/   piezas de la landing (Navbar con menú móvil, Footer, ui, HeroCarrusel)

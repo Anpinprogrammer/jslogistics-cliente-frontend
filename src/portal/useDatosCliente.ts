@@ -12,7 +12,7 @@ export interface DatosCliente {
   error: Error | null;
 }
 
-/** Todo lo que muestran los dos portales del cliente, desde las mismas consultas. */
+/** Todo lo que muestra el portal del cliente, desde las mismas consultas. */
 export function useDatosCliente(): DatosCliente {
   const p = usePedidosCliente(), c = useFichaCliente(), m = useMovimientosCliente();
   return useMemo(() => {

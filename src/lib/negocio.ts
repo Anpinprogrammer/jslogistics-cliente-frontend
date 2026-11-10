@@ -1,6 +1,6 @@
 /**
- * Reglas de negocio que ve el cliente, copiadas de js-logistics/app/js/app.js para que los dos portales
- * muestren exactamente lo mismo que la app actual. Cuando el backend devuelva los saldos ya calculados
+ * Reglas de negocio que ve el cliente, copiadas de js-logistics/app/js/app.js para que el portal
+ * muestre exactamente lo mismo que la app actual. Cuando el backend devuelva los saldos ya calculados
  * (pendiente en backend/README.md), estas funciones solo quedan para mostrar el detalle.
  */
 import type { Movimiento, Pedido, TipoMovimiento } from '../types/dominio';

@@ -5,6 +5,7 @@
  */
 import { Fragment, useEffect, useState } from 'react';
 import { Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { Moon, Sun } from 'lucide-react';
 import './clasico.css';
 import { useSesion } from '../../auth/AuthProvider';
 import { useConfirmarCambio, usePaginaPedidos, usePruebas, type FiltroPedidos } from '../../api/cliente';
@@ -15,6 +16,7 @@ import {
   reciboDelDia, resumenCliente, saldoPedido, servicio, textoDomi, textoSaldo, ultimaActividad, type Recibo,
 } from '../../lib/negocio';
 import { useDatosCliente, type DatosCliente } from '../useDatosCliente';
+import { useTheme } from '../../hooks/useTheme';
 import { Icono } from './iconos';
 import { Cabecera, Columnas, Dialogo, Dona, EtqCambio, EtqDash, EtqEstado, FiltroDia, Foto, Paginador } from './piezas';
 
@@ -30,9 +32,11 @@ function useToast() {
 export default function PortalClasico() {
   const d = useDatosCliente();
   const { usuario, salir } = useSesion();
+  const { theme, toggleTheme } = useTheme();
   const nav = useNavigate(), loc = useLocation();
   const [sp, setSp] = useSearchParams();
   const { toast, nodo: toastNodo } = useToast();
+  const [menuColapsado, setMenuColapsado] = useState(false);
   const ver = sp.get('ver');
   const abrir = (guia: string) => setSp(prev => { const n = new URLSearchParams(prev); n.set('ver', guia); return n; });
   const cerrar = () => setSp(prev => { const n = new URLSearchParams(prev); n.delete('ver'); return n; }, { replace: true });
@@ -40,16 +44,32 @@ export default function PortalClasico() {
   const tab = loc.pathname.endsWith('/pedidos') ? 'pedidos' : loc.pathname.endsWith('/cuenta') ? 'cuenta' : 'inicio';
   const enRuta = d.pedidos.filter(p => p.estado === 'pendiente').length, cambios = d.pedidos.filter(cambioPendiente);
   const items: [string, string, number?][] = [['inicio', 'Inicio'], ['pedidos', 'Mis pedidos', enRuta + cambios.length], ['cuenta', 'Mi cuenta']];
+  // En el escritorio el menú va agrupado por sección, como el de la oficina; en el celular se muestran las pestañas de siempre.
+  const SECCIONES: [string, string[]][] = [['Principal', ['inicio', 'pedidos']], ['Mi cuenta', ['cuenta']]];
   const ir = (k: string, filtro?: string) => { nav('/cliente' + (k === 'inicio' ? '' : '/' + k) + (filtro ? '?f=' + filtro : '')); scrollTo(0, 0); };
-  const botones = items.map(([k, t, n]) => (
-    <button key={k} onClick={() => ir(k)} aria-current={tab === k ? 'page' : undefined}>
+  const boton = ([k, t, n]: [string, string, number?]) => (
+    <button key={k} onClick={() => ir(k)} aria-current={tab === k ? 'page' : undefined} aria-label={t} title={t}>
       <Icono n={k} /><span className="t">{t}</span>{n ? <span className="num">{n}</span> : null}
     </button>
-  ));
+  );
+  const botones = items.map(boton);
+  const grupos = SECCIONES.map(([titulo, claves]) => {
+    const xs = items.filter(([k]) => claves.includes(k));
+    return xs.length ? <div className="lat-grupo" key={titulo}><span className="lat-titulo">{titulo}</span>{xs.map(boton)}</div> : null;
+  });
 
   const h = new Date().getHours(), nom = usuario?.nombre || '';
   const corto = nom.includes('@') ? nom.split('@')[0] : nom.split(' ')[0];
   const iniciales = nom.replace(/@.*/, '').split(/\s+/).filter(Boolean).slice(0, 2).map(x => x[0]).join('').toUpperCase();
+
+  // La barra del navegador en celular (theme-color) también acompaña al tema del portal.
+  useEffect(() => {
+    const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    if (!meta) return;
+    const anterior = meta.content;
+    meta.content = theme === 'dark' ? '#0f172a' : '#f8fafc';
+    return () => { meta.content = anterior; };
+  }, [theme]);
 
   let vista;
   if (d.error) vista = <><h1>Hola</h1><div className="vacio">{d.error.message}</div></>;
@@ -65,15 +85,29 @@ export default function PortalClasico() {
   );
 
   return (
-    <div className="clasico">
+    <div className={'clasico' + (menuColapsado ? ' menu-colapsado' : '')} data-theme={theme}>
       <aside className="lateral">
-        <div className="marca-lat"><img src={LOGO} alt="" /><span>JS Logistics<small>Servir es nuestra labor</small></span></div>
-        <nav id="navLateral" aria-label="Menú principal">{botones}</nav>
-        <div className="lat-pie">JS Logistics · Cali</div>
+        <div className="marca-lat">
+          <img src={LOGO} alt="" />
+          <div className="marca-lat-txt"><b>JS Logistics</b><small>Servir es nuestra labor</small></div>
+        </div>
+        <nav id="navLateral" aria-label="Menú principal">{grupos}</nav>
+        <div className="lat-pie">
+          <button type="button" className="plegar" onClick={() => setMenuColapsado(v => !v)}
+            aria-label={menuColapsado ? 'Expandir menú' : 'Colapsar menú'}
+            title={menuColapsado ? 'Expandir menú' : 'Colapsar menú'}>
+            {menuColapsado ? <Icono n="expandir" /> : <><span>Colapsar menú</span><Icono n="contraer" /></>}
+          </button>
+        </div>
       </aside>
       <header className="barra">
         <div className="marca"><img src={LOGO} alt="" /><span>JS Logistics<small>Servir es nuestra labor</small></span></div>
         <div className="saludo"><b>{h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches'}{corto ? ', ' + corto : ''}</b><span>{fechaLarga(hoy())}</span></div>
+        <button type="button" className="tema" data-tema={theme} onClick={toggleTheme}
+          aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+          title={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}>
+          {theme === 'dark' ? <Sun /> : <Moon />}
+        </button>
         {nom && <span className="avatar" aria-hidden="true">{iniciales}</span>}
         <button className="salir" aria-label="Cerrar sesión" onClick={() => salir().then(() => nav('/'))}><Icono n="salir" /><span>Salir</span></button>
       </header>
@@ -116,14 +150,14 @@ function Inicio({ d, ir, abrir }: { d: DatosCliente; ir: (k: string, f?: string)
         <section className="tarjeta c8"><h3>Tus envíos entregados <small>Últimos 30 días · {tot30} en total</small></h3><Columnas datos={dias} /></section>
       </div>
       <div className="dash">
-        <section className="tarjeta c7"><h3>Últimos pedidos <button className="btn sec chico" onClick={() => ir('pedidos', 'todos')}>Ver todos</button></h3>
+        <section className="tarjeta c6"><h3>Últimos pedidos <button className="btn sec chico" onClick={() => ir('pedidos', 'todos')}>Ver todos</button></h3>
           {ultimos.length ? <div className="mini-lista">{ultimos.map(p => (
             <button key={p.guia} onClick={() => abrir(p.guia)}><Foto src={p.mini} />
               <span className="info"><span className="guia">{p.guia}</span> <EtqDash p={p} /><p>{lineaPedido(p)}</p></span>
               <span className="val">{p.estado === 'entregado' ? pesos(p.valorCobrado) : ''}</span></button>
           ))}</div> : <div className="vacio">Todavía no tienes envíos.</div>}
         </section>
-        <section className="tarjeta c5"><h3>Últimos movimientos <button className="btn sec chico" onClick={() => ir('cuenta')}>Mi cuenta</button></h3>
+        <section className="tarjeta c6"><h3>Últimos movimientos <button className="btn sec chico" onClick={() => ir('cuenta')}>Mi cuenta</button></h3>
           {movs.length ? <div className="mini-lista">{movs.map((m, i) => (
             <div key={i}><span className="info"><b style={{ fontWeight: 600, fontSize: '.88rem' }}>{m.guia ? m.guia + (m.nom ? ' · ' + m.nom : '') : m.nom || m.det}</b><p>{hora(m.fecha)}</p></span>
               <span className={'val ' + (m.v < 0 ? 'neg' : 'pos')}>{pesos(m.v)}</span></div>
