@@ -8,7 +8,7 @@ La memoria del repo hermano (backend y app de oficina) está en `js-logistics/do
 
 - **Landing** (`pages/Home.tsx`): portada a pantalla completa con **carrusel de fotos** de fondo (`components/HeroCarrusel.tsx`), velo azul noche del 70–85 %, malla discreta, badge, título con resplandor, dos botones e indicadores de barra cian. Después: estadísticas, nosotros, servicios, cómo funciona, CTA y contacto.
 - **Menú móvil** (`components/layout/Navbar.tsx`): overlay a pantalla completa, fondo `#070B19`/95 con blur, bloquea el scroll del `body`, cierra con Escape y al tocar un enlace, foco a la X al abrir. Se dibuja con `createPortal` en `document.body` porque el `<header>` usa `backdrop-filter`, que atrapa a los hijos `fixed` y rompería el "pantalla completa".
-- **Login** (`pages/Login.tsx`): oscuro, mapa mundial punteado con rutas animadas, tarjeta de cristal, caja DEMO con botones de copiar y "Rellenar" (solo con `VITE_DEMO=true`). Tiene el enlace "¿Olvidaste tu contraseña?", que abre `/recuperar`; las páginas `/restablecer` y `/activar` abren los enlaces del correo. Las tres comparten el marco de `components/acceso.tsx`.
+- **Login** (`pages/Login.tsx`): oscuro, mapa del mundo real (contorno de Natural Earth, punteado) con rutas animadas y un pin en la sede de Cali, tarjeta de cristal, caja DEMO con botones de copiar y "Rellenar" (solo con `VITE_DEMO=true`). Tiene el enlace "¿Olvidaste tu contraseña?", que abre `/recuperar`; las páginas `/restablecer` y `/activar` abren los enlaces del correo. Las tres comparten el marco de `components/acceso.tsx`.
 - **Portal del cliente:** dos portales (`mejorado/` y `clasico/`) con los mismos datos; Mis pedidos pagina en el servidor (8 por página en celular, 20 en computador, `lib/pantalla.ts`); cada página se descarga cuando se visita.
 - **Corrección de desbordes laterales en móvil** (portal y login revisados a 320–430 px).
 
@@ -19,6 +19,8 @@ La memoria del repo hermano (backend y app de oficina) está en `js-logistics/do
 3. **Las fotos del carrusel son de ejemplo** (Wikimedia Commons, CC BY-SA y CC0). Antes de publicar hay que cambiarlas por fotos propias de JS Logistics, con los mismos nombres. Detalles, tamaños y créditos en `public/img/hero/LEEME.md`. Si falta una foto, la diapositiva muestra un fondo de color y no se rompe.
 4. **Un `grid` siempre lleva su columna base** (`grid grid-cols-1 lg:grid-cols-12`); sin ella, en móvil la columna se ensancha al contenido más largo y la tarjeta se sale de la pantalla (pasó en el Inicio del portal). Los textos largos en flex llevan `min-w-0`. `html { overflow-x: clip }` es solo red de seguridad.
 5. **El carrusel respeta `prefers-reduced-motion`** (no rota solo), se pausa con la pestaña oculta y al pasar el mouse por los indicadores. No cambies el intervalo (5,5 s) ni el desvanecimiento (1000 ms) sin que lo pidan.
+
+6. **El mapa del login va anclado a la columna del formulario, no a la pantalla** (`MapaSede` en `components/acceso.tsx`). Así el pin de Cali queda siempre en un sitio libre: en celular, a la izquierda del logo (el mundo completo queda detrás de la cabecera, porque la tarjeta tapa el resto); desde `md`, a la izquierda de la tarjeta. Si cambias el tamaño del logo o de la tarjeta, revisa que el pin y su etiqueta no queden tapados a 320, 390, 820 y 1440 px. El contorno (`components/mapaMundo.ts`) es generado desde Natural Earth 1:50m en proyección equirrectangular; las ciudades se ubican con `punto(longitud, latitud)`, no a ojo.
 
 ## Trampas del entorno
 
@@ -37,6 +39,7 @@ La memoria del repo hermano (backend y app de oficina) está en `js-logistics/do
 
 ## Registro de sesiones (lo más reciente arriba)
 
+- **2026-11-10:** login: el fondo ahora es un mapa del mundo real y lleva un pin en la sede principal (Cali). Revisado a 320, 390, 820 y 1440 px en modo demo.
 - **2026-11-09:** login: enlace “¿Olvidaste tu contraseña?” y páginas públicas `/recuperar`, `/restablecer` y `/activar`, con el mismo diseño del login (marco compartido en `components/acceso.tsx`). Revisadas a 390 px en modo demo.
 - **2026-11-09:** revisión de la documentación; se agregó este archivo y se corrigió en `AGENTS.md` la regla de la landing.
 - **2026-11-07/08:** rediseño de la portada (carrusel), del menú móvil y del login; fotos de ejemplo; corrección de desbordes laterales en móvil.
