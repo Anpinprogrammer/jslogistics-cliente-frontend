@@ -115,6 +115,10 @@ Por petición explícita del dueño, `Home.tsx` sustituye la composición anteri
 
 - App monta una única instancia de JSBot en `/` y `/login`; se retira su montaje directo de Home. Comparte burbuja, panel y conversación local entre esas dos rutas, sin duplicación. Otras rutas no muestran el chatbot.
 
+## Scroll al entrar a login — 2026-11-10
+
+- ScrollToHash reinicia la posición a 0 de forma instantánea con useLayoutEffect en cada navegación a `/login` (pathname y location.key), evitando heredar el scroll de la landing y el desplazamiento suave global. Los enlaces a secciones de la landing conservan su comportamiento.
+
 ## Qué hay hecho
 
 - **Landing** (`pages/Home.tsx`): Hero a 90vh/100vh con **navbar propio** (`<Navbar hero />`), carrusel de fotos con overlay `slate-950` (90/70/100 %), badge, título de 3xl a 8xl, barra de rastreo que lleva a `/track?n=...`, CTAs e indicador lateral de scroll. Después: estadísticas en tarjetas (`+12,000`, `99.3%`, `+180`, `24/7`), "Quiénes Somos" en bento 7/5 con iconos de **Lucide**, servicios en 3 columnas con iconos Lucide y entrada escalonada, cómo funciona, CTA y contacto.
