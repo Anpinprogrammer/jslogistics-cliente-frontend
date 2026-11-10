@@ -1,6 +1,8 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ShieldCheck, Receipt, LocateFixed, Headset } from 'lucide-react';
 import HeroCarrusel from '../components/HeroCarrusel';
+import Navbar from '../components/layout/Navbar';
 
 const services = [
   {
@@ -66,85 +68,142 @@ const services = [
 ];
 
 const stats = [
-  { value: '+12,000', label: 'Entregas mensuales' },
+  { value: '+12,000', label: 'Entregas' },
   { value: '99.3%', label: 'Tasa de éxito' },
-  { value: '+180', label: 'Ciudades cubiertas' },
-  { value: '24/7', label: 'Soporte operativo' },
+  { value: '+180', label: 'Ciudades' },
+  { value: '24/7', label: 'Soporte' },
+];
+
+const features = [
+  {
+    icon: ShieldCheck,
+    title: 'Alta Confiabilidad',
+    desc: 'Comprometidos con cada entrega desde la recogida hasta la firma de recibido.',
+    color: 'text-sky-500 dark:text-sky-400',
+  },
+  {
+    icon: Receipt,
+    title: 'Transparencia Financiera',
+    desc: 'Estado de cuenta claro: saldos, facturas y pagos en un solo lugar.',
+    color: 'text-emerald-500 dark:text-emerald-400',
+  },
+  {
+    icon: LocateFixed,
+    title: 'Trazabilidad Total',
+    desc: 'Cada paquete con seguimiento en tiempo real visible para ti y tu cliente.',
+    color: 'text-indigo-500 dark:text-indigo-400',
+  },
+  {
+    icon: Headset,
+    title: 'Soporte Dedicado',
+    desc: 'Ejecutivo de cuenta asignado para empresas con operación activa.',
+    color: 'text-cyan-500 dark:text-cyan-400',
+  },
 ];
 
 const Home: React.FC = () => {
-  return (
-    <div className="overflow-x-hidden">
-      {/* ── HERO ─────────────────────────────────────────────────────────── */}
-      <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#070B19] pt-16">
-        <HeroCarrusel />
+  const [guia, setGuia] = useState('');
+  const navigate = useNavigate();
+  const rastrear = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = guia.trim();
+    navigate(q ? `/track?n=${encodeURIComponent(q)}` : '/track');
+  };
 
-        <div className="relative z-10 mx-auto max-w-7xl px-4 pb-32 text-center sm:px-6">
-          <div className="mb-8 inline-flex animate-fade-up items-center gap-2 rounded-full border border-[#38bdf8]/50 bg-[#070B19]/50 px-4 py-1.5 backdrop-blur-md">
-            <span className="h-1.5 w-1.5 animate-pulse-slow rounded-full bg-[#38bdf8]" />
-            <span className="font-mono text-xs tracking-wider text-[#7dd3fc]">PLATAFORMA LOGÍSTICA EMPRESARIAL</span>
+  return (
+    <div className="overflow-x-hidden bg-slate-50 dark:bg-slate-950">
+      {/* ── HERO ─────────────────────────────────────────────────────────── */}
+      <section className="relative min-h-[90vh] lg:min-h-screen w-full flex flex-col justify-between overflow-hidden bg-slate-950 text-white">
+        <HeroCarrusel />
+        <Navbar hero />
+
+        {/* Gradiente de desvanecimiento hacia los KPIs */}
+        <div className="pointer-events-none absolute bottom-0 left-0 right-0 z-10 h-32 bg-gradient-to-b from-transparent via-slate-950/70 to-slate-950 dark:to-slate-950" aria-hidden="true" />
+
+        <div className="relative z-20 w-full flex-1 flex flex-col items-center justify-center text-center px-4 sm:px-6 max-w-5xl mx-auto py-12">
+          <div className="hero-badge-in inline-flex max-w-full items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/80 border border-slate-700/60 backdrop-blur-md mb-6">
+            <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
+            <span className="text-[10px] sm:text-xs font-semibold tracking-widest text-slate-300 uppercase">Plataforma Logística Empresarial</span>
           </div>
 
-          <h1 className="animate-fade-up animate-delay-100 mb-6 font-display text-5xl font-800 leading-[0.95] tracking-tight text-white drop-shadow-[0_0_28px_rgba(56,189,248,0.45)] sm:text-7xl lg:text-8xl">
-            LOGÍSTICA QUE
-            <br />
-            <span className="bg-clip-text text-transparent"
-              style={{ backgroundImage: 'linear-gradient(90deg, #7dd3fc, #38bdf8, #a5d8ff)' }}>
-              MUEVE NEGOCIOS
-            </span>
+          <h1 className="w-full max-w-full break-words text-3xl xs:text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black uppercase tracking-tight text-white leading-none mb-6 text-balance">
+            Logística que{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-cyan-300 to-indigo-400">mueve negocios</span>
           </h1>
 
-          <p className="animate-fade-up animate-delay-200 mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-slate-200 sm:text-xl">
+          <p className="w-full text-sm sm:text-base md:text-lg lg:text-xl text-slate-300 max-w-2xl font-normal leading-relaxed mb-8 text-balance">
             Conectamos empresas colombianas con sus clientes finales a través de una plataforma de envíos confiable, rastreable y financieramente transparente.
           </p>
 
-          <div className="animate-fade-up animate-delay-300 flex flex-col items-center justify-center gap-4 sm:flex-row">
+          {/* Rastreo rápido: lleva la guía a /track, que ya sabe consultarla */}
+          <form onSubmit={rastrear} className="w-full max-w-lg lg:max-w-xl xl:max-w-2xl p-1.5 lg:p-2 rounded-2xl xs:rounded-full bg-slate-900/90 border border-slate-700/80 backdrop-blur-xl shadow-2xl flex flex-col xs:flex-row items-stretch xs:items-center gap-2 mb-8 transition-all">
+            <label htmlFor="guiaHero" className="sr-only">Número de guía o pedido</label>
+            <input
+              id="guiaHero"
+              type="text"
+              value={guia}
+              onChange={e => setGuia(e.target.value)}
+              placeholder="Ingresa tu número de guía / pedido..."
+              className="w-full xs:w-auto xs:flex-1 min-w-0 bg-transparent px-4 lg:px-6 py-2.5 lg:py-3.5 text-xs sm:text-sm lg:text-base text-white placeholder-slate-400 focus:outline-none"
+            />
+            <button type="submit" className="w-full xs:w-auto justify-center px-5 lg:px-7 py-2.5 lg:py-3.5 rounded-full bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs sm:text-sm lg:text-base flex items-center gap-2 transition-all shadow-lg shadow-sky-500/20 active:scale-95 whitespace-nowrap">
+              Rastrear envío →
+            </button>
+          </form>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-md">
             <Link to="/register"
-              className="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0284c7] to-[#22d3ee] px-8 py-3.5 text-base font-semibold text-white shadow-[0_8px_24px_-8px_rgba(34,211,238,0.6)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_36px_-8px_rgba(34,211,238,0.85)] sm:w-auto">
+              className="inline-flex min-h-[44px] items-center justify-center rounded-full bg-white px-6 lg:px-8 py-3 lg:py-4 text-xs sm:text-sm lg:text-base font-bold text-slate-950 shadow-md transition-all hover:bg-slate-100 active:scale-95 whitespace-nowrap">
               Comenzar ahora
-              <svg className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
             </Link>
-            <Link to="/track"
-              className="inline-flex w-full items-center justify-center rounded-xl border border-white/25 bg-white/10 px-8 py-3.5 text-base font-semibold text-white backdrop-blur-md transition duration-200 hover:border-[#38bdf8]/60 hover:bg-white/15 sm:w-auto">
-              Rastrear envío
-            </Link>
+            <a href="#servicios"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-full bg-slate-900/60 hover:bg-slate-800/80 border border-slate-700/60 px-6 lg:px-8 py-3 lg:py-4 text-xs sm:text-sm lg:text-base font-semibold text-slate-200 hover:text-white backdrop-blur-md transition-all active:scale-95 whitespace-nowrap">
+              Ver servicios
+            </a>
           </div>
         </div>
 
-        {/* Scroll indicator */}
-        <a href="#nosotros" className="absolute bottom-8 left-1/2 z-20 flex -translate-x-1/2 animate-bounce flex-col items-center gap-1 text-slate-300 hover:text-white">
-          <span className="font-mono text-xs tracking-widest">VER MÁS</span>
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
+        {/* Indicador de scroll */}
+        <a href="#resultados" className="relative z-20 mb-8 flex flex-col items-center gap-1 pb-16 opacity-70 hover:opacity-100 transition-opacity cursor-pointer" aria-label="Ver más contenido">
+          <svg className="w-4 h-4 animate-bounce text-sky-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M19 9l-7 7-7-7" />
           </svg>
+          <span className="text-[9px] font-bold tracking-widest text-slate-400 uppercase">Ver más</span>
         </a>
       </section>
 
       {/* ── STATS ─────────────────────────────────────────────────────────── */}
-      <section className="py-16 px-4 border-y border-steel-800 bg-steel-900/30">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-8">
-          {stats.map(({ value, label }) => (
-            <div key={label} className="text-center">
-              <p className="font-display font-800 text-3xl sm:text-4xl dark:text-accent-400 text-steel-800 mb-1">{value}</p>
-              <p className="text-xs font-mono text-silver-500 uppercase tracking-widest">{label}</p>
+      <section id="resultados" className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 sm:-mt-16 mb-16 lg:mb-24">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6">
+          {stats.map((stat, idx) => (
+            <div
+              key={idx}
+              className="relative p-4 sm:p-6 rounded-2xl bg-white/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 backdrop-blur-xl shadow-xl dark:shadow-slate-950/80 transition-all duration-300 hover:-translate-y-1"
+            >
+              <div className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white">
+                {stat.value}
+              </div>
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-1">
+                {stat.label}
+              </div>
             </div>
           ))}
         </div>
       </section>
 
       {/* ── ABOUT ─────────────────────────────────────────────────────────── */}
-      <section id="nosotros" className="section">
-        <div className="container">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <p className="text-xs font-mono text-accent-400 uppercase tracking-widest mb-3">Quiénes somos</p>
-              <h2 className="font-display font-700 text-4xl sm:text-5xl dark:text-white text-gray-600 leading-tight mb-6">
-                La infraestructura logística que tu empresa necesita
+      <section id="nosotros" className="relative pb-16 lg:pb-24">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 lg:gap-12 items-center">
+            {/* Texto de infraestructura: 7 columnas */}
+            <div className="lg:col-span-7">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">
+                Quiénes Somos
+              </span>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight my-4">
+                La infraestructura logística que tu empresa <span className="text-sky-500 dark:text-sky-400">necesita</span>
               </h2>
-              <div className="divider mb-6" />
-              <div className="space-y-4 text-silver-400 leading-relaxed">
+              <div className="space-y-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300 sm:text-base">
                 <p>
                   JS Logistics es una empresa de soluciones logísticas B2B especializada en la gestión de envíos entre empresas y sus clientes finales a lo largo del territorio colombiano.
                 </p>
@@ -157,45 +216,47 @@ const Home: React.FC = () => {
               </div>
             </div>
 
-            {/* Feature grid */}
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { icon: '🎯', title: 'Alta confiabilidad', desc: 'Comprometidos con cada entrega desde la recogida hasta la firma de recibido.' },
-                { icon: '📊', title: 'Transparencia financiera', desc: 'Estado de cuenta claro: saldos, facturas y pagos en un solo lugar.' },
-                { icon: '🔍', title: 'Trazabilidad total', desc: 'Cada paquete con seguimiento en tiempo real visible para ti y tu cliente.' },
-                { icon: '🤝', title: 'Soporte dedicado', desc: 'Ejecutivo de cuenta asignado para empresas con operación activa.' },
-              ].map(({ icon, title, desc }) => (
-                <div key={title} className="card p-5">
-                  <div className="text-2xl mb-3">{icon}</div>
-                  <p className="font-display font-600 dark:text-white text-gray-600 text-sm mb-1">{title}</p>
-                  <p className="text-xs text-silver-500 leading-relaxed">{desc}</p>
-                </div>
-              ))}
+            {/* Beneficios en bento 2×2: 5 columnas */}
+            <div className="mt-10 lg:col-span-5 lg:mt-0">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-5">
+                {features.map(({ icon: Icon, title, desc, color }) => (
+                  <div
+                    key={title}
+                    className="p-6 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 shadow-md hover:shadow-xl dark:shadow-slate-950/60 hover:border-sky-500/40 transition-all duration-300 group"
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-sky-500/10 dark:bg-sky-500/20 border border-sky-500/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <Icon className={`w-6 h-6 ${color}`} />
+                    </div>
+                    <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">{title}</h3>
+                    <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{desc}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* ── SERVICES ──────────────────────────────────────────────────────── */}
-      <section id="servicios" className="section bg-steel-900/20 border-y border-steel-800">
+      <section id="servicios" className="section bg-slate-50 dark:bg-slate-950 border-y border-slate-200 dark:border-steel-800">
         <div className="container">
           <div className="text-center mb-14">
-            <p className="text-xs font-mono text-accent-400 uppercase tracking-widest mb-3">Lo que hacemos</p>
-            <h2 className="font-display font-700 text-4xl sm:text-5xl text-white mb-4">Nuestros servicios</h2>
-            <p className="text-silver-400 max-w-xl mx-auto">Soluciones logísticas adaptadas al ritmo de tu operación empresarial.</p>
+            <p className="text-xs font-mono text-sky-600 dark:text-accent-400 uppercase tracking-widest mb-3">Lo que hacemos</p>
+            <h2 className="font-display font-700 text-4xl sm:text-5xl text-slate-900 dark:text-white mb-4">Nuestros servicios</h2>
+            <p className="text-slate-600 dark:text-silver-400 max-w-xl mx-auto">Soluciones logísticas adaptadas al ritmo de tu operación empresarial.</p>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {services.map(({ icon, title, desc, tag }) => (
               <div key={title} className="card-hover p-6 group">
                 <div className="flex items-start justify-between mb-5">
-                  <div className="w-12 h-12 rounded-xl bg-steel-800 border border-steel-700 flex items-center justify-center text-silver-400 group-hover:border-accent-500/40 group-hover:text-accent-400 transition-all duration-300">
+                  <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-steel-800 border border-slate-200 dark:border-steel-700 flex items-center justify-center text-slate-500 dark:text-silver-400 group-hover:border-accent-500/40 group-hover:text-accent-400 transition-all duration-300">
                     {icon}
                   </div>
-                  <span className="text-xs font-mono text-steel-500 uppercase tracking-wider">{tag}</span>
+                  <span className="text-xs font-mono text-slate-500 dark:text-steel-500 uppercase tracking-wider">{tag}</span>
                 </div>
-                <h3 className="font-display font-600 text-lg dark:text-white text-gray-600 mb-2">{title}</h3>
-                <p className="text-sm text-silver-500 leading-relaxed">{desc}</p>
+                <h3 className="font-display font-600 text-lg text-slate-900 dark:text-white mb-2">{title}</h3>
+                <p className="text-sm text-slate-500 dark:text-silver-500 leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
