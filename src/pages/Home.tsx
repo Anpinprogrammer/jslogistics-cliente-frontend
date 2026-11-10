@@ -618,34 +618,60 @@ export default function Home() {
         className="landing-section landing-process relative isolate overflow-hidden border-y"
       >
         <div className="landing-shell">
-          <Reveal className="mx-auto mb-12 max-w-2xl text-center">
-            <p className="landing-eyebrow">04 / Así de sencillo</p>
-            <h2 className="landing-heading mt-4">Del clic a la entrega.</h2>
-            <p className="landing-muted mt-5">
+          <Reveal className="mx-auto mb-10 max-w-xl text-center">
+            <span className="mb-3 inline-block rounded-full border border-sky-500/20 bg-sky-500/10 px-3.5 py-1 text-[10px] font-bold uppercase tracking-widest text-sky-700 dark:text-sky-400 sm:text-xs">
+              04 / Así de sencillo
+            </span>
+            <h2 className="mt-1 text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
+              Del clic a la entrega
+            </h2>
+            <p className="mt-2 text-xs font-medium text-slate-600 dark:text-slate-400 sm:text-sm">
               Un recorrido claro para ti y para tu negocio.
             </p>
           </Reveal>
-          <div className="relative grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="relative mx-auto max-w-2xl lg:max-w-none">
             <div
               aria-hidden="true"
-              className="landing-process-line absolute left-[10%] right-[10%] top-8 hidden h-px lg:block"
+              className="pointer-events-none absolute bottom-7 left-7 top-7 z-0 border-l-2 border-dashed border-sky-300 dark:border-slate-800 sm:bottom-8 sm:left-8 sm:top-8 lg:hidden"
             />
-            {steps.map(({ icon: Icon, title, text }, i) => (
-              <Reveal key={title} delay={i * 90}>
-                <div className="relative">
-                  <div className="landing-surface landing-step relative mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border">
-                    <Icon size={26} className="landing-accent" />
-                    <span className="landing-step-number absolute -right-2 -top-2 grid h-6 w-6 place-items-center rounded-full text-[10px] font-bold">
-                      0{i + 1}
-                    </span>
-                  </div>
-                  <h3 className="text-xl font-bold">{title}</h3>
-                  <p className="landing-muted mt-3 max-w-xs text-sm leading-relaxed">
-                    {text}
-                  </p>
-                </div>
-              </Reveal>
-            ))}
+            <div
+              aria-hidden="true"
+              className="landing-process-line pointer-events-none absolute left-8 right-8 top-8 hidden h-px lg:block"
+            />
+            <ol className="relative z-10 space-y-8 lg:grid lg:grid-cols-4 lg:gap-8 lg:space-y-0">
+              {steps.map(({ icon: Icon, title, text }, i) => (
+                <li key={title} className="min-w-0">
+                  <Reveal delay={i * 90}>
+                    <div className="group flex items-start gap-4 sm:gap-6 lg:flex-col lg:gap-5">
+                      <div className="relative shrink-0">
+                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-sky-500/30 bg-white shadow-md transition-colors group-hover:border-sky-500 dark:border-slate-800 dark:bg-slate-900 sm:h-16 sm:w-16">
+                          <Icon
+                            className="h-6 w-6 text-sky-600 dark:text-sky-400 sm:h-7 sm:w-7"
+                            aria-hidden="true"
+                          />
+                        </div>
+                      </div>
+                      <div className="min-w-0 flex-1 pt-1 lg:w-full">
+                        <div className="flex items-start gap-2">
+                          <span
+                            aria-hidden="true"
+                            className="shrink-0 text-2xl font-black leading-none text-sky-700 dark:text-sky-400/20"
+                          >
+                            #0{i + 1}
+                          </span>
+                          <h3 className="text-base font-bold leading-snug text-slate-900 dark:text-white sm:text-lg">
+                            {title}
+                          </h3>
+                        </div>
+                        <p className="mt-1 w-full text-xs font-normal leading-relaxed text-slate-600 dark:text-slate-400 sm:text-sm">
+                          {text}
+                        </p>
+                      </div>
+                    </div>
+                  </Reveal>
+                </li>
+              ))}
+            </ol>
           </div>
         </div>
       </section>

@@ -90,6 +90,18 @@ Por petición explícita del dueño, `Home.tsx` sustituye la composición anteri
 
 - Sustituye la decisión anterior de alto rígido: `min-h-dvh` en el hero, sin área central con overflow/scroll interno. Ocupa como mínimo la pantalla y crece si hace falta. KPIs en flujo normal con el resto de la página.
 
+## Proceso en timeline responsivo — 2026-11-10
+
+- Sección “Del clic a la entrega” con tres pasos solicitados: registro, pedido y seguimiento. Se retira el cuarto paso de control de este bloque.
+- Timeline vertical hasta lg: iconos de 56/64 px, badges numéricos de 28 px, número decorativo junto al título y texto flex-1 min-w-0 sin max-width. Lista ordenada y entradas independientes conservadas.
+- Desde lg, tres columnas con conexión horizontal. Encabezado compacto con badge y contraste claro/oscuro.
+- Verificado en Chromium en ambos temas a 320–1920 px: sin desbordes ni errores JS, timeline de una columna hasta md y tres desde lg. `build` y `build:demo` pasan.
+
+## Corrección de pasos del proceso — 2026-11-10
+
+- Se recupera el cuarto paso “Mantén el control” con CheckCheck y el texto anterior. Escritorio vuelve a cuatro columnas; móvil conserva timeline vertical.
+- Eliminados badges numéricos sobre los iconos. Solo se muestran los números grandes junto a los títulos.
+
 ## Qué hay hecho
 
 - **Landing** (`pages/Home.tsx`): Hero a 90vh/100vh con **navbar propio** (`<Navbar hero />`), carrusel de fotos con overlay `slate-950` (90/70/100 %), badge, título de 3xl a 8xl, barra de rastreo que lleva a `/track?n=...`, CTAs e indicador lateral de scroll. Después: estadísticas en tarjetas (`+12,000`, `99.3%`, `+180`, `24/7`), "Quiénes Somos" en bento 7/5 con iconos de **Lucide**, servicios en 3 columnas con iconos Lucide y entrada escalonada, cómo funciona, CTA y contacto.
