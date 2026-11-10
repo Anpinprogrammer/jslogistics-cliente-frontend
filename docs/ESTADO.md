@@ -102,6 +102,19 @@ Por petición explícita del dueño, `Home.tsx` sustituye la composición anteri
 - Se recupera el cuarto paso “Mantén el control” con CheckCheck y el texto anterior. Escritorio vuelve a cuatro columnas; móvil conserva timeline vertical.
 - Eliminados badges numéricos sobre los iconos. Solo se muestran los números grandes junto a los títulos.
 
+## Footer de landing compartido con login — 2026-11-10
+
+- `components/layout/LandingFooter.tsx` extrae el footer de Home y lo reutiliza en `/login` desde App, sin duplicación. Otros accesos y portales conservan Footer anterior.
+- Enlaces Nosotros/Servicios/Contacto apuntan a `/#...` para volver correctamente a la landing desde login. Conserva aspecto, textura radial y soporte de tema.
+
+## Header de landing en login — 2026-11-10
+
+- `/login` reutiliza `<Navbar hero />`: cabecera fija de cristal, logo, enlaces, acciones y menú móvil iguales a la landing. El marco del formulario conserva su padding superior. Otras rutas mantienen su variante anterior.
+
+## JSBot compartido con login — 2026-11-10
+
+- App monta una única instancia de JSBot en `/` y `/login`; se retira su montaje directo de Home. Comparte burbuja, panel y conversación local entre esas dos rutas, sin duplicación. Otras rutas no muestran el chatbot.
+
 ## Qué hay hecho
 
 - **Landing** (`pages/Home.tsx`): Hero a 90vh/100vh con **navbar propio** (`<Navbar hero />`), carrusel de fotos con overlay `slate-950` (90/70/100 %), badge, título de 3xl a 8xl, barra de rastreo que lleva a `/track?n=...`, CTAs e indicador lateral de scroll. Después: estadísticas en tarjetas (`+12,000`, `99.3%`, `+180`, `24/7`), "Quiénes Somos" en bento 7/5 con iconos de **Lucide**, servicios en 3 columnas con iconos Lucide y entrada escalonada, cómo funciona, CTA y contacto.
