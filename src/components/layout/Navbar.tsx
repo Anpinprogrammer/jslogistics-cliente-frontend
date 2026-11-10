@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { Sun, Moon, Users, Briefcase, PhoneCall, Search, LogIn, UserPlus, ChevronRight, X, LogOut, Home, Package, UserRound } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSesion } from '../../auth/AuthProvider';
 import { useTheme } from '../../hooks/useTheme';
@@ -15,7 +16,8 @@ const Navbar: React.FC<{ hero?: boolean }> = ({ hero = false }) => {
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', onScroll);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
@@ -74,16 +76,16 @@ const Navbar: React.FC<{ hero?: boolean }> = ({ hero = false }) => {
     <div id="menu-movil" role="dialog" aria-modal="true" aria-label="Menú de navegación" aria-hidden={!mobileOpen}
       // @ts-expect-error `inert` aún no está en los tipos de React 18: evita el foco en el menú cerrado.
       inert={mobileOpen ? undefined : ''}
-      className={`${hero ? 'lg:hidden' : 'md:hidden'} fixed inset-0 z-[60] flex h-dvh w-screen flex-col overflow-y-auto bg-[#070B19]/95 backdrop-blur-xl transition-all duration-300 ease-in-out ${
-        mobileOpen ? 'visible translate-y-0 opacity-100' : 'invisible -translate-y-4 opacity-0'
+      className={`${hero ? 'lg:hidden' : 'md:hidden'} fixed inset-0 z-[60] flex h-dvh w-screen flex-col overflow-x-hidden overflow-y-auto bg-slate-950/95 backdrop-blur-xl transition-all duration-200 ease-in-out motion-reduce:transition-none ${
+        mobileOpen ? 'visible scale-100 opacity-100' : 'invisible scale-95 opacity-0'
       }`}>
       {/* Malla discreta, igual que la portada */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-[0.05]"
         style={{ backgroundImage: 'linear-gradient(rgba(148,176,207,1) 1px, transparent 1px), linear-gradient(90deg, rgba(148,176,207,1) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
-      <div aria-hidden="true" className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[#0284c7]/25 blur-[100px]" />
+      <div aria-hidden="true" className="pointer-events-none absolute right-0 top-0 h-72 w-72 rounded-full bg-[#0284c7]/25 blur-[100px]" />
 
       {/* Cabecera */}
-      <div className="relative flex h-16 shrink-0 items-center justify-between px-4"
+      <div className="relative flex min-h-20 shrink-0 items-center justify-between gap-4 px-6"
         style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <Link to="/" onClick={cerrarMenu} className="flex items-center gap-3">
           {/* Badge claro: el isotipo es azul oscuro y el .webp trae el texto en blanco, por eso se recorta. */}
@@ -95,65 +97,64 @@ const Navbar: React.FC<{ hero?: boolean }> = ({ hero = false }) => {
           <span className="font-display text-lg font-800 uppercase tracking-wide text-white">JS Logistics</span>
         </Link>
         <button ref={cerrarRef} type="button" onClick={cerrarMenu} aria-label="Cerrar menú"
-          className="grid min-h-[44px] min-w-[44px] place-items-center rounded-xl text-[#f8fafc] transition-colors hover:bg-white/5 hover:text-sky-400 active:text-sky-400">
-          <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18L18 6M6 6l12 12" /></svg>
+          className="grid min-h-[44px] min-w-[44px] place-items-center rounded-xl border border-slate-800 bg-slate-900 p-2.5 text-slate-400 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400">
+          <X className="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
 
-      {/* Enlaces */}
-      <nav aria-label="Menú móvil" className="relative flex-1 px-6 pt-6">
-        <ul>
-          {navLinks.map(({ to, label }) => (
-            <li key={to}>
-              <Link to={to} onClick={cerrarMenu}
-                className={`block py-4 font-body text-2xl font-medium transition-colors active:text-sky-400 ${
-                  activo(to) ? 'text-sky-400' : 'text-slate-200 hover:text-sky-400'
-                }`}>
-                {label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-
-        <div className="my-4 border-t border-slate-800/80" />
-
-        <div className="flex flex-col gap-3 pb-8" style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}>
+      <div className="relative flex flex-1 flex-col px-6" style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
+        <nav aria-label="Menú móvil" className="my-auto py-6">
+          <ul className="flex flex-col gap-2">
+            {navLinks.map(({ to, label }) => {
+              const Icon = to === '/#nosotros' ? Users : to === '/#servicios' ? Briefcase : to === '/#contacto' ? PhoneCall : to === '/track' ? Search : to === '/cliente' ? Home : to === '/cliente/pedidos' ? Package : to === '/cliente/cuenta' ? UserRound : Briefcase;
+              return <li key={to}>
+                <Link to={to} onClick={cerrarMenu} aria-current={activo(to) ? 'page' : undefined}
+                  className={`group flex min-h-[64px] items-center justify-between gap-3 rounded-2xl border p-3.5 text-base font-semibold transition-all hover:border-sky-500/40 hover:bg-slate-900 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400 ${activo(to) ? 'border-sky-500/40 bg-slate-900 text-sky-300' : 'border-slate-800/60 bg-slate-900/40 text-slate-200'}`}>
+                  <span className="flex min-w-0 items-center gap-3.5"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-sky-500/20 bg-sky-500/10 text-sky-400 transition-transform group-hover:scale-110 motion-reduce:transform-none"><Icon className="h-4 w-4" aria-hidden="true" /></span><span>{label}</span></span>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-slate-600 transition-all group-hover:translate-x-0.5 group-hover:text-sky-400 motion-reduce:transform-none" aria-hidden="true" />
+                </Link>
+              </li>;
+            })}
+          </ul>
+        </nav>
+        <div className="flex flex-col gap-3 border-t border-slate-800/80 pt-4">
           <button type="button" onClick={toggleTheme}
-            className="min-h-[48px] w-full rounded-xl border border-slate-700 bg-slate-900/50 py-3 text-center font-medium text-slate-200 transition-colors hover:border-slate-500">
-            {theme === 'dark' ? '☀️ Modo claro' : '🌙 Modo oscuro'}
+            className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900 py-3 text-xs font-semibold text-slate-300 transition-all hover:bg-slate-800">
+            {theme === 'dark' ? <Sun className="h-4 w-4 text-amber-400" aria-hidden="true" /> : <Moon className="h-4 w-4 text-sky-400" aria-hidden="true" />}
+            <span>{theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}</span>
           </button>
           {isAuthenticated ? (
             <button type="button" onClick={() => { cerrarMenu(); handleLogout(); }}
-              className="min-h-[48px] w-full rounded-xl border border-red-400/40 bg-red-500/10 py-3 text-center font-medium text-red-300 transition-colors hover:bg-red-500/20">
-              Cerrar sesión
+              className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-red-400/40 bg-red-500/10 py-3 text-xs font-semibold text-red-300 transition-all hover:bg-red-500/20">
+              <LogOut className="h-4 w-4" aria-hidden="true" /> Cerrar sesión
             </button>
           ) : (
             <>
               <Link to="/login" onClick={cerrarMenu}
-                className="min-h-[48px] w-full rounded-xl border border-sky-500/50 py-3 text-center font-medium text-sky-400 transition-colors hover:bg-sky-500/10">
-                Iniciar Sesión
+                className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900 py-3 text-xs font-semibold text-slate-200 transition-all hover:bg-slate-800">
+                <LogIn className="h-4 w-4 text-slate-400" aria-hidden="true" /> Iniciar Sesión
               </Link>
               <Link to="/register" onClick={cerrarMenu}
-                className="min-h-[48px] w-full rounded-xl bg-gradient-to-r from-[#0284c7] to-[#38bdf8] py-3.5 text-center font-bold text-white shadow-lg shadow-sky-500/20 transition hover:brightness-110">
-                Registrarse
+                className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-sky-400 py-3.5 text-xs font-bold text-slate-950 shadow-lg shadow-sky-500/20 transition-all hover:bg-sky-300 active:scale-95">
+                <UserPlus className="h-4 w-4" aria-hidden="true" /> Registrarse
               </Link>
             </>
           )}
         </div>
-      </nav>
+      </div>
     </div>
   );
 
   return (
     <header className={hero
-      ? 'relative z-20 w-full'
+      ? `fixed top-0 inset-x-0 z-50 w-full border-b bg-slate-950/80 dark:bg-slate-950/85 backdrop-blur-md transition-all duration-300 ${scrolled ? 'border-slate-700/80 shadow-xl shadow-slate-950/30' : 'border-slate-800/60'}`
       : `fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
           scrolled
             ? 'dark:bg-steel-950/95 dark:shadow-steel dark:border-b dark:border-steel-800 bg-white/95 shadow-steel-light border-b border-gray-200 backdrop-blur-md'
             : 'bg-transparent'
         }`}>
       <nav className={hero
-        ? 'relative z-20 mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8'
+        ? 'relative mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:h-20 lg:px-8'
         : 'max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between'}>
         {/* Logo */}
         <div onClick={handleLogoClick} className="flex cursor-pointer items-center gap-3 group">

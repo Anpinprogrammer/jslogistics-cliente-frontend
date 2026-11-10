@@ -69,22 +69,6 @@ const HeroCarrusel: React.FC = () => {
         }} />
       <div className="pointer-events-none absolute inset-0 z-10" aria-hidden="true"
         style={{ backgroundImage: 'radial-gradient(ellipse at 50% 0%, rgba(56,189,248,0.12) 0%, transparent 60%)' }} />
-
-      {/* Indicadores: barra cian que se expande en la activa. Se ocultan en teléfonos muy pequeños para no amontonar el Hero. */}
-      <div className="absolute bottom-32 left-1/2 z-20 hidden xs:flex -translate-x-1/2 items-center gap-2"
-        role="tablist" aria-label="Imágenes del carrusel"
-        onMouseEnter={() => setPausado(true)} onMouseLeave={() => setPausado(document.hidden)}>
-        {DIAPOSITIVAS.map((d, i) => (
-          <button key={d.foto} type="button" role="tab" aria-selected={i === actual} aria-label={`Imagen ${i + 1}: ${d.alt}`}
-            onClick={() => setActual(i)}
-            className={`relative h-1.5 overflow-hidden rounded-full bg-white/25 transition-all duration-500 hover:bg-white/40 ${i === actual ? 'w-12' : 'w-4'}`}>
-            {i === actual && (
-              <span key={`${actual}-${pausado}`} className={`absolute inset-y-0 left-0 rounded-full bg-[#38bdf8] shadow-[0_0_10px_#38bdf8] ${sinMovimiento ? 'w-full' : 'hero-progreso'}`}
-                style={{ animationDuration: `${INTERVALO_MS}ms`, animationPlayState: pausado ? 'paused' : 'running' }} />
-            )}
-          </button>
-        ))}
-      </div>
     </>
   );
 };

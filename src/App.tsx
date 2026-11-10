@@ -80,7 +80,7 @@ function Rutas() {
           </Routes>
         </Suspense>
       </main>
-      {!sinMarco && (
+      {!sinMarco && !esPortada && (
         // En el portal propuesto, el menú de abajo del celular tapa el final de la página: se deja espacio debajo del footer.
         <div className={pathname.startsWith('/cliente') ? 'pb-24 md:pb-0' : ''}><Footer /></div>
       )}
