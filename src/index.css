@@ -235,11 +235,18 @@
   .animate-delay-500 { animation-delay: 500ms; }
 }
 
-/* Hero: progreso del indicador activo y zoom lento de la foto */
-@keyframes hero-progreso { from { width: 0%; } to { width: 100%; } }
+/* Hero: zoom lento de la foto */
 @keyframes hero-zoom { from { transform: scale(1); } to { transform: scale(1.08); } }
-.hero-progreso { animation-name: hero-progreso; animation-timing-function: linear; animation-fill-mode: forwards; }
 .hero-zoom { animation: hero-zoom 8s ease-out forwards; }
+
+/* Servicios: entrada escalonada al hacer scroll (IntersectionObserver en Home) */
+@keyframes servicio-entra { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+.servicio-reveal { opacity: 0; }
+.servicio-reveal.is-visible { animation: servicio-entra .55s ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  .servicio-reveal { opacity: 1; }
+  .servicio-reveal.is-visible { animation: none; }
+}
 
 /* Entrada del badge del Hero (reemplaza tailwindcss-animate, que no está instalado) */
 @keyframes hero-badge-in { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: translateY(0); } }

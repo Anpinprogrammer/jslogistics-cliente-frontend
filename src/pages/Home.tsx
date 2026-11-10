@@ -1,380 +1,766 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { ShieldCheck, Receipt, LocateFixed, Headset } from 'lucide-react';
-import HeroCarrusel from '../components/HeroCarrusel';
-import Navbar from '../components/layout/Navbar';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  ArrowDown,
+  ArrowRight,
+  Check,
+  CheckCheck,
+  ChevronRight,
+  CircleCheck,
+  ClipboardList,
+  Clock3,
+  Mail,
+  MapPin,
+  Package,
+  Receipt,
+  Route,
+  Search,
+  ShieldCheck,
+  Truck,
+} from "lucide-react";
+import HeroCarrusel from "../components/HeroCarrusel";
+import Navbar from "../components/layout/Navbar";
+import JSBot from "../components/jsbot/JSBot";
+import "./landing.css";
+import { AnimatedCounter } from "../components/ui/AnimatedCounter";
+
+function Reveal({
+  children,
+  className = "",
+  delay = 0,
+}: {
+  children: ReactNode;
+  className?: string;
+  delay?: number;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !("IntersectionObserver" in window)) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // Solo se oculta tras instalar el observador: sin JS el contenido sigue legible.
+    el.dataset.reveal = "pending";
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.dataset.reveal = "visible";
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.08 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  return (
+    <div
+      ref={ref}
+      className={`landing-reveal ${className}`}
+      style={{ "--reveal-delay": `${delay}ms` } as CSSProperties}
+    >
+      {children}
+    </div>
+  );
+}
 
 const services = [
   {
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-7 h-7">
-        <path d="M1 3h15v13H1z" /><path d="M16 8h4l3 3v5h-7V8z" /><circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" />
-      </svg>
-    ),
-    title: 'Envío Estándar',
-    desc: 'Entregas en 3–5 días hábiles. Cobertura nacional completa con trazabilidad en cada punto.',
-    tag: 'Nacional',
+    icon: Truck,
+    number: "01",
+    title: "Envíos para tu empresa",
+    text: "Coordina tus pedidos y consulta el estado de cada entrega desde tu portal.",
+    tag: "Distribución",
+    className: "lg:col-span-2",
   },
   {
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-7 h-7">
-        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-      </svg>
-    ),
-    title: 'Express 48h',
-    desc: 'Cuando el tiempo es crítico. Recogida el mismo día y entrega garantizada en 48 horas.',
-    tag: 'Express',
-  },
-  {
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-7 h-7">
-        <circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20" />
-      </svg>
-    ),
-    title: 'Internacional',
-    desc: 'Operaciones de importación y exportación con gestión aduanera y documentación incluida.',
-    tag: 'Internacional',
-  },
-  {
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-7 h-7">
-        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" /><polyline points="9,22 9,12 15,12 15,22" />
-      </svg>
-    ),
-    title: 'Almacenamiento',
-    desc: 'Bodegas climatizadas con gestión de inventario y despacho programado.',
-    tag: 'Logística',
-  },
-  {
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-7 h-7">
-        <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-      </svg>
-    ),
-    title: 'Rastreo en Tiempo Real',
-    desc: 'Panel de control con actualizaciones de estado y notificaciones para tu empresa y tus clientes.',
-    tag: 'Tecnología',
-  },
-  {
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-7 h-7">
-        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14,2 14,8 20,8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" />
-      </svg>
-    ),
-    title: 'Facturación Integrada',
-    desc: 'Estado de cuenta, historial de facturación y gestión de pagos directamente en tu portal.',
-    tag: 'Finanzas',
-  },
-];
-
-const stats = [
-  { value: '+12,000', label: 'Entregas' },
-  { value: '99.3%', label: 'Tasa de éxito' },
-  { value: '+180', label: 'Ciudades' },
-  { value: '24/7', label: 'Soporte' },
-];
-
-const features = [
-  {
-    icon: ShieldCheck,
-    title: 'Alta Confiabilidad',
-    desc: 'Comprometidos con cada entrega desde la recogida hasta la firma de recibido.',
-    color: 'text-sky-500 dark:text-sky-400',
+    icon: Search,
+    number: "02",
+    title: "Seguimiento de pedidos",
+    text: "Una guía, un estado claro. Consulta el recorrido de tu envío sin perderte entre mensajes.",
+    tag: "Trazabilidad",
+    className: "",
   },
   {
     icon: Receipt,
-    title: 'Transparencia Financiera',
-    desc: 'Estado de cuenta claro: saldos, facturas y pagos en un solo lugar.',
-    color: 'text-emerald-500 dark:text-emerald-400',
+    number: "03",
+    title: "Cuentas claras",
+    text: "Revisa tus movimientos y el detalle de tu operación en un mismo lugar.",
+    tag: "Control financiero",
+    className: "",
   },
   {
-    icon: LocateFixed,
-    title: 'Trazabilidad Total',
-    desc: 'Cada paquete con seguimiento en tiempo real visible para ti y tu cliente.',
-    color: 'text-indigo-500 dark:text-indigo-400',
+    icon: ClipboardList,
+    number: "04",
+    title: "Tu operación, organizada",
+    text: "Centraliza la información de tus destinatarios y pedidos para trabajar con más orden.",
+    tag: "Portal empresarial",
+    className: "lg:col-span-2",
+  },
+];
+const steps = [
+  {
+    icon: ClipboardList,
+    title: "Registra tu empresa",
+    text: "Crea tu cuenta y da el primer paso para organizar tus envíos.",
   },
   {
-    icon: Headset,
-    title: 'Soporte Dedicado',
-    desc: 'Ejecutivo de cuenta asignado para empresas con operación activa.',
-    color: 'text-cyan-500 dark:text-cyan-400',
+    icon: Package,
+    title: "Crea tu pedido",
+    text: "Ingresa los datos de recogida, entrega y destinatario.",
+  },
+  {
+    icon: Truck,
+    title: "Sigue la entrega",
+    text: "Consulta las novedades de tu pedido durante su recorrido.",
+  },
+  {
+    icon: CheckCheck,
+    title: "Mantén el control",
+    text: "Revisa tus pedidos y movimientos desde tu portal.",
   },
 ];
 
-const Home: React.FC = () => {
-  const [guia, setGuia] = useState('');
+export default function Home() {
+  const [guia, setGuia] = useState("");
   const navigate = useNavigate();
-  const rastrear = (e: React.FormEvent) => {
-    e.preventDefault();
-    const q = guia.trim();
-    navigate(q ? `/track?n=${encodeURIComponent(q)}` : '/track');
-  };
-
   return (
-    <div className="overflow-x-hidden bg-slate-50 dark:bg-slate-950">
-      {/* ── HERO ─────────────────────────────────────────────────────────── */}
-      <section className="relative min-h-[90vh] lg:min-h-screen w-full flex flex-col justify-between overflow-hidden bg-slate-950 text-white">
+    <div className="landing">
+      <Navbar hero />
+      <JSBot />
+      <section className="landing-hero relative isolate flex min-h-dvh w-full flex-col overflow-hidden bg-slate-950 pt-16 lg:pt-20">
         <HeroCarrusel />
-        <Navbar hero />
-
-        {/* Gradiente de desvanecimiento hacia los KPIs */}
-        <div className="pointer-events-none absolute bottom-0 left-0 right-0 z-10 h-32 bg-gradient-to-b from-transparent via-slate-950/70 to-slate-950 dark:to-slate-950" aria-hidden="true" />
-
-        <div className="relative z-20 w-full flex-1 flex flex-col items-center justify-center text-center px-4 sm:px-6 max-w-5xl mx-auto py-12">
-          <div className="hero-badge-in inline-flex max-w-full items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/80 border border-slate-700/60 backdrop-blur-md mb-6">
-            <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
-            <span className="text-[10px] sm:text-xs font-semibold tracking-widest text-slate-300 uppercase">Plataforma Logística Empresarial</span>
-          </div>
-
-          <h1 className="w-full max-w-full break-words text-3xl xs:text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black uppercase tracking-tight text-white leading-none mb-6 text-balance">
-            Logística que{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-cyan-300 to-indigo-400">mueve negocios</span>
-          </h1>
-
-          <p className="w-full text-sm sm:text-base md:text-lg lg:text-xl text-slate-300 max-w-2xl font-normal leading-relaxed mb-8 text-balance">
-            Conectamos empresas colombianas con sus clientes finales a través de una plataforma de envíos confiable, rastreable y financieramente transparente.
-          </p>
-
-          {/* Rastreo rápido: lleva la guía a /track, que ya sabe consultarla */}
-          <form onSubmit={rastrear} className="w-full max-w-lg lg:max-w-xl xl:max-w-2xl p-1.5 lg:p-2 rounded-2xl xs:rounded-full bg-slate-900/90 border border-slate-700/80 backdrop-blur-xl shadow-2xl flex flex-col xs:flex-row items-stretch xs:items-center gap-2 mb-8 transition-all">
-            <label htmlFor="guiaHero" className="sr-only">Número de guía o pedido</label>
-            <input
-              id="guiaHero"
-              type="text"
-              value={guia}
-              onChange={e => setGuia(e.target.value)}
-              placeholder="Ingresa tu número de guía / pedido..."
-              className="w-full xs:w-auto xs:flex-1 min-w-0 bg-transparent px-4 lg:px-6 py-2.5 lg:py-3.5 text-xs sm:text-sm lg:text-base text-white placeholder-slate-400 focus:outline-none"
-            />
-            <button type="submit" className="w-full xs:w-auto justify-center px-5 lg:px-7 py-2.5 lg:py-3.5 rounded-full bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs sm:text-sm lg:text-base flex items-center gap-2 transition-all shadow-lg shadow-sky-500/20 active:scale-95 whitespace-nowrap">
-              Rastrear envío →
-            </button>
-          </form>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-md">
-            <Link to="/register"
-              className="inline-flex min-h-[44px] items-center justify-center rounded-full bg-white px-6 lg:px-8 py-3 lg:py-4 text-xs sm:text-sm lg:text-base font-bold text-slate-950 shadow-md transition-all hover:bg-slate-100 active:scale-95 whitespace-nowrap">
-              Comenzar ahora
-            </Link>
-            <a href="#servicios"
-              className="inline-flex min-h-[44px] items-center justify-center rounded-full bg-slate-900/60 hover:bg-slate-800/80 border border-slate-700/60 px-6 lg:px-8 py-3 lg:py-4 text-xs sm:text-sm lg:text-base font-semibold text-slate-200 hover:text-white backdrop-blur-md transition-all active:scale-95 whitespace-nowrap">
-              Ver servicios
-            </a>
-          </div>
-        </div>
-
-        {/* Indicador de scroll */}
-        <a href="#resultados" className="relative z-20 mb-8 flex flex-col items-center gap-1 pb-16 opacity-70 hover:opacity-100 transition-opacity cursor-pointer" aria-label="Ver más contenido">
-          <svg className="w-4 h-4 animate-bounce text-sky-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M19 9l-7 7-7-7" />
-          </svg>
-          <span className="text-[9px] font-bold tracking-widest text-slate-400 uppercase">Ver más</span>
-        </a>
-      </section>
-
-      {/* ── STATS ─────────────────────────────────────────────────────────── */}
-      <section id="resultados" className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 sm:-mt-16 mb-16 lg:mb-24">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6">
-          {stats.map((stat, idx) => (
-            <div
-              key={idx}
-              className="relative p-4 sm:p-6 rounded-2xl bg-white/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 backdrop-blur-xl shadow-xl dark:shadow-slate-950/80 transition-all duration-300 hover:-translate-y-1"
+        <div
+          aria-hidden="true"
+          className="landing-hero-fade pointer-events-none absolute inset-x-0 bottom-0 z-10 h-28 sm:h-36"
+        />
+        <div className="landing-shell relative z-20 flex flex-1 flex-col items-center justify-center gap-6 py-6 lg:grid lg:grid-cols-12 lg:gap-x-12 lg:gap-y-6 lg:py-8 lg:content-center">
+          <div className="w-full min-w-0 shrink-0 lg:col-span-7 lg:col-start-1 lg:row-start-1">
+            <div className="landing-enter mb-4 inline-flex items-center gap-2.5 rounded-full border border-sky-400/30 bg-sky-400/10 px-3 py-2 text-[10px] font-bold uppercase tracking-[.16em] text-sky-200 sm:text-xs">
+              <span className="h-1.5 w-1.5 rounded-full bg-sky-300" /> Desde
+              Cali. Conectados contigo.
+            </div>
+            <h1
+              className="landing-enter text-3xl font-black uppercase tracking-tight leading-none text-white sm:text-5xl lg:text-6xl xl:text-7xl"
+              style={{ animationDelay: "80ms" }}
             >
-              <div className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white">
-                {stat.value}
+              Tu negocio avanza.
+              <br />
+              <span className="text-sky-300">
+                Nosotros lo
+                <br className="hidden xl:block" /> movemos
+              </span>
+            </h1>
+            <p
+              className="landing-enter mt-4 max-w-lg text-sm leading-relaxed text-slate-300 sm:text-base lg:mt-6 lg:text-lg"
+              style={{ animationDelay: "160ms" }}
+            >
+              Detrás de cada envío hay una promesa. Conecta tu empresa con sus
+              clientes y mantén el control de tus pedidos, de principio a fin.
+            </p>
+          </div>
+          <div
+            className="landing-enter w-full min-w-0 max-w-md shrink-0 lg:col-span-5 lg:col-start-8 lg:row-start-1 lg:row-span-2 lg:max-w-lg lg:self-center"
+            style={{ animationDelay: "320ms" }}
+          >
+            <div className="landing-tracking relative z-20 flex w-full flex-col justify-between rounded-3xl border border-slate-800/90 bg-slate-900/90 p-6 shadow-2xl backdrop-blur-2xl lg:p-8">
+              <div className="mb-4 flex items-center justify-between">
+                <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-slate-300">
+                  <Route size={18} className="text-sky-300" /> Siempre cerca
+                </span>
+                <span className="rounded-full bg-sky-400/10 px-2.5 py-1 text-[10px] font-semibold text-sky-200">
+                  RASTREO
+                </span>
               </div>
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-1">
-                {stat.label}
+              <h2 className="mb-1 text-xl font-bold text-white lg:text-2xl">
+                ¿Dónde va tu envío?
+              </h2>
+              <p className="mb-4 text-xs leading-relaxed text-slate-400">
+                Ingresa tu número de guía para conocer el estado en tiempo real.
+              </p>
+              <form
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  const q = guia.trim();
+                  navigate(q ? `/track?n=${encodeURIComponent(q)}` : "/track");
+                }}
+              >
+                <label
+                  htmlFor="guiaHero"
+                  className="mb-2 block text-xs font-medium text-slate-300"
+                >
+                  Número de guía o pedido
+                </label>
+                <div className="relative">
+                  <Package
+                    size={19}
+                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+                  <input
+                    id="guiaHero"
+                    value={guia}
+                    onChange={(e) => setGuia(e.target.value)}
+                    placeholder="Escribe tu número de guía"
+                    className="w-full min-w-0 rounded-xl border border-slate-800 bg-slate-950 py-3 pl-10 pr-4 text-xs text-white placeholder:text-slate-500 transition-all focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm"
+                  />
+                </div>
+                <button
+                  className="mt-3 flex w-full min-h-[44px] items-center justify-center gap-2 rounded-xl bg-sky-400 py-3 text-xs font-bold text-slate-950 shadow-md transition-all hover:bg-sky-300 active:scale-95 sm:text-sm"
+                  type="submit"
+                >
+                  Rastrear mi envío <Search size={18} />
+                </button>
+              </form>
+              <div className="mt-4 border-t border-slate-800 pt-4">
+                <div className="flex items-center gap-3 text-xs text-slate-400">
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-slate-800">
+                    <Clock3 size={15} />
+                  </span>
+                  <p>
+                    ¿Ya eres cliente?{" "}
+                    <Link
+                      to="/login"
+                      className="font-semibold text-sky-200 underline decoration-sky-300/30 underline-offset-4"
+                    >
+                      Ingresa a tu portal
+                    </Link>
+                  </p>
+                </div>
               </div>
             </div>
+          </div>
+          <div className="w-full min-w-0 shrink-0 lg:col-span-7 lg:col-start-1 lg:row-start-2">
+            <div
+              className="landing-enter flex w-full flex-col gap-3 lg:flex-row"
+              style={{ animationDelay: "240ms" }}
+            >
+              <Link
+                to="/register"
+                className="flex w-full min-h-[44px] items-center justify-center gap-2 rounded-2xl bg-sky-400 px-5 py-3.5 text-sm font-bold text-slate-950 shadow-lg shadow-sky-500/20 transition-all hover:bg-sky-300 active:scale-95 lg:w-auto"
+              >
+                Quiero enviar <ArrowRight size={18} />
+              </Link>
+              <a
+                href="#nosotros"
+                className="flex w-full min-h-[44px] items-center justify-center gap-2 rounded-2xl border border-slate-800 bg-slate-900/60 px-5 py-3 text-xs font-semibold text-slate-300 transition-colors hover:bg-slate-800 lg:w-auto"
+              >
+                Conoce JS Logistics <ArrowDown size={16} />
+              </a>
+            </div>
+            <div className="mt-5 flex flex-wrap gap-x-6 gap-y-3 text-xs text-slate-300">
+              <span className="flex items-center gap-2">
+                <ShieldCheck size={16} className="text-sky-300" /> Atención a
+                empresas
+              </span>
+              <span className="flex items-center gap-2">
+                <MapPin size={16} className="text-sky-300" /> Cali, Colombia
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          role="region"
+          aria-label="JS Logistics en cifras"
+          className="relative z-20 w-full shrink-0 border-t border-slate-800/80 bg-slate-950/90 py-4 backdrop-blur-md lg:py-5"
+        >
+          <div className="landing-shell">
+            <div className="grid grid-cols-2 items-stretch gap-x-4 md:grid-cols-4 lg:gap-x-8">
+              {[
+                {
+                  end: 15000,
+                  suffix: "+",
+                  label: "Envíos mensuales",
+                  color: "text-sky-400",
+                },
+                {
+                  end: 99.4,
+                  decimals: 1,
+                  suffix: "%",
+                  label: "Entregas a tiempo",
+                  color: "text-emerald-400",
+                },
+                {
+                  end: 180,
+                  suffix: "+",
+                  label: "Municipios cubiertos",
+                  color: "text-indigo-400",
+                },
+                {
+                  end: 15,
+                  prefix: "< ",
+                  suffix: " min",
+                  label: "Respuesta en soporte",
+                  color: "text-cyan-400",
+                },
+              ].map(({ label, color, ...counter }, i) => (
+                <div
+                  key={label}
+                  className={`flex min-w-0 flex-col items-center justify-center p-2 text-center ${i % 2 === 1 ? "border-l border-slate-800/60" : ""} ${i >= 2 ? "border-t border-slate-800/60 md:border-t-0" : ""} ${i === 2 ? "md:border-l md:border-slate-800/60" : ""}`}
+                >
+                  <div className="text-xl font-black tracking-tight text-white sm:text-2xl lg:text-3xl">
+                    <AnimatedCounter {...counter} />
+                  </div>
+                  <span
+                    className={`mt-0.5 text-[10px] font-semibold uppercase tracking-wider sm:text-xs ${color}`}
+                  >
+                    {label}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        aria-label="Tu operación de un vistazo"
+        className="landing-highlights relative z-30 border-t border-slate-200 py-12 dark:border-slate-800/80 lg:py-16"
+      >
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 top-1/2 border-t border-slate-200 dark:border-slate-800/80"
+        />
+        <div className="landing-shell relative grid grid-cols-2 gap-3 md:grid-cols-4 sm:gap-4">
+          {[
+            { icon: Package, title: "Pedidos", text: "En un mismo lugar" },
+            { icon: Route, title: "Seguimiento", text: "Consulta cada estado" },
+            {
+              icon: Receipt,
+              title: "Movimientos",
+              text: "Información organizada",
+            },
+            { icon: MapPin, title: "Cali", text: "Nuestra ciudad de origen" },
+          ].map(({ icon: Icon, title, text }, i) => (
+            <Reveal key={title} delay={i * 60}>
+              <div className="landing-surface h-full rounded-2xl border p-4 shadow-lg sm:p-6">
+                <Icon size={22} className="landing-accent mb-3" />
+                <h2 className="break-words text-xl font-bold sm:text-2xl">
+                  {title}
+                </h2>
+                <p className="landing-muted mt-1 text-xs leading-relaxed">
+                  {text}
+                </p>
+              </div>
+            </Reveal>
           ))}
         </div>
       </section>
-
-      {/* ── ABOUT ─────────────────────────────────────────────────────────── */}
-      <section id="nosotros" className="relative pb-16 lg:pb-24">
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 lg:gap-12 items-center">
-            {/* Texto de infraestructura: 7 columnas */}
-            <div className="lg:col-span-7">
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">
-                Quiénes Somos
+      <section
+        id="nosotros"
+        className="landing-section landing-about relative isolate overflow-hidden"
+      >
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -left-20 top-1/4 -z-10 h-96 w-96 rounded-full bg-sky-500/10 blur-3xl dark:bg-sky-500/15"
+        />
+        <div className="landing-shell grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-20">
+          <Reveal className="relative min-w-0">
+            <div className="relative overflow-hidden rounded-[1.75rem] bg-slate-900">
+              <img
+                src="/img/hero/mensajero-1280.webp"
+                alt="Vehículo de reparto en una operación logística"
+                loading="lazy"
+                width={1280}
+                height={960}
+                className="aspect-[4/3] w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-transparent" />
+              <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between gap-4 text-white sm:bottom-8 sm:left-8 sm:right-8">
+                <div>
+                  <p className="mb-2 text-[10px] uppercase tracking-[.2em] text-sky-200">
+                    El origen de cada recorrido
+                  </p>
+                  <p className="font-display text-4xl font-bold">
+                    Cali, Valle del Cauca.
+                  </p>
+                </div>
+                <MapPin size={32} className="shrink-0 text-sky-300" />
+              </div>
+            </div>
+            <div className="landing-surface relative mx-4 -mt-5 flex items-center gap-4 rounded-2xl border p-5 shadow-lg sm:mx-8">
+              <span className="landing-icon">
+                <ShieldCheck size={24} />
               </span>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight my-4">
-                La infraestructura logística que tu empresa <span className="text-sky-500 dark:text-sky-400">necesita</span>
+              <div>
+                <p className="font-semibold">
+                  Tu empresa tiene quién la mueva.
+                </p>
+                <p className="landing-muted mt-1 text-xs sm:text-sm">
+                  Una relación cercana, en cada entrega.
+                </p>
+              </div>
+            </div>
+          </Reveal>
+          <Reveal delay={100} className="min-w-0">
+            <p className="landing-eyebrow">01 / Somos JS Logistics</p>
+            <h2 className="landing-heading mt-4">
+              La logística se trata de{" "}
+              <span className="landing-accent">conectar personas.</span>
+            </h2>
+            <p className="landing-muted mt-6 text-base leading-relaxed sm:text-lg">
+              Tus clientes esperan más que un paquete. Esperan que cumplas.
+              Acompañamos a las empresas en la gestión de sus envíos, con
+              información organizada y una atención cercana.
+            </p>
+            <div className="mt-8 space-y-5">
+              {[
+                {
+                  icon: Route,
+                  title: "Visibilidad en cada paso",
+                  text: "Consulta el estado de tus pedidos desde un mismo lugar.",
+                },
+                {
+                  icon: Receipt,
+                  title: "Información que te da control",
+                  text: "Pedidos y movimientos claros para tu operación.",
+                },
+              ].map(({ icon: Icon, title, text }) => (
+                <div key={title} className="flex items-start gap-4">
+                  <span className="landing-icon shrink-0">
+                    <Icon size={21} />
+                  </span>
+                  <div>
+                    <h3 className="text-base font-bold">{title}</h3>
+                    <p className="landing-muted mt-1 text-sm leading-relaxed">
+                      {text}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <a href="#servicios" className="landing-text-link mt-8">
+              Así podemos ayudarte <ArrowRight size={17} />
+            </a>
+          </Reveal>
+        </div>
+      </section>
+
+      <section
+        id="servicios"
+        className="landing-section landing-services relative isolate overflow-hidden border-y"
+      >
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-20 bottom-1/4 -z-10 h-96 w-96 rounded-full bg-indigo-500/10 blur-3xl dark:bg-indigo-500/15"
+        />
+        <div className="landing-shell">
+          <Reveal className="mb-10 flex flex-col justify-between gap-5 md:flex-row md:items-end">
+            <div className="max-w-xl">
+              <p className="landing-eyebrow">02 / Soluciones que conectan</p>
+              <h2 className="landing-heading mt-4">
+                Menos fricción.
+                <br />
+                <span className="landing-accent">Más movimiento.</span>
               </h2>
-              <div className="space-y-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300 sm:text-base">
-                <p>
-                  JS Logistics es una empresa de soluciones logísticas B2B especializada en la gestión de envíos entre empresas y sus clientes finales a lo largo del territorio colombiano.
-                </p>
-                <p>
-                  Proveemos a nuestros clientes empresariales un portal digital donde pueden crear pedidos, hacer seguimiento en tiempo real a cada entrega y gestionar su estado financiero con completa transparencia.
-                </p>
-                <p>
-                  Nuestra red de distribución cubre más de 180 municipios y contamos con centros de operaciones en Cali, Bogotá, Medellín y Barranquilla.
-                </p>
-              </div>
             </div>
-
-            {/* Beneficios en bento 2×2: 5 columnas */}
-            <div className="mt-10 lg:col-span-5 lg:mt-0">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-5">
-                {features.map(({ icon: Icon, title, desc, color }) => (
-                  <div
-                    key={title}
-                    className="p-6 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 shadow-md hover:shadow-xl dark:shadow-slate-950/60 hover:border-sky-500/40 transition-all duration-300 group"
-                  >
-                    <div className="w-12 h-12 rounded-xl bg-sky-500/10 dark:bg-sky-500/20 border border-sky-500/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                      <Icon className={`w-6 h-6 ${color}`} />
+            <p className="landing-muted max-w-sm text-base leading-relaxed">
+              Del primer pedido al cierre de cuentas. Herramientas para que te
+              concentres en hacer crecer tu negocio.
+            </p>
+          </Reveal>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
+            {services.map(
+              ({ icon: Icon, number, title, text, tag, className }, i) => (
+                <Reveal key={number} delay={(i % 2) * 80} className={className}>
+                  <article className="landing-service landing-surface group relative h-full overflow-hidden rounded-3xl border p-6 sm:p-8">
+                    <div className="flex items-start justify-between gap-4">
+                      <span className="landing-icon">
+                        <Icon size={25} />
+                      </span>
+                      <span className="landing-muted font-mono text-xs">
+                        /{number}
+                      </span>
                     </div>
-                    <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">{title}</h3>
-                    <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{desc}</p>
+                    <div className="mt-9 max-w-md">
+                      <p className="landing-accent mb-3 text-[10px] font-bold uppercase tracking-[.18em]">
+                        {tag}
+                      </p>
+                      <h3 className="text-2xl font-bold sm:text-3xl">
+                        {title}
+                      </h3>
+                      <p className="landing-muted mt-3 text-sm leading-relaxed sm:text-base">
+                        {text}
+                      </p>
+                    </div>
+                    <div aria-hidden="true" className="landing-service-line" />
+                  </article>
+                </Reveal>
+              ),
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="plataforma"
+        className="landing-section landing-platform relative isolate overflow-hidden border-b"
+      >
+        <div className="landing-shell grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-16">
+          <Reveal className="min-w-0 lg:col-span-5">
+            <p className="landing-eyebrow">03 / Tu centro de operaciones</p>
+            <h2 className="landing-heading mt-4">
+              Todo conectado.
+              <br />
+              <span className="landing-accent">Todo más claro.</span>
+            </h2>
+            <p className="landing-muted mt-6 text-base leading-relaxed">
+              Tu portal reúne la información que necesitas para gestionar tu
+              día. Menos búsquedas entre conversaciones. Más claridad para tomar
+              decisiones.
+            </p>
+            <ul className="my-7 space-y-3">
+              {[
+                "Consulta tus pedidos y sus estados",
+                "Revisa el detalle de cada entrega",
+                "Mantén tus movimientos a la vista",
+              ].map((text) => (
+                <li key={text} className="flex items-center gap-3 text-sm">
+                  <Check size={17} className="landing-accent shrink-0" />
+                  {text}
+                </li>
+              ))}
+            </ul>
+            <Link to="/login" className="landing-text-link">
+              Ir a mi portal <ArrowRight size={17} />
+            </Link>
+          </Reveal>
+          <Reveal delay={120} className="min-w-0 lg:col-span-7">
+            <div className="landing-dashboard landing-surface overflow-hidden rounded-2xl border shadow-xl sm:rounded-3xl">
+              <div className="landing-divider flex items-center justify-between gap-3 border-b px-4 py-4 sm:px-6">
+                <span className="flex items-center gap-2 text-sm font-bold">
+                  <Package size={19} className="landing-accent" /> JS / Portal
+                </span>
+                <span className="landing-muted rounded-full border px-2 py-1 text-[10px]">
+                  Vista ilustrativa
+                </span>
+              </div>
+              <div className="p-4 sm:p-7">
+                <div className="mb-6 flex items-start justify-between gap-3">
+                  <div>
+                    <p className="landing-muted text-xs">
+                      Tu operación, en un solo lugar
+                    </p>
+                    <h3 className="mt-1 text-2xl font-bold sm:text-3xl">
+                      Cada pedido cuenta.
+                    </h3>
                   </div>
-                ))}
+                  <span className="landing-icon hidden sm:flex">
+                    <Route size={22} />
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-2 sm:gap-4">
+                  {[
+                    { value: "08", text: "En camino" },
+                    { value: "24", text: "Entregados" },
+                    { value: "32", text: "Pedidos" },
+                  ].map((stat) => (
+                    <div
+                      key={stat.text}
+                      className="landing-section-alt rounded-xl border p-3 sm:p-4"
+                    >
+                      <p className="text-2xl font-bold sm:text-3xl">
+                        {stat.value}
+                      </p>
+                      <p className="landing-muted mt-1 text-[10px] sm:text-xs">
+                        {stat.text}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-6 flex items-center justify-between">
+                  <h4 className="text-sm font-bold">Últimos movimientos</h4>
+                  <span className="landing-muted text-[10px]">
+                    Datos de ejemplo
+                  </span>
+                </div>
+                <div className="mt-2">
+                  {[
+                    { city: "Cali", state: "En camino", icon: Truck },
+                    { city: "Palmira", state: "Entregado", icon: CircleCheck },
+                    { city: "Yumbo", state: "Entregado", icon: CircleCheck },
+                  ].map(({ city, state, icon: Icon }, i) => (
+                    <div
+                      key={city}
+                      className="landing-divider flex items-center justify-between gap-2 border-b py-4 last:border-0"
+                    >
+                      <div className="flex min-w-0 items-center gap-3">
+                        <span className="landing-icon !h-9 !w-9 !rounded-lg">
+                          <Icon size={16} />
+                        </span>
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold sm:text-sm">
+                            Pedido #00{103 + i}
+                          </p>
+                          <p className="landing-muted text-xs">{city}</p>
+                        </div>
+                      </div>
+                      <span
+                        className={`rounded-full px-2 py-1 text-[10px] font-semibold sm:px-3 sm:text-xs ${i === 0 ? "bg-sky-500/10 text-sky-700 dark:text-sky-300" : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"}`}
+                      >
+                        {state}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
+          </Reveal>
         </div>
       </section>
 
-      {/* ── SERVICES ──────────────────────────────────────────────────────── */}
-      <section id="servicios" className="section bg-slate-50 dark:bg-slate-950 border-y border-slate-200 dark:border-steel-800">
-        <div className="container">
-          <div className="text-center mb-14">
-            <p className="text-xs font-mono text-sky-600 dark:text-accent-400 uppercase tracking-widest mb-3">Lo que hacemos</p>
-            <h2 className="font-display font-700 text-4xl sm:text-5xl text-slate-900 dark:text-white mb-4">Nuestros servicios</h2>
-            <p className="text-slate-600 dark:text-silver-400 max-w-xl mx-auto">Soluciones logísticas adaptadas al ritmo de tu operación empresarial.</p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {services.map(({ icon, title, desc, tag }) => (
-              <div key={title} className="card-hover p-6 group">
-                <div className="flex items-start justify-between mb-5">
-                  <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-steel-800 border border-slate-200 dark:border-steel-700 flex items-center justify-center text-slate-500 dark:text-silver-400 group-hover:border-accent-500/40 group-hover:text-accent-400 transition-all duration-300">
-                    {icon}
-                  </div>
-                  <span className="text-xs font-mono text-slate-500 dark:text-steel-500 uppercase tracking-wider">{tag}</span>
-                </div>
-                <h3 className="font-display font-600 text-lg text-slate-900 dark:text-white mb-2">{title}</h3>
-                <p className="text-sm text-slate-500 dark:text-silver-500 leading-relaxed">{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── HOW IT WORKS ──────────────────────────────────────────────────── */}
-      <section className="section">
-        <div className="container">
-          <div className="text-center mb-14">
-            <p className="text-xs font-mono text-accent-400 uppercase tracking-widest mb-3">Proceso</p>
-            <h2 className="font-display font-700 text-4xl sm:text-5xl dark:text-white text-gray-600">¿Cómo funciona?</h2>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 relative">
-            {/* Connector line */}
-            <div className="hidden lg:block absolute top-10 left-[calc(12.5%+1rem)] right-[calc(12.5%+1rem)] h-px bg-steel-700" />
-
-            {[
-              { step: '01', title: 'Registra tu empresa', desc: 'Crea tu cuenta empresarial en minutos y accede al portal.' },
-              { step: '02', title: 'Crea el pedido', desc: 'Ingresa los datos del destinatario, tipo de paquete y servicio.' },
-              { step: '03', title: 'Nosotros lo gestionamos', desc: 'Recogemos, transportamos y entregamos con seguimiento completo.' },
-              { step: '04', title: 'Facturación automática', desc: 'Cada entrega genera un cargo visible en tu estado de cuenta.' },
-            ].map(({ step, title, desc }) => (
-              <div key={step} className="relative text-center">
-                <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-steel-800 border border-steel-700 flex items-center justify-center">
-                  <span className="font-display font-800 text-xl text-accent-400">{step}</span>
-                </div>
-                <p className="font-display font-600 dark:text-white text-gray-600 mb-2">{title}</p>
-                <p className="text-sm text-silver-500 leading-relaxed">{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── CTA ───────────────────────────────────────────────────────────── */}
-      <section className="section">
-        <div className="container">
-          <div className="card relative overflow-hidden p-8 sm:p-14 text-center" style={{ background: 'linear-gradient(135deg, rgba(30,63,116,0.6) 0%, rgba(37,80,142,0.4) 100%)' }}>
-            <div className="absolute inset-0 opacity-10"
-              style={{
-                backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(14,165,233,0.4) 0%, transparent 70%)',
-              }}
+      <section
+        id="proceso"
+        className="landing-section landing-process relative isolate overflow-hidden border-y"
+      >
+        <div className="landing-shell">
+          <Reveal className="mx-auto mb-12 max-w-2xl text-center">
+            <p className="landing-eyebrow">04 / Así de sencillo</p>
+            <h2 className="landing-heading mt-4">Del clic a la entrega.</h2>
+            <p className="landing-muted mt-5">
+              Un recorrido claro para ti y para tu negocio.
+            </p>
+          </Reveal>
+          <div className="relative grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            <div
+              aria-hidden="true"
+              className="landing-process-line absolute left-[10%] right-[10%] top-8 hidden h-px lg:block"
             />
-            <div className="relative z-10">
-              <p className="text-xs font-mono text-accent-400 uppercase tracking-widest mb-3">Únete hoy</p>
-              <h2 className="font-display font-800 text-4xl sm:text-6xl text-white mb-5">
-                Lista tu empresa.<br />Envía con confianza.
-              </h2>
-              <p className="dark:text-silver-400 text-gray-600 max-w-lg mx-auto mb-8">
-                Accede al portal empresarial, crea tu primer pedido y experimenta la diferencia de una logística transparente.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link to="/register" className="btn-primary btn-lg">Crear cuenta gratis</Link>
-                <Link to="/login" className="btn-ghost btn-lg">Ya tengo cuenta</Link>
-              </div>
-            </div>
+            {steps.map(({ icon: Icon, title, text }, i) => (
+              <Reveal key={title} delay={i * 90}>
+                <div className="relative">
+                  <div className="landing-surface landing-step relative mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border">
+                    <Icon size={26} className="landing-accent" />
+                    <span className="landing-step-number absolute -right-2 -top-2 grid h-6 w-6 place-items-center rounded-full text-[10px] font-bold">
+                      0{i + 1}
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-bold">{title}</h3>
+                  <p className="landing-muted mt-3 max-w-xs text-sm leading-relaxed">
+                    {text}
+                  </p>
+                </div>
+              </Reveal>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ── CONTACT ───────────────────────────────────────────────────────── */}
-      <section id="contacto" className="section border-t border-steel-800 bg-steel-900/20">
-        <div className="container">
-          <div className="grid lg:grid-cols-2 gap-12 items-start">
+      <section
+        id="contacto"
+        className="landing-section landing-closing relative isolate overflow-hidden border-t"
+      >
+        <div
+          aria-hidden="true"
+          className="landing-dot-mesh pointer-events-none absolute inset-0 -z-10"
+        />
+        <div className="landing-shell">
+          <Reveal>
+            <div className="landing-contact relative overflow-hidden rounded-3xl p-6 sm:p-10 lg:p-16">
+              <div aria-hidden="true" className="landing-contact-orbit" />
+              <div className="relative grid grid-cols-1 gap-10 lg:grid-cols-12 lg:items-end">
+                <div className="lg:col-span-7">
+                  <p className="text-xs font-bold uppercase tracking-[.18em] text-sky-200">
+                    El siguiente paso es tuyo
+                  </p>
+                  <h2 className="mt-5 font-display text-4xl font-bold leading-[1.05] text-white sm:text-6xl lg:text-7xl">
+                    Hagamos que
+                    <br />
+                    las cosas pasen.
+                  </h2>
+                  <p className="mt-6 max-w-lg text-base leading-relaxed text-slate-300">
+                    Cuéntanos qué mueve tu negocio. Conversemos sobre tus envíos
+                    y la forma de acompañar tu operación.
+                  </p>
+                  <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                    <Link
+                      to="/register"
+                      className="landing-button landing-button-primary"
+                    >
+                      Crear mi cuenta <ArrowRight size={18} />
+                    </Link>
+                    <a
+                      href="mailto:info@jslogistics.co?subject=Quiero%20enviar%20con%20JS%20Logistics"
+                      className="landing-button border border-white/25 text-white hover:bg-white/10"
+                    >
+                      Hablemos <Mail size={17} />
+                    </a>
+                  </div>
+                </div>
+                <div className="min-w-0 border-t border-white/20 pt-7 lg:col-span-5 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
+                  <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 text-sky-200">
+                    <Mail size={24} />
+                  </span>
+                  <p className="text-xs text-slate-300">Escríbenos a</p>
+                  <a
+                    href="mailto:info@jslogistics.co"
+                    className="mt-2 inline-flex max-w-full items-center gap-2 break-all text-lg font-bold text-white underline-offset-4 hover:underline sm:text-xl"
+                  >
+                    info@jslogistics.co{" "}
+                    <ChevronRight size={18} className="shrink-0" />
+                  </a>
+                  <p className="mt-4 text-xs leading-relaxed text-slate-300">
+                    El enlace abre tu aplicación de correo para que puedas
+                    enviarnos tu consulta.
+                  </p>
+                  <p className="mt-6 flex items-center gap-2 text-sm text-slate-300">
+                    <MapPin size={16} /> Cali, Valle del Cauca
+                  </p>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+      <footer className="landing-closing relative isolate overflow-hidden border-t py-10">
+        <div
+          aria-hidden="true"
+          className="landing-dot-mesh pointer-events-none absolute inset-0 -z-10"
+        />
+        <div className="landing-shell">
+          <div className="flex flex-col justify-between gap-8 sm:flex-row sm:items-start">
             <div>
-              <p className="text-xs font-mono text-accent-400 uppercase tracking-widest mb-3">Contáctanos</p>
-              <h2 className="font-display font-700 text-4xl text-white mb-5">¿Tienes preguntas?</h2>
-              <p className="text-silver-400 mb-8">Nuestro equipo comercial está disponible para ayudarte a configurar tu operación logística.</p>
-              <div className="space-y-4">
-                {[
-                  { label: 'Email comercial', value: 'info@jslogistics.co' },
-                  { label: 'Línea directa', value: '+57 601 555 0100' },
-                  { label: 'WhatsApp', value: '+57 320 000 1234' },
-                  { label: 'Horario', value: 'Lunes a Viernes · 7:00 a.m. – 6:00 p.m.' },
-                ].map(({ label, value }) => (
-                  <div key={label} className="flex gap-4 items-start">
-                    <div className="w-1.5 h-1.5 bg-accent-500 rounded-full mt-2 flex-shrink-0" />
-                    <div>
-                      <p className="text-xs text-silver-500 uppercase tracking-wider">{label}</p>
-                      <p className="text-silver-200 font-600">{value}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <Link
+                to="/"
+                className="font-display text-2xl font-bold tracking-wide"
+              >
+                JS LOGISTICS<span className="landing-accent">.</span>
+              </Link>
+              <p className="landing-muted mt-2 text-sm">
+                Conectamos tu negocio con lo que sigue.
+              </p>
             </div>
-
-            {/* Contact form */}
-            <div className="card p-6 sm:p-8">
-              <h3 className="font-display font-700 text-xl dark:text-white text-gray-600 mb-6">Envíanos un mensaje</h3>
-              <form className="space-y-4" onSubmit={e => { e.preventDefault(); alert('Mensaje enviado. Te contactaremos pronto.'); }}>
-                <div className="form-grid">
-                  <div className="form-group">
-                    <label className="input-label">Nombre</label>
-                    <input className="input" placeholder="Tu nombre" required />
-                  </div>
-                  <div className="form-group">
-                    <label className="input-label">Empresa</label>
-                    <input className="input" placeholder="Razón social" required />
-                  </div>
-                </div>
-                <div className="form-group">
-                  <label className="input-label">Email</label>
-                  <input type="email" className="input" placeholder="correo@empresa.com" required />
-                </div>
-                <div className="form-group">
-                  <label className="input-label">Mensaje</label>
-                  <textarea className="input resize-none" rows={4} placeholder="Cuéntanos sobre tu operación y necesidades..." required />
-                </div>
-                <button type="submit" className="btn-primary w-full">Enviar mensaje</button>
-              </form>
-            </div>
+            <nav
+              aria-label="Enlaces del pie de página"
+              className="flex flex-wrap gap-x-6 gap-y-4 text-sm"
+            >
+              <a href="#nosotros" className="hover:underline">
+                Nosotros
+              </a>
+              <a href="#servicios" className="hover:underline">
+                Servicios
+              </a>
+              <a href="#contacto" className="hover:underline">
+                Contacto
+              </a>
+              <Link to="/login" className="landing-text-link">
+                Mi portal <ArrowRight size={15} />
+              </Link>
+            </nav>
+          </div>
+          <div className="landing-divider landing-muted mt-8 flex flex-col justify-between gap-3 border-t pt-6 text-xs sm:flex-row">
+            <p>
+              © {new Date().getFullYear()} JS Logistics. Todos los derechos
+              reservados.
+            </p>
+            <p>Cali, Colombia</p>
           </div>
         </div>
-      </section>
+      </footer>
     </div>
   );
-};
-
-export default Home;
+}
