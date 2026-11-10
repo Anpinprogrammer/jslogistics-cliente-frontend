@@ -9,7 +9,6 @@ import LandingFooter from './components/layout/LandingFooter';
 import { Spinner } from './components/ui';
 import Home from './pages/Home';
 import JSBot from './components/jsbot/JSBot';
-import { usePortal } from './portal/config';
 import { ApiError } from './api/http';
 
 // La portada va en el archivo principal porque es lo que más se abre. El resto de páginas se descarga solo cuando se visita:
@@ -58,10 +57,9 @@ function ScrollToHash() {
 }
 
 function Rutas() {
-  const { portal, cambiar } = usePortal();
   const { pathname } = useLocation();
-  // El portal clásico trae su propia barra y menú (los de la app actual); el resto usa los de la landing.
-  const sinMarco = portal === 'clasico' && pathname.startsWith('/cliente');
+  // El portal del cliente trae su propia barra y menú (los de la app actual); el resto usa los de la landing.
+  const sinMarco = pathname.startsWith('/cliente');
   // La portada trae su propio navbar dentro del Hero, para que el fondo llegue hasta arriba.
   const esPortada = pathname === '/';
   // En el ingreso se va bajando el portal, para que al entrar no haya que esperarlo.
@@ -81,7 +79,7 @@ function Rutas() {
             <Route path="/activar" element={<Restablecer />} />
             <Route path="/register" element={<Register />} />
             <Route path="/track" element={<Track />} />
-            <Route path="/cliente/*" element={<RequireRole roles={['cliente']}><PortalCliente portal={portal} cambiar={cambiar} /></RequireRole>} />
+            <Route path="/cliente/*" element={<RequireRole roles={['cliente']}><PortalCliente /></RequireRole>} />
             <Route path="/equipo" element={<RequireRole roles={['admin', 'asistente', 'mensajero']}><Equipo /></RequireRole>} />
             <Route path="*" element={
               <div className="min-h-screen flex flex-col items-center justify-center gap-4 text-center px-4">
@@ -93,10 +91,7 @@ function Rutas() {
           </Routes>
         </Suspense>
       </main>
-      {!sinMarco && !esPortada && (
-        // En el portal propuesto, el menú de abajo del celular tapa el final de la página: se deja espacio debajo del footer.
-        <div className={pathname.startsWith('/cliente') ? 'pb-24 md:pb-0' : ''}>{pathname === '/login' ? <LandingFooter /> : <Footer />}</div>
-      )}
+      {!sinMarco && !esPortada && (pathname === '/login' ? <LandingFooter /> : <Footer />)}
     </div>
   );
 }

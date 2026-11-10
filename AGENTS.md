@@ -30,7 +30,7 @@ npm run build:demo   # build en modo demo (así se construyen las vistas previas
 ```
 
 **Antes de dar por terminado un cambio**, corre `npm run build` y `npm run build:demo`, y los dos deben pasar.
-No hay pruebas automáticas todavía. Si cambias pantallas, revísalas con `npm run dev:demo` en el ancho de celular (unos 375 px) y en escritorio, y en los dos portales.
+No hay pruebas automáticas todavía. Si cambias pantallas, revísalas con `npm run dev:demo` en el ancho de celular (unos 375 px) y en escritorio.
 
 ## El contrato con la API
 
@@ -83,10 +83,8 @@ src/
   types/dominio.ts      tipos del dominio, iguales a las respuestas del backend
   lib/formato.ts        pesos, días y horas en America/Bogota
   lib/negocio.ts        reglas de negocio copiadas de js-logistics/app/js/app.js
-  portal/config.ts      qué portal se ve (VITE_PORTAL_CLIENTE) y el botón para cambiarlo
-  portal/useDatosCliente.ts  junta pedidos, ficha y movimientos para los dos portales
-  portal/mejorado/      portal "propuesta": diseño de la landing con Tailwind
-  portal/clasico/       portal "clásico": copia fiel de la vista de cliente de la app actual
+  portal/useDatosCliente.ts  junta pedidos, ficha y movimientos del portal
+  portal/clasico/       portal del cliente: vista clásica de la app actual, con su menú de oficina
   demo/datos.ts         datos inventados para VITE_DEMO=true
   pages/                landing (Home), Login, Register, Recuperar, Restablecer, Track y Equipo
   components/           Navbar (con el menú móvil), Footer, ui, HeroCarrusel y acceso.tsx (marco del login)
@@ -98,14 +96,15 @@ src/
 
 ## Reglas para cambiar código
 
-1. **Los dos portales muestran lo mismo.**
-   - "Propuesta" (`mejorado/`) y "clásico" (`clasico/`) usan los mismos datos (`useDatosCliente`, `api/cliente.ts`) y las mismas reglas (`lib/negocio.ts`); solo cambia el diseño.
-   - Un cambio de **funcionalidad** (un dato nuevo, una acción nueva) va en los dos.
-   - Un cambio de **diseño** va solo en el portal que se pidió.
-2. **El clásico debe verse igual a la app actual.**
+1. **Hay un solo portal del cliente.**
+   - El portal clásico (`portal/clasico/`) usa los datos de `useDatosCliente` y las reglas de `lib/negocio.ts`.
+   - La "vista de propuesta" se retiró: no vuelvas a crear un segundo portal ni un selector de versión.
+2. **El clásico debe verse igual a la app actual, salvo el menú de escritorio y el dashboard.**
    - Su HTML y sus clases salen de `js-logistics/app`.
+   - El menú lateral de escritorio sigue el estilo de la app de oficina: logo con separador, grupos con título (`lat-grupo`, `lat-titulo`) y el activo con acento azul. Se puede **colapsar a 76 px** con el botón `plegar` del pie; los accesos conservan `title` y `aria-label`.
+   - El Dashboard de Inicio tiene tema claro/oscuro con botón en la barra superior (`useTheme` + `data-theme` en `.clasico`). El **sidebar de escritorio permanece oscuro** (`slate-900`) en ambos temas, como el de la oficina; la barra superior y las pestañas sí cambian. Las tarjetas tienen borde y el layout es fluido desde 1280 px. No lo devuelvas al estilo fijo anterior.
    - `clasico.css` es una copia de `js-logistics/app/css/estilos.css`. `postcss.config.js` antepone `.clasico` a todas sus reglas, así que no choca con Tailwind.
-   - No metas clases de Tailwind en el clásico ni CSS global fuera de `clasico.css`.
+   - No metas clases de Tailwind en el clásico ni CSS global fuera de `clasico.css`; los ajustes propios van al final del archivo.
 3. **Nada de lógica de negocio en los componentes.**
    - Saldos, totales, textos de estado y reglas de cobro van en `lib/negocio.ts` y deben dar lo mismo que `app.js`.
    - Cuando el backend calcule algo (por ejemplo, los saldos), se usa su valor y se deja de calcular aquí.
@@ -118,11 +117,10 @@ src/
 6. **Modo demo.**
    - Toda consulta o mutación nueva necesita su rama `if (DEMO)` con datos en `src/demo/datos.ts`.
    - Si no la tiene, las vistas previas de Vercel se rompen, y son las que se le muestran al dueño.
-7. **Estilo visual del portal propuesto y de la landing.**
+7. **Estilo visual de la landing.**
    - La paleta `steel`, `silver` y `accent` está en `tailwind.config.cjs`.
    - El modo oscuro va con la clase `dark`.
-   - Las piezas compartidas están en `portal/mejorado/ui.tsx` y `components/ui`; reúsalas antes de crear otras.
-   - El menú de abajo en el celular (`NavInferior`) debe quedar visible, así que deja espacio con `pb-*`.
+   - Las piezas compartidas están en `components/ui`; reúsalas antes de crear otras.
 8. **TypeScript estricto.** No uses `any`, `// @ts-ignore` ni variables sin usar (`noUnusedLocals` está activo).
 9. **Idioma.**
    - Textos de pantalla en español de Colombia, con tuteo y frases claras para alguien que no es técnico.

@@ -27,7 +27,7 @@ La arquitectura general del sistema (backend, base de datos y migración desde F
 ```text
 pages / portal/*   pantallas: solo muestran datos y llaman hooks
       │
-portal/useDatosCliente.ts   junta lo que necesitan los dos portales
+portal/useDatosCliente.ts   junta lo que necesita el portal
       │
 api/cliente.ts, api/auth.ts  hooks de TanStack Query (caché, reintentos, invalidación)
       │
@@ -64,24 +64,19 @@ El token nunca llega al JavaScript. La versión de sesión vive en el JWT, y el 
 | `/` | público | Landing |
 | `/login` | público | Ingreso |
 | `/register`, `/track` | público | Páginas heredadas de la landing original. Todavía no tienen endpoint |
-| `/cliente`, `/cliente/pedidos`, `/cliente/cuenta` | `cliente` | Portal (propuesta o clásico) |
+| `/cliente`, `/cliente/pedidos`, `/cliente/cuenta` | `cliente` | Portal del cliente |
 | `/equipo` | admin, asistente, mensajero | Aviso de que usen la app de oficina |
 
-## Dos portales con los mismos datos
+## Portal del cliente
 
-El dueño puede elegir qué ven sus clientes después de iniciar sesión:
+Después de iniciar sesión, el cliente ve el portal clásico: el de la app actual, con el mismo HTML, las mismas clases y
+su `estilos.css`. En escritorio el menú lateral adopta el estilo de la app de oficina (logo con separador, accesos
+agrupados por sección y el activo con acento azul); en el celular se mantienen las pestañas de abajo. El Dashboard de
+Inicio tiene tema claro/oscuro con botón en la barra superior y usa todo el ancho desde 1280 px (tope de 1600 px en
+monitores muy anchos).
 
-| | Propuesta (`portal/mejorado/`) | Clásico (`portal/clasico/`) |
-| --- | --- | --- |
-| Diseño | El de la landing: Tailwind, tema steel, tarjetas, modo oscuro, menú de abajo en el celular | El de la app actual, tal cual: mismo HTML, mismas clases y su `estilos.css` |
-| Datos y reglas | `useDatosCliente` + `lib/negocio.ts` | Los mismos |
-| Se elige con | `VITE_PORTAL_CLIENTE=mejorado` | `VITE_PORTAL_CLIENTE=clasico` |
-
-- Con `VITE_PERMITIR_CAMBIO_PORTAL=true` aparece un botón flotante ("Versión: propuesta / clásica") que guarda la elección en `localStorage` (`jsl_portal`).
-- `PortalCliente.tsx` carga cada portal con `lazy()`, así que el CSS y el código del que no se usa no se descargan.
-- **CSS del clásico.** `postcss.config.js` antepone `.clasico` a cada regla de `clasico.css` y convierte `:root`, `html` y `body` en `.clasico`. Gracias a eso, el CSS original se puede copiar casi sin tocarlo y no afecta a Tailwind ni a la landing. Si la app actual cambia su `estilos.css`, se vuelve a copiar.
-
-Por qué dos portales: la propuesta es la mejora visual que se le ofrece al dueño. El clásico garantiza que, si él prefiere, sus clientes sigan viendo exactamente lo de siempre, ya con el backend nuevo.
+- `PortalCliente.tsx` carga el portal con `lazy()`, así que su CSS y su código solo se descargan al entrar.
+- **CSS del clásico.** `postcss.config.js` antepone `.clasico` a cada regla de `clasico.css` y convierte `:root`, `html` y `body` en `.clasico`. Gracias a eso, el CSS original se puede copiar casi sin tocarlo y no afecta a Tailwind ni a la landing. Si la app actual cambia su `estilos.css`, se vuelve a copiar; los ajustes propios van al final del archivo.
 
 ## Modo demo
 
@@ -91,7 +86,7 @@ Con `VITE_DEMO=true` (`npm run dev:demo`, `npm run build:demo`), `api/auth.ts` y
 - La cuenta es `cliente@demo.co` / `demo1234`.
 - Las confirmaciones de prenda de cambio se guardan en `localStorage`.
 
-Las vistas previas de Vercel se construyen así, para mostrarle al dueño los dos portales sin backend. Por eso toda consulta nueva necesita su versión demo.
+Las vistas previas de Vercel se construyen así, para mostrarle al dueño el portal sin backend. Por eso toda consulta nueva necesita su versión demo.
 
 ## Despliegue
 
