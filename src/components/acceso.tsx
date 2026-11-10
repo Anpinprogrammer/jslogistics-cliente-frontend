@@ -2,7 +2,7 @@
  * Marco visual de las pantallas de acceso del portal de clientes (login, recuperar y restablecer).
  * Usa exactamente las clases del Login original: aquí solo se reutiliza el diseño, no se cambia.
  */
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode, Ref } from 'react';
 import { TIERRA } from './mapaMundo';
 
 export const ETIQUETA = 'mb-1.5 block text-xs font-medium uppercase tracking-wider text-slate-400';
@@ -53,7 +53,7 @@ const SEDE = { left: `${CALI[0] / 10}%`, top: `${(CALI[1] - VISTA_Y) / 5}%` };
  * en celular el mundo queda detrás de la cabecera, con Cali a la izquierda del logo (la tarjeta tapa el resto de la pantalla);
  * desde `md` ocupa toda la pantalla, con Cali a la izquierda de la tarjeta.
  */
-function MapaSede() {
+function MapaSede({ sedeRef }: { sedeRef?: Ref<HTMLDivElement> }) {
   return (
     <div aria-hidden="true"
       className="pointer-events-none absolute -z-10 aspect-[2/1] w-[120vw] max-w-none left-[calc(50%-62.49vw)] top-[calc(44px-33.05vw)] sm:top-[calc(60px-33.05vw)] md:left-1/2 md:top-1/2 md:w-[max(1500px,100vw)] md:-translate-x-1/2 md:-translate-y-1/2">
@@ -80,7 +80,7 @@ function MapaSede() {
       </svg>
 
       {/* Pin de la sede: la punta queda justo sobre Cali */}
-      <div className="absolute h-0 w-0" style={SEDE}>
+      <div ref={sedeRef} className="absolute h-0 w-0" style={SEDE}>
         <span className="login-sede absolute -left-2 -top-2 h-4 w-4 rounded-full border border-[#38bdf8]" />
         <span className="absolute -left-[3px] -top-[3px] h-1.5 w-1.5 rounded-full bg-white shadow-[0_0_8px_2px_rgba(56,189,248,.9)]" />
         <svg viewBox="0 0 28 36" className="absolute -left-3.5 -top-9 h-9 w-7 max-w-none drop-shadow-[0_0_10px_rgba(56,189,248,.85)] md:-left-[18px] md:-top-[46px] md:h-[46px] md:w-9">
@@ -97,20 +97,54 @@ function MapaSede() {
   );
 }
 
+/**
+ * Lo que la animación de entrada del login le pone al marco en el cuadro actual (ver `components/intro/`).
+ * Solo lo pasa el login; sin esta prop el marco queda exactamente igual. El fondo (malla, luces y mapa) nunca se toca.
+ */
+export type IntroMarco = {
+  raiz: Ref<HTMLDivElement>;
+  /** Punto exacto del pin de Cali, para que el primer mensajero salga de ahí. */
+  sede: Ref<HTMLDivElement>;
+  /** Capas decorativas detrás y delante del contenido (sin clics y ocultas a los lectores de pantalla). */
+  detras: ReactNode;
+  frente: ReactNode;
+  contenido: { ref: Ref<HTMLDivElement>; style?: CSSProperties };
+  insignia: Ref<HTMLDivElement>;
+  halo: CSSProperties;
+  placa: { ref: Ref<HTMLSpanElement>; style?: CSSProperties };
+  icono: CSSProperties;
+  titulo: { ref: Ref<HTMLHeadingElement>; style?: CSSProperties };
+  letras: ReactNode;
+  subtitulo: CSSProperties;
+  tarjeta: { ref: Ref<HTMLDivElement>; style?: CSSProperties };
+  borde: CSSProperties;
+  haloTarjeta: CSSProperties;
+  /** El vidrio que se revela mientras el cuerpo real de la tarjeta queda transparente. */
+  vidrio: ReactNode;
+  cuerpo: CSSProperties;
+  pie: CSSProperties;
+};
+
 /** Fondo del login, cabecera con el logo, tarjeta de cristal y un pie opcional. */
 export function MarcoAcceso({
   children,
   pie,
   titulo = 'Portal Empresarial',
   subtitulo = 'JS Logistics – Acceso de clientes',
+  intro,
+  sinEntrada = false,
 }: {
   children: ReactNode;
   pie?: ReactNode;
   titulo?: string;
   subtitulo?: string;
+  /** Animación de entrada del login, cuadro a cuadro. */
+  intro?: IntroMarco;
+  /** Quita la entrada suave de siempre (`animate-fade-up`): el login la cambia por su animación. */
+  sinEntrada?: boolean;
 }) {
   return (
-    <div className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-[#070B19] px-4 pb-10 pt-24 sm:pb-16 sm:pt-28">
+    <div ref={intro?.raiz} className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-[#070B19] px-4 pb-10 pt-24 sm:pb-16 sm:pt-28">
       {/* Fondo: malla y luces ambientales (el mapa va en MapaSede, anclado a la columna) */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute inset-0 opacity-[0.05]"
@@ -118,45 +152,55 @@ export function MarcoAcceso({
         <div className="absolute -left-32 -top-32 h-[28rem] w-[28rem] rounded-full bg-[#0284c7]/30 blur-[120px]" />
         <div className="absolute -bottom-40 -right-28 h-[32rem] w-[32rem] rounded-full bg-[#38bdf8]/20 blur-[130px]" />
       </div>
+      {intro && <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">{intro.detras}</div>}
 
       <div className="relative w-full max-w-sm sm:max-w-md">
-        <MapaSede />
-        <div className="animate-fade-up">
+        <MapaSede sedeRef={intro?.sede} />
+        {/* Con la animación del login no va `animate-fade-up`, pero se deja `will-change: opacity`: la animación de siempre
+            deja este bloque como "raíz" del desenfoque de la tarjeta (el mapa se ve a través del vidrio), y sin eso
+            el vidrio se vería más opaco que hoy. */}
+        <div ref={intro?.contenido.ref} className={sinEntrada ? '[will-change:opacity]' : 'animate-fade-up'} style={intro?.contenido.style}>
         {/* Cabecera */}
         <div className="mb-5 text-center sm:mb-8">
-          <div className="relative mx-auto mb-3 grid h-16 w-16 place-items-center sm:mb-5 sm:h-24 sm:w-24">
-            <span aria-hidden="true" className="absolute -inset-3 rounded-[2rem] bg-[#38bdf8]/50 blur-2xl" />
-            <span className="relative grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-white to-sky-100 p-1.5 sm:h-24 sm:w-24 sm:rounded-3xl sm:p-2.5 shadow-[0_0_0_1px_rgba(255,255,255,.7),0_0_28px_6px_rgba(56,189,248,.45),0_12px_28px_-6px_rgba(2,132,199,.55),inset_0_1px_0_#fff]">
+          <div ref={intro?.insignia} className="relative mx-auto mb-3 grid h-16 w-16 place-items-center sm:mb-5 sm:h-24 sm:w-24">
+            <span aria-hidden="true" className="absolute -inset-3 rounded-[2rem] bg-[#38bdf8]/50 blur-2xl" style={intro?.halo} />
+            <span ref={intro?.placa.ref} style={intro?.placa.style} className="relative grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-white to-sky-100 p-1.5 sm:h-24 sm:w-24 sm:rounded-3xl sm:p-2.5 shadow-[0_0_0_1px_rgba(255,255,255,.7),0_0_28px_6px_rgba(56,189,248,.45),0_12px_28px_-6px_rgba(2,132,199,.55),inset_0_1px_0_#fff]">
               {/* El .webp trae "LOGISTICS CALI" en blanco (invisible sobre el badge claro): se recorta para mostrar solo el isotipo. */}
-              <span className="relative block h-full w-full overflow-hidden rounded-2xl">
+              <span className="relative block h-full w-full overflow-hidden rounded-2xl" style={intro?.icono}>
                 <img src="/img/icono-96.webp" alt="JS Logistics" width={96} height={96} className="absolute left-[-10%] top-[3%] w-[120%] max-w-none" />
               </span>
             </span>
           </div>
-          <h1 className="font-display text-2xl font-700 text-white sm:text-3xl">{titulo}</h1>
-          <p className="mt-1 text-sm text-[#94a3b8]">{subtitulo}</p>
+          <h1 ref={intro?.titulo.ref} style={intro?.titulo.style} className="font-display text-2xl font-700 text-white sm:text-3xl">{titulo}{intro?.letras}</h1>
+          <p className="mt-1 text-sm text-[#94a3b8]" style={intro?.subtitulo}>{subtitulo}</p>
         </div>
 
         {/* Tarjeta de cristal con borde brillante */}
-        <div className="relative">
-          <div aria-hidden="true" className="absolute -inset-px rounded-[1.4rem] bg-gradient-to-br from-sky-400/70 via-blue-600/30 to-cyan-300/50 opacity-70" />
-          <div aria-hidden="true" className="absolute -inset-6 -z-10 rounded-[2.5rem] bg-blue-600/20 blur-3xl" />
-          <div className="relative rounded-3xl bg-slate-900/60 p-5 shadow-[0_24px_80px_-20px_rgba(2,132,199,0.45),0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-xl sm:p-8">
+        <div ref={intro?.tarjeta.ref} style={intro?.tarjeta.style} className="relative">
+          <div aria-hidden="true" className="absolute -inset-px rounded-[1.4rem] bg-gradient-to-br from-sky-400/70 via-blue-600/30 to-cyan-300/50 opacity-70" style={intro?.borde} />
+          <div aria-hidden="true" className="absolute -inset-6 -z-10 rounded-[2.5rem] bg-blue-600/20 blur-3xl" style={intro?.haloTarjeta} />
+          {intro?.vidrio}
+          <div className="relative rounded-3xl bg-slate-900/60 p-5 shadow-[0_24px_80px_-20px_rgba(2,132,199,0.45),0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-xl sm:p-8" style={intro?.cuerpo}>
             {children}
           </div>
         </div>
 
-        {pie}
+        {pie && <div style={intro?.pie}>{pie}</div>}
         </div>
       </div>
+      {intro && <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">{intro.frente}</div>}
     </div>
   );
 }
 
 /** Botón principal con el mismo degradado del login. */
-export function BotonAcceso({ cargando, children, cargandoTexto }: { cargando: boolean; children: ReactNode; cargandoTexto: string }) {
+export function BotonAcceso({ cargando, children, cargandoTexto, intro }: {
+  cargando: boolean; children: ReactNode; cargandoTexto: string;
+  /** Durante la animación del login el botón sigue ahí (teclado y lectores de pantalla), solo tapado a la vista. */
+  intro?: { ref: Ref<HTMLButtonElement>; style?: CSSProperties };
+}) {
   return (
-    <button type="submit" disabled={cargando}
+    <button ref={intro?.ref} style={intro?.style} type="submit" disabled={cargando}
       className="group relative mt-2 flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-[#0284c7] to-[#38bdf8] px-5 py-3 font-bold sm:py-3.5 text-white shadow-[0_8px_24px_-8px_rgba(56,189,248,0.6)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_-8px_rgba(56,189,248,0.85)] active:translate-y-0 disabled:cursor-wait disabled:opacity-90 disabled:hover:translate-y-0">
       <span aria-hidden="true" className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
       {cargando ? (
