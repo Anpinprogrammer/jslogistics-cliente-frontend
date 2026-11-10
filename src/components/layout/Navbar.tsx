@@ -4,7 +4,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSesion } from '../../auth/AuthProvider';
 import { useTheme } from '../../hooks/useTheme';
 
-const Navbar: React.FC = () => {
+const Navbar: React.FC<{ hero?: boolean }> = ({ hero = false }) => {
   const { usuario, salir } = useSesion();
   const isAuthenticated = !!usuario;
   const { theme, toggleTheme } = useTheme();
@@ -66,13 +66,15 @@ const Navbar: React.FC = () => {
         { to: '/track', label: 'Rastrear' },
       ];
 
+  const activo = (to: string) => to.startsWith('/#') ? location.hash === to.slice(1) : location.pathname === to;
+
   const cerrarMenu = () => setMobileOpen(false);
 
   const menuMovil = (
     <div id="menu-movil" role="dialog" aria-modal="true" aria-label="Menú de navegación" aria-hidden={!mobileOpen}
       // @ts-expect-error `inert` aún no está en los tipos de React 18: evita el foco en el menú cerrado.
       inert={mobileOpen ? undefined : ''}
-      className={`md:hidden fixed inset-0 z-[60] flex h-dvh w-screen flex-col overflow-y-auto bg-[#070B19]/95 backdrop-blur-xl transition-all duration-300 ease-in-out ${
+      className={`${hero ? 'lg:hidden' : 'md:hidden'} fixed inset-0 z-[60] flex h-dvh w-screen flex-col overflow-y-auto bg-[#070B19]/95 backdrop-blur-xl transition-all duration-300 ease-in-out ${
         mobileOpen ? 'visible translate-y-0 opacity-100' : 'invisible -translate-y-4 opacity-0'
       }`}>
       {/* Malla discreta, igual que la portada */}
@@ -105,7 +107,7 @@ const Navbar: React.FC = () => {
             <li key={to}>
               <Link to={to} onClick={cerrarMenu}
                 className={`block py-4 font-body text-2xl font-medium transition-colors active:text-sky-400 ${
-                  location.pathname === to ? 'text-sky-400' : 'text-slate-200 hover:text-sky-400'
+                  activo(to) ? 'text-sky-400' : 'text-slate-200 hover:text-sky-400'
                 }`}>
                 {label}
               </Link>
@@ -143,41 +145,57 @@ const Navbar: React.FC = () => {
   );
 
   return (
-    <header className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
-      scrolled 
-        ? 'dark:bg-steel-950/95 dark:shadow-steel dark:border-b dark:border-steel-800 bg-white/95 shadow-steel-light border-b border-gray-200 backdrop-blur-md' 
-        : 'bg-transparent'
-    }`}>
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+    <header className={hero
+      ? 'relative z-20 w-full'
+      : `fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
+          scrolled
+            ? 'dark:bg-steel-950/95 dark:shadow-steel dark:border-b dark:border-steel-800 bg-white/95 shadow-steel-light border-b border-gray-200 backdrop-blur-md'
+            : 'bg-transparent'
+        }`}>
+      <nav className={hero
+        ? 'relative z-20 mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8'
+        : 'max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between'}>
         {/* Logo */}
-        <div onClick={handleLogoClick} className="flex items-center gap-3 group cursor-pointer">
-          <div className="w-9 h-9 rounded-lg bg-steel-gradient dark:bg-steel-gradient flex items-center justify-center dark:border dark:border-steel-600 border border-steel-200 shadow-steel group-hover:border-accent-500 transition-colors">
-            {/**
-             * <svg viewBox="0 0 24 24" className="w-5 h-5 text-accent-400" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z" />
-              <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16" />
-            </svg>
-             */}
-            <img src="/img/logo.png" alt="logo" />
-            
-          </div>
-          <div>
-            <span className="font-display font-800 text-lg dark:text-white text-steel-700 tracking-wide">JS</span>
-            <span className="font-display font-400 text-lg dark:text-silver-400 text-steel-500 tracking-wider"> LOGISTICS</span>
-          </div>
+        <div onClick={handleLogoClick} className="flex cursor-pointer items-center gap-3 group">
+          {hero ? (
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-white to-sky-100 p-1 shadow-[0_0_14px_2px_rgba(56,189,248,0.35)]">
+              <span className="relative block h-full w-full overflow-hidden rounded-lg">
+                <img src="/img/icono-96.webp" alt="" width={96} height={96} className="absolute left-[-10%] top-[3%] w-[120%] max-w-none" />
+              </span>
+            </span>
+          ) : (
+            <div className="w-9 h-9 rounded-lg bg-steel-gradient dark:bg-steel-gradient flex items-center justify-center dark:border dark:border-steel-600 border border-steel-200 shadow-steel group-hover:border-accent-500 transition-colors">
+              <img src="/img/logo.png" alt="logo" />
+            </div>
+          )}
+          {hero ? (
+            <div className="flex items-center gap-2">
+              <span className="font-display text-lg font-800 uppercase tracking-wide text-white">JS Logistics</span>
+              <span className="hidden xs:inline-flex items-center rounded-full border border-sky-400/30 bg-sky-500/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-sky-300">B2B</span>
+            </div>
+          ) : (
+            <div>
+              <span className="font-display font-800 text-lg dark:text-white text-steel-700 tracking-wide">JS</span>
+              <span className="font-display font-400 text-lg dark:text-silver-400 text-steel-500 tracking-wider"> LOGISTICS</span>
+            </div>
+          )}
         </div>
 
         {/* Desktop nav links */}
-        <div className="hidden md:flex items-center gap-1">
+        <div className={hero
+          ? 'hidden lg:flex items-center gap-8 text-xs font-semibold tracking-wider'
+          : 'hidden md:flex items-center gap-1'}>
           {navLinks.map(({ to, label }) => (
             <Link
               key={to}
               to={to}
-              className={`px-4 py-2 text-sm font-body font-600 rounded-lg transition-all duration-200 ${
-                location.pathname === to
-                  ? 'text-accent-400 dark:bg-accent-500/10 bg-accent-50'
-                  : 'dark:text-silver-400 dark:hover:text-silver-100 dark:hover:bg-steel-800 text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-              }`}
+              className={hero
+                ? `transition-colors hover:text-white ${activo(to) ? 'text-white' : 'text-slate-300'}`
+                : `px-4 py-2 text-sm font-body font-600 rounded-lg transition-all duration-200 ${
+                    activo(to)
+                      ? 'text-accent-400 dark:bg-accent-500/10 bg-accent-50'
+                      : 'dark:text-silver-400 dark:hover:text-silver-100 dark:hover:bg-steel-800 text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
             >
               {label}
             </Link>
@@ -185,15 +203,18 @@ const Navbar: React.FC = () => {
         </div>
 
         {/* Right side */}
-        <div className="hidden md:flex items-center gap-3">
+        <div className={hero ? 'hidden lg:flex items-center gap-2' : 'hidden md:flex items-center gap-3'}>
           {/* Theme toggle */}
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-lg dark:text-silver-400 dark:hover:text-silver-100 dark:hover:bg-steel-800 text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+            className={hero
+              ? 'grid h-9 w-9 place-items-center rounded-full text-slate-400 transition-colors hover:bg-white/5 hover:text-white'
+              : 'p-2 rounded-lg dark:text-silver-400 dark:hover:text-silver-100 dark:hover:bg-steel-800 text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors'}
             title={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+            aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
           >
             {theme === 'dark' ? (
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
                 <circle cx="12" cy="12" r="5" />
                 <line x1="12" y1="1" x2="12" y2="3" />
                 <line x1="12" y1="21" x2="12" y2="23" />
@@ -205,19 +226,41 @@ const Navbar: React.FC = () => {
                 <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
               </svg>
             ) : (
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
               </svg>
             )}
           </button>
 
           {isAuthenticated ? (
+            hero ? (
+              <>
+                <button onClick={handleLogout}
+                  className="rounded-full border border-slate-700/70 px-4 py-2 text-xs font-semibold text-slate-200 transition-colors hover:border-slate-500 hover:text-white">
+                  Salir
+                </button>
+                <Link to={usuario?.rol === 'cliente' ? '/cliente' : '/equipo'}
+                  className="rounded-full bg-sky-500 px-4 py-2 text-xs font-bold text-slate-950 shadow-lg shadow-sky-500/20 transition-all hover:bg-sky-400 active:scale-95">
+                  {usuario?.rol === 'cliente' ? 'Acceso Clientes' : 'Panel'}
+                </Link>
+              </>
+            ) : (
+              <>
+                <div className="text-right mr-1">
+                  <p className="text-sm font-600 dark:text-silver-200 text-gray-800">{usuario?.nombre}</p>
+                  <p className="text-xs dark:text-silver-500 text-gray-500">{usuario?.email}</p>
+                </div>
+                <button onClick={handleLogout} className="btn-ghost btn-sm">Salir</button>
+              </>
+            )
+          ) : hero ? (
             <>
-              <div className="text-right mr-1">
-                <p className="text-sm font-600 dark:text-silver-200 text-gray-800">{usuario?.nombre}</p>
-                <p className="text-xs dark:text-silver-500 text-gray-500">{usuario?.email}</p>
-              </div>
-              <button onClick={handleLogout} className="btn-ghost btn-sm">Salir</button>
+              <Link to="/login" className="rounded-full border border-slate-700/70 px-4 py-2 text-xs font-semibold text-slate-200 transition-colors hover:border-slate-500 hover:text-white">
+                Iniciar Sesión
+              </Link>
+              <Link to="/register" className="rounded-full bg-sky-500 px-4 py-2 text-xs font-bold text-slate-950 shadow-lg shadow-sky-500/20 transition-all hover:bg-sky-400 active:scale-95">
+                Registrarse
+              </Link>
             </>
           ) : (
             <>
@@ -229,7 +272,9 @@ const Navbar: React.FC = () => {
 
         {/* Mobile burger */}
         <button ref={hamburguesaRef} type="button"
-          className="md:hidden grid min-h-[44px] min-w-[44px] place-items-center rounded-lg dark:text-silver-400 dark:hover:text-white text-gray-600 hover:text-gray-900"
+          className={hero
+            ? 'lg:hidden grid min-h-[44px] min-w-[44px] place-items-center rounded-lg p-2 text-slate-200 transition-colors hover:bg-white/5 hover:text-white'
+            : 'md:hidden grid min-h-[44px] min-w-[44px] place-items-center rounded-lg dark:text-silver-400 dark:hover:text-white text-gray-600 hover:text-gray-900'}
           aria-label="Abrir menú" aria-expanded={mobileOpen} aria-controls="menu-movil"
           onClick={() => setMobileOpen(true)}>
           <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>

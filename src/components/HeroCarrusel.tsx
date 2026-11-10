@@ -54,26 +54,24 @@ const HeroCarrusel: React.FC = () => {
               <img src={`/img/hero/${d.foto}-1920.webp`} srcSet={`/img/hero/${d.foto}-1280.webp 1280w, /img/hero/${d.foto}-1920.webp 1920w`} sizes="100vw"
                 alt="" decoding="async"
                 onError={() => setFallidas(f => ({ ...f, [i]: true }))}
-                className={`absolute inset-0 h-full w-full object-cover ${!sinMovimiento && i === actual ? 'hero-zoom' : ''}`} />
+                className={`absolute inset-0 h-full w-full object-cover object-center opacity-35 pointer-events-none ${!sinMovimiento && i === actual ? 'hero-zoom' : ''}`} />
             )}
           </div>
         ))}
       </div>
 
-      {/* Capas de legibilidad: azul noche 70–85 %, tinte corporativo y malla */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#070B19]/85 via-[#0f172a]/75 to-[#070B19]/85" aria-hidden="true" />
-      <div className="absolute inset-0 bg-[#0284c7]/20 mix-blend-multiply" aria-hidden="true" />
-      <div className="absolute inset-0 backdrop-blur-[2px]" aria-hidden="true" />
-      <div className="absolute inset-0 opacity-[0.06]" aria-hidden="true"
+      {/* Overlay de contraste (el pedido del rediseño) + textura sutil */}
+      <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-b from-slate-950/90 via-slate-950/70 to-slate-950" aria-hidden="true" />
+      <div className="pointer-events-none absolute inset-0 z-10 opacity-[0.04]" aria-hidden="true"
         style={{
           backgroundImage: 'linear-gradient(rgba(148,176,207,1) 1px, transparent 1px), linear-gradient(90deg, rgba(148,176,207,1) 1px, transparent 1px)',
           backgroundSize: '60px 60px',
         }} />
-      <div className="absolute inset-0" aria-hidden="true"
-        style={{ backgroundImage: 'radial-gradient(ellipse at 50% 0%, rgba(56,189,248,0.14) 0%, transparent 60%)' }} />
+      <div className="pointer-events-none absolute inset-0 z-10" aria-hidden="true"
+        style={{ backgroundImage: 'radial-gradient(ellipse at 50% 0%, rgba(56,189,248,0.12) 0%, transparent 60%)' }} />
 
-      {/* Indicadores: barra cian que se expande en la activa */}
-      <div className="absolute bottom-24 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2"
+      {/* Indicadores: barra cian que se expande en la activa. Se ocultan en teléfonos muy pequeños para no amontonar el Hero. */}
+      <div className="absolute bottom-32 left-1/2 z-20 hidden xs:flex -translate-x-1/2 items-center gap-2"
         role="tablist" aria-label="Imágenes del carrusel"
         onMouseEnter={() => setPausado(true)} onMouseLeave={() => setPausado(document.hidden)}>
         {DIAPOSITIVAS.map((d, i) => (

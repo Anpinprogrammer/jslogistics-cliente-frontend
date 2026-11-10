@@ -4,6 +4,13 @@ module.exports = {
   darkMode: 'class', // Enable class-based dark mode
   theme: {
     extend: {
+      screens: {
+        // Pantallas muy pequeñas (iPhone SE viejo, 320–399 px): el título del hero baja un escalón.
+        xs: '400px',
+      },
+      opacity: {
+        35: '0.35',
+      },
       fontFamily: {
         display: ['"Barlow Condensed"', 'sans-serif'],
         body: ['"DM Sans"', 'sans-serif'],

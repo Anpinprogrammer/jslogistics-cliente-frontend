@@ -50,11 +50,13 @@ function Rutas() {
   const { pathname } = useLocation();
   // El portal clásico trae su propia barra y menú (los de la app actual); el resto usa los de la landing.
   const sinMarco = portal === 'clasico' && pathname.startsWith('/cliente');
+  // La portada trae su propio navbar dentro del Hero, para que el fondo llegue hasta arriba.
+  const esPortada = pathname === '/';
   // En el ingreso se va bajando el portal, para que al entrar no haya que esperarlo.
   useEffect(() => { if (pathname === '/login') import('./portal/PortalCliente').catch(() => { /* se reintenta al abrirlo */ }); }, [pathname]);
   return (
     <div className="flex flex-col min-h-screen">
-      {!sinMarco && <Navbar />}
+      {!sinMarco && !esPortada && <Navbar />}
       <main className="flex-grow">
         <ScrollToHash />
         <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Spinner size="lg" /></div>}>
