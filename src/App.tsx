@@ -5,8 +5,10 @@ import { AuthProvider } from './auth/AuthProvider';
 import RequireRole from './auth/RequireRole';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
+import LandingFooter from './components/layout/LandingFooter';
 import { Spinner } from './components/ui';
 import Home from './pages/Home';
+import JSBot from './components/jsbot/JSBot';
 import { usePortal } from './portal/config';
 import { ApiError } from './api/http';
 
@@ -56,7 +58,8 @@ function Rutas() {
   useEffect(() => { if (pathname === '/login') import('./portal/PortalCliente').catch(() => { /* se reintenta al abrirlo */ }); }, [pathname]);
   return (
     <div className="flex flex-col min-h-screen">
-      {!sinMarco && !esPortada && <Navbar />}
+      {!sinMarco && !esPortada && <Navbar hero={pathname === '/login'} />}
+      {(esPortada || pathname === '/login') && <JSBot />}
       <main className="flex-grow">
         <ScrollToHash />
         <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Spinner size="lg" /></div>}>
@@ -82,7 +85,7 @@ function Rutas() {
       </main>
       {!sinMarco && !esPortada && (
         // En el portal propuesto, el menú de abajo del celular tapa el final de la página: se deja espacio debajo del footer.
-        <div className={pathname.startsWith('/cliente') ? 'pb-24 md:pb-0' : ''}><Footer /></div>
+        <div className={pathname.startsWith('/cliente') ? 'pb-24 md:pb-0' : ''}>{pathname === '/login' ? <LandingFooter /> : <Footer />}</div>
       )}
     </div>
   );
