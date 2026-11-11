@@ -182,6 +182,8 @@ Por petición explícita del dueño, `Home.tsx` sustituye la composición anteri
 
 15. **El rastreo del Hero es un solo formulario que cambia de forma.** Antes de `lg` es una barra de una línea (icono de paquete, campo y lupa a la derecha, con el enlace “¿Ya eres cliente?” debajo y los CTA justo después); desde `lg` es la tarjeta con título, texto y botón “Rastrear mi envío”. Es un único `<form>` con un único `#guiaHero` (sin duplicar por `block lg:hidden` / `hidden lg:block`); la etiqueta es `sr-only`. Envía a `/track?n=…` con Enter o con la lupa.
 
+16. **Historial de movimientos en celular (≤ 600 px) muestra Fecha, Valor e info.** El detalle sale de la tabla (se cortaba y el Valor quedaba fuera de la vista) y se abre con el botón `Info` en una hoja inferior, que reutiliza `Dialogo` + `Cabecera` + `.datos` (ya es hoja inferior en celular). Se usa el corte de 600 px del portal, no el `sm` de 640 px de Tailwind, y las clases son de `clasico.css` (`.mov-det`, `.mov-info`, `.mov-info-btn`, `.mov-detalle`), nunca de Tailwind. Desde 601 px la tabla es la de siempre y el botón no se ve. Si agregas una columna a esa tabla, revisa que `th:nth-child(3)` (Valor) siga siendo la de 18 % en ≥ 1280 px.
+
 ## Trampas del entorno
 
 - **Backend en el puerto 4000:** el proxy de `npm run dev` va a `http://localhost:4000`. Si otro proyecto ocupa ese puerto verás 403/404 que no son de nuestro backend (el nuestro responde `{ error: { code, message } }`). Se cambia con `VITE_PROXY_API` (ojo: en `js-logistics/frontend` la variable se llama `VITE_API_PROXY`).
@@ -199,6 +201,7 @@ Por petición explícita del dueño, `Home.tsx` sustituye la composición anteri
 
 ## Registro de sesiones (lo más reciente arriba)
 
+- **2026-11-11:** Mi cuenta: la tabla de movimientos en celular pasa a Fecha · Valor · botón de info, con el detalle completo en una hoja inferior (decisión 16). Revisado a 320, 390 y 1440 px en claro/oscuro, sin desbordes; a 320 px la fecha baja a dos líneas para que quepa el botón.
 - **2026-11-11:** Hero: jerarquía tipográfica en celular (< 640 px): H1 de 32 px con interlineado 1,08, badge de 10 px más liviano (`py-1`, `sky-400/90`), bajada de 13 px, CTA en `text-xs` con `tracking-wide` y micro-badges `font-medium` con iconos de 14 px. Desde `sm` todo queda como antes (comparado píxel a píxel a 768 y 1440 px). El campo de rastreo se dejó en `text-sm`: bajo 16 px iOS ya hace zoom al enfocar, y `text-xs` lo empeoraría.
 - **2026-11-11:** Hero: el rastreo en celular pasa de una tarjeta de ~300 px a una barra de una línea con lupa (decisión 15); en escritorio la tarjeta pierde el rótulo “Siempre cerca”, la etiqueta RASTREO y el reloj, y queda más ligera. Revisado a 320, 390, 768 y 1440 px, sin desbordes; Enter y lupa llevan a `/track?n=…`.
 - **2026-11-11:** landing, sección “Nosotros” en celular: el título va antes de la foto, la tarjeta blanca queda dentro de la foto (vidrio, sin desbordarse) y el texto de Cali sube arriba (decisión 14). Foto cuadrada bajo 400 px y 5:4 hasta `sm` para que quepan. Revisado a 320, 390, 768 y 1024 px en claro/oscuro sin desbordes; a 1440 px idéntico píxel a píxel a antes.

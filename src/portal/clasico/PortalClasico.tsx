@@ -5,7 +5,7 @@
  */
 import { useEffect, useState, type FormEvent } from 'react';
 import { Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { AlertTriangle, Bot, Calendar, CheckCircle2, ChevronRight, Eye, EyeOff, FileText, Image as ImageIcon, KeyRound, Lock, Mail, MapPin, Maximize2, Moon, PackageCheck, Phone, Receipt, RotateCcw, Save, Search, Settings, ShieldCheck, Store, Sun, Truck, Undo2, X } from 'lucide-react';
+import { AlertTriangle, Bot, Calendar, CheckCircle2, ChevronRight, Eye, EyeOff, FileText, Image as ImageIcon, Info, KeyRound, Lock, Mail, MapPin, Maximize2, Moon, PackageCheck, Phone, Receipt, RotateCcw, Save, Search, Settings, ShieldCheck, Store, Sun, Truck, Undo2, X } from 'lucide-react';
 import './clasico.css';
 import { useSesion } from '../../auth/AuthProvider';
 import { useActualizarPerfilCliente, useConfirmarCambio, useCuentaCliente, useMovimientosCliente, usePaginaPedidos, usePruebas, type FiltroPedidos } from '../../api/cliente';
@@ -467,6 +467,7 @@ function Cuenta({ d, toast }: { d: DatosCliente; toast: (t: string) => void }) {
   const cuentaCliente = useCuentaCliente(paginaMov, porPaginaMov);
   const s = cuentaCliente.data?.saldo ?? 0, rows = cuentaCliente.data?.filas ?? [];
   const totalMov = cuentaCliente.data?.total ?? 0, paginasMov = cuentaCliente.data?.paginas ?? 1;
+  const [movVer, setMovVer] = useState<(typeof rows)[number] | null>(null);
   const irMov = (n: number) => { setPaginaMov(n); document.getElementById('historial-movimientos')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
   const [pedirRecibo, setPedirRecibo] = useState(false);
   const movsRecibo = useMovimientosCliente(pedirRecibo);
@@ -499,7 +500,7 @@ function Cuenta({ d, toast }: { d: DatosCliente; toast: (t: string) => void }) {
         <section className="cuenta-saldo" aria-label="Estado financiero actual"><div className="cuenta-saldo-contenido"><span className="cuenta-saldo-label">BALANCE ACTUAL</span><strong>{pesos(Math.abs(s))}</strong><span className="cuenta-saldo-estado">{s === 0 ? 'Cuenta al día' : s > 0 ? 'Saldo a tu favor' : 'Saldo pendiente'}</span><p>{textoSaldo(s)}</p></div><div className="cuenta-saldo-icono"><Receipt size={30} /></div></section>
         <section className="cuenta-bloque"><div className="cuenta-bloque-cab"><div><h2>Recibo de cuadre</h2><p>Consulta el detalle de tus entregas y pagos por día.</p></div></div><div className="cuenta-recibo-form"><div className="campo"><label htmlFor="diaRC">Fecha del recibo</label><input type="date" id="diaRC" value={diaRec} onChange={e => setDiaRec(e.target.value || hoy())} /></div><button type="button" className="btn" onClick={verRecibo} disabled={pedirRecibo && movsRecibo.isFetching}><FileText size={17} /> {pedirRecibo && movsRecibo.isFetching ? 'Cargando…' : 'Ver recibo'}</button></div></section>
         </div>
-        <section className="cuenta-bloque" id="historial-movimientos"><div className="cuenta-bloque-cab"><div><h2>Historial de movimientos</h2><p>Registro de pedidos y pagos, ordenado del más reciente al más antiguo.</p></div><span className="cuenta-total">{totalMov} movimientos</span></div>{cuentaCliente.isLoading ? <div className="vacio">Cargando movimientos…</div> : rows.length ? <><div className="cuenta-tabla" style={cuentaCliente.isPlaceholderData ? { opacity: .6 } : undefined}><table><thead><tr><th scope="col">Fecha</th><th scope="col">Detalle</th><th scope="col" className="n">Valor</th></tr></thead><tbody>{rows.map((r, i) => <tr key={`${r.fecha}-${i}`}><td>{hora(r.fecha)}</td><td>{r.det}</td><td className={'n ' + (r.v < 0 ? 'neg' : r.v > 0 ? 'pos' : '')}>{pesosConSigno(r.v)}</td></tr>)}</tbody></table></div><Paginador pagina={cuentaCliente.data?.pagina ?? paginaMov} paginas={paginasMov} total={totalMov} porPagina={porPaginaMov} ir={irMov} cargando={cuentaCliente.isFetching} /></> : <div className="vacio">Aún no hay movimientos en tu cuenta.</div>}</section>
+        <section className="cuenta-bloque" id="historial-movimientos"><div className="cuenta-bloque-cab"><div><h2>Historial de movimientos</h2><p>Registro de pedidos y pagos, ordenado del más reciente al más antiguo.</p></div><span className="cuenta-total">{totalMov} movimientos</span></div>{cuentaCliente.isLoading ? <div className="vacio">Cargando movimientos…</div> : rows.length ? <><div className="cuenta-tabla" style={cuentaCliente.isPlaceholderData ? { opacity: .6 } : undefined}><table><thead><tr><th scope="col">Fecha</th><th scope="col" className="mov-det">Detalle</th><th scope="col" className="n">Valor</th><th scope="col" className="mov-info"><span className="mov-sr">Ver detalle</span></th></tr></thead><tbody>{rows.map((r, i) => <tr key={`${r.fecha}-${i}`}><td>{hora(r.fecha)}</td><td className="mov-det">{r.det}</td><td className={'n ' + (r.v < 0 ? 'neg' : r.v > 0 ? 'pos' : '')}>{pesosConSigno(r.v)}</td><td className="mov-info"><button type="button" className="mov-info-btn" onClick={() => setMovVer(r)} aria-label={`Ver detalle del movimiento del ${hora(r.fecha)}`}><Info size={18} aria-hidden="true" /></button></td></tr>)}</tbody></table></div><Paginador pagina={cuentaCliente.data?.pagina ?? paginaMov} paginas={paginasMov} total={totalMov} porPagina={porPaginaMov} ir={irMov} cargando={cuentaCliente.isFetching} /></> : <div className="vacio">Aún no hay movimientos en tu cuenta.</div>}</section>
       </div> : <div role="tabpanel" id="cuenta-panel-config" aria-labelledby="cuenta-tab-config" className="cuenta-panel cuenta-config">
         <form className="cuenta-bloque cuenta-form" onSubmit={guardarPerfil}>
           <div className="cuenta-form-cab">
@@ -531,6 +532,18 @@ function Cuenta({ d, toast }: { d: DatosCliente; toast: (t: string) => void }) {
           <div className="cuenta-form-pie"><button className="btn cuenta-guardar" type="submit" disabled={guardandoClave}><Lock size={17} /> {guardandoClave ? 'Actualizando…' : 'Actualizar contraseña'}</button></div>
         </form>
       </div>}
+      <Dialogo abierto={!!movVer} alCerrar={() => setMovVer(null)}>
+        {movVer && <>
+          <Cabecera alCerrar={() => setMovVer(null)}><h2>Detalle del movimiento</h2></Cabecera>
+          <dl className="datos">
+            <dt>Fecha y hora</dt><dd>{hora(movVer.fecha)}</dd>
+            <dt>Valor</dt><dd className={movVer.v < 0 ? 'neg' : movVer.v > 0 ? 'pos' : ''}>{pesosConSigno(movVer.v)}</dd>
+          </dl>
+          <p className="sub" style={{ margin: '0 0 6px' }}>Descripción completa</p>
+          <div className="mov-detalle">{movVer.det}</div>
+          <div className="acciones" style={{ marginTop: 16 }}><button className="btn sec" style={{ flex: 1, minHeight: 44 }} onClick={() => setMovVer(null)}>Cerrar</button></div>
+        </>}
+      </Dialogo>
       <Dialogo abierto={!!recibo} alCerrar={() => setRecibo(null)}>
         {recibo && <VerRecibo r={recibo} dia={diaRec} nombre={d.cliente!.nombre} alCerrar={() => setRecibo(null)} toast={toast} />}
       </Dialogo>
