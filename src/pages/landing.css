@@ -212,7 +212,7 @@
     padding-inline: 16px;
   }
   .landing-tracking {
-    padding: 20px;
+    padding: 0;
   }
 }
 @media (prefers-reduced-motion: reduce) {

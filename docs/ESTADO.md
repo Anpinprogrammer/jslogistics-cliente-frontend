@@ -180,6 +180,8 @@ Por petición explícita del dueño, `Home.tsx` sustituye la composición anteri
 
 14. **“Nosotros” cambia de orden antes de `lg`.** En celular y tablet el orden es eyebrow + título, foto (con la tarjeta “Tu empresa tiene quién la mueva” *dentro* de la foto, con vidrio, y “Cali, Valle del Cauca” arriba) y luego texto, puntos y enlace. Se logra con un solo `grid` de tres hijos (título, foto, texto) en el orden del DOM; desde `lg` la foto va con `lg:col-start-1 lg:row-span-2` y el título y el texto en la columna 2 (`self-end` / `self-start`). Así hay un único `h2` y el escritorio queda idéntico píxel a píxel. No dupliques el título con `hidden`/`lg:hidden`.
 
+15. **El rastreo del Hero es un solo formulario que cambia de forma.** Antes de `lg` es una barra de una línea (icono de paquete, campo y lupa a la derecha, con el enlace “¿Ya eres cliente?” debajo y los CTA justo después); desde `lg` es la tarjeta con título, texto y botón “Rastrear mi envío”. Es un único `<form>` con un único `#guiaHero` (sin duplicar por `block lg:hidden` / `hidden lg:block`); la etiqueta es `sr-only`. Envía a `/track?n=…` con Enter o con la lupa.
+
 ## Trampas del entorno
 
 - **Backend en el puerto 4000:** el proxy de `npm run dev` va a `http://localhost:4000`. Si otro proyecto ocupa ese puerto verás 403/404 que no son de nuestro backend (el nuestro responde `{ error: { code, message } }`). Se cambia con `VITE_PROXY_API` (ojo: en `js-logistics/frontend` la variable se llama `VITE_API_PROXY`).
@@ -197,6 +199,7 @@ Por petición explícita del dueño, `Home.tsx` sustituye la composición anteri
 
 ## Registro de sesiones (lo más reciente arriba)
 
+- **2026-11-11:** Hero: el rastreo en celular pasa de una tarjeta de ~300 px a una barra de una línea con lupa (decisión 15); en escritorio la tarjeta pierde el rótulo “Siempre cerca”, la etiqueta RASTREO y el reloj, y queda más ligera. Revisado a 320, 390, 768 y 1440 px, sin desbordes; Enter y lupa llevan a `/track?n=…`.
 - **2026-11-11:** landing, sección “Nosotros” en celular: el título va antes de la foto, la tarjeta blanca queda dentro de la foto (vidrio, sin desbordarse) y el texto de Cali sube arriba (decisión 14). Foto cuadrada bajo 400 px y 5:4 hasta `sm` para que quepan. Revisado a 320, 390, 768 y 1024 px en claro/oscuro sin desbordes; a 1440 px idéntico píxel a píxel a antes.
 - **2026-11-11:** login en celular más compacto: tarjeta de 320 px como máximo (antes casi todo el ancho) y unos 60 px más baja; la animación de entrada se mide sola sobre el nuevo tamaño. Revisado a 320, 360, 390 y 430 px; desde 640 px queda idéntico a antes.
 - **2026-11-10:** Mi cuenta / Movimientos: historial paginado en backend y frontend (5 en celular, 10 en computador) con `GET /clientes/:id/cuenta?pagina=&porPagina=`, saldo calculado en SQL y paginador. El portal ya no carga los 1000 movimientos al entrar: el dashboard pide 6 filas, la tabla pide su página y el recibo carga los movimientos completos solo al pulsar “Ver recibo”. Verificado el SQL contra el cálculo anterior en 230 clientes (saldo, total y filas) y el flujo en demo a 390 y 1440 px.
