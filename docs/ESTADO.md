@@ -6,6 +6,11 @@
 - El drawer de `Navbar.tsx` entra desde arriba y sale hacia arriba en 480 ms. Sigue presente durante la salida para que `visibility` no corte la transición; el scroll permanece bloqueado y el foco vuelve al botón hamburguesa al terminar. Respeta `prefers-reduced-motion`.
 - El menú móvil incluye “Inicio” con icono `Home`: lleva a `/` y desplaza al Hero igual que el logo. En sesión de cliente, el enlace del panel se llama “Mi portal” para distinguirlo de la portada. Cambiar entre modo claro y oscuro cierra la cortina con su animación de salida.
 
+## Demo pública para el portafolio — 2026-11-11
+
+- Guía en [`demo-publica.md`](demo-publica.md): cómo publicar este portal junto con la oficina y un backend de pruebas para que el flujo completo se pueda probar. La guía completa vive en `js-logistics/docs/demo-publica.md`.
+- `src/api/solicitudes.ts` ya no tiene rama `DEMO`: el formulario siempre llama a `POST /api/solicitudes/publico`. Las vistas previas de Vercel (modo demo en memoria) envían a la API a la que apunte la reescritura de `vercel.json`.
+
 ## Solicitar envío (`/register`) — 2026-11-11
 
 - En móvil (`lg:hidden`) el formulario es ahora un **wizard de 3 pasos**: Datos de Recogida, Detalles de Paquetes y Destino y Confirmación. Muestra un solo paso a la vez, barra de progreso, validación antes de avanzar, resumen de la recogida antes de enviar y transiciones horizontales (`registro-paso-der`/`registro-paso-izq`, con `prefers-reduced-motion`). El escritorio (`lg:block`) conserva el formulario completo de una sola página.
