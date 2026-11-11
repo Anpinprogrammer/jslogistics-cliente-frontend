@@ -5,9 +5,9 @@
 import type { CSSProperties, ReactNode, Ref } from 'react';
 import { TIERRA } from './mapaMundo';
 
-export const ETIQUETA = 'mb-1.5 block text-xs font-medium uppercase tracking-wider text-slate-400';
+export const ETIQUETA = 'mb-1 block text-[11px] sm:mb-1.5 sm:text-xs font-medium uppercase tracking-wider text-slate-400';
 export const ENTRADA =
-  'peer w-full rounded-xl border border-slate-700/80 bg-slate-950/60 py-2.5 pl-11 text-base sm:py-3 sm:text-[15px] text-slate-100 placeholder:text-slate-500 ' +
+  'peer w-full rounded-xl border border-slate-700/80 bg-slate-950/60 py-2 pl-11 text-base sm:py-3 sm:text-[15px] text-slate-100 placeholder:text-slate-500 ' +
   'transition duration-200 hover:border-slate-500 focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-400 disabled:opacity-60';
 export const ICONO = 'pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 transition-colors peer-focus:text-sky-400';
 export const ENLACE = 'font-semibold text-sky-400 underline-offset-4 transition-colors hover:text-sky-300 hover:underline';
@@ -56,7 +56,7 @@ const SEDE = { left: `${CALI[0] / 10}%`, top: `${(CALI[1] - VISTA_Y) / 5}%` };
 function MapaSede({ sedeRef }: { sedeRef?: Ref<HTMLDivElement> }) {
   return (
     <div aria-hidden="true"
-      className="pointer-events-none absolute -z-10 aspect-[2/1] w-[120vw] max-w-none left-[calc(50%-62.49vw)] top-[calc(44px-33.05vw)] sm:top-[calc(60px-33.05vw)] md:left-1/2 md:top-1/2 md:w-[max(1500px,100vw)] md:-translate-x-1/2 md:-translate-y-1/2">
+      className="pointer-events-none absolute -z-10 aspect-[2/1] w-[120vw] max-w-none left-[calc(50%-62.49vw)] top-[calc(40px-33.05vw)] sm:top-[calc(60px-33.05vw)] md:left-1/2 md:top-1/2 md:w-[max(1500px,100vw)] md:-translate-x-1/2 md:-translate-y-1/2">
       <svg className="absolute inset-0 h-full w-full opacity-60" viewBox={`0 ${VISTA_Y} 1000 500`} fill="none">
         <defs>
           <pattern id="loginPuntos" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1" fill="#38bdf8" fillOpacity=".55" /></pattern>
@@ -144,7 +144,7 @@ export function MarcoAcceso({
   sinEntrada?: boolean;
 }) {
   return (
-    <div ref={intro?.raiz} className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-[#070B19] px-4 pb-10 pt-24 sm:pb-16 sm:pt-28">
+    <div ref={intro?.raiz} className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-[#070B19] px-5 pb-10 pt-24 sm:px-4 sm:pb-16 sm:pt-28">
       {/* Fondo: malla y luces ambientales (el mapa va en MapaSede, anclado a la columna) */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute inset-0 opacity-[0.05]"
@@ -154,25 +154,26 @@ export function MarcoAcceso({
       </div>
       {intro && <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">{intro.detras}</div>}
 
-      <div className="relative w-full max-w-sm sm:max-w-md">
+      {/* En el celular la columna llega a 320 px y deja al menos 20 px a cada lado: a todo el ancho la tarjeta se veía enorme y pegada a los bordes. */}
+      <div className="relative w-full max-w-[20rem] sm:max-w-md">
         <MapaSede sedeRef={intro?.sede} />
         {/* Con la animación del login no va `animate-fade-up`, pero se deja `will-change: opacity`: la animación de siempre
             deja este bloque como "raíz" del desenfoque de la tarjeta (el mapa se ve a través del vidrio), y sin eso
             el vidrio se vería más opaco que hoy. */}
         <div ref={intro?.contenido.ref} className={sinEntrada ? '[will-change:opacity]' : 'animate-fade-up'} style={intro?.contenido.style}>
         {/* Cabecera */}
-        <div className="mb-5 text-center sm:mb-8">
-          <div ref={intro?.insignia} className="relative mx-auto mb-3 grid h-16 w-16 place-items-center sm:mb-5 sm:h-24 sm:w-24">
+        <div className="mb-4 text-center sm:mb-8">
+          <div ref={intro?.insignia} className="relative mx-auto mb-3 grid h-14 w-14 place-items-center sm:mb-5 sm:h-24 sm:w-24">
             <span aria-hidden="true" className="absolute -inset-3 rounded-[2rem] bg-[#38bdf8]/50 blur-2xl" style={intro?.halo} />
-            <span ref={intro?.placa.ref} style={intro?.placa.style} className="relative grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-white to-sky-100 p-1.5 sm:h-24 sm:w-24 sm:rounded-3xl sm:p-2.5 shadow-[0_0_0_1px_rgba(255,255,255,.7),0_0_28px_6px_rgba(56,189,248,.45),0_12px_28px_-6px_rgba(2,132,199,.55),inset_0_1px_0_#fff]">
+            <span ref={intro?.placa.ref} style={intro?.placa.style} className="relative grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-white to-sky-100 p-1.5 sm:h-24 sm:w-24 sm:rounded-3xl sm:p-2.5 shadow-[0_0_0_1px_rgba(255,255,255,.7),0_0_28px_6px_rgba(56,189,248,.45),0_12px_28px_-6px_rgba(2,132,199,.55),inset_0_1px_0_#fff]">
               {/* El .webp trae "LOGISTICS CALI" en blanco (invisible sobre el badge claro): se recorta para mostrar solo el isotipo. */}
               <span className="relative block h-full w-full overflow-hidden rounded-2xl" style={intro?.icono}>
                 <img src="/img/icono-96.webp" alt="JS Logistics" width={96} height={96} className="absolute left-[-10%] top-[3%] w-[120%] max-w-none" />
               </span>
             </span>
           </div>
-          <h1 ref={intro?.titulo.ref} style={intro?.titulo.style} className="font-display text-2xl font-700 text-white sm:text-3xl">{titulo}{intro?.letras}</h1>
-          <p className="mt-1 text-sm text-[#94a3b8]" style={intro?.subtitulo}>{subtitulo}</p>
+          <h1 ref={intro?.titulo.ref} style={intro?.titulo.style} className="font-display text-xl font-700 text-white sm:text-3xl">{titulo}{intro?.letras}</h1>
+          <p className="mt-0.5 text-xs text-[#94a3b8] sm:mt-1 sm:text-sm" style={intro?.subtitulo}>{subtitulo}</p>
         </div>
 
         {/* Tarjeta de cristal con borde brillante */}
@@ -180,7 +181,7 @@ export function MarcoAcceso({
           <div aria-hidden="true" className="absolute -inset-px rounded-[1.4rem] bg-gradient-to-br from-sky-400/70 via-blue-600/30 to-cyan-300/50 opacity-70" style={intro?.borde} />
           <div aria-hidden="true" className="absolute -inset-6 -z-10 rounded-[2.5rem] bg-blue-600/20 blur-3xl" style={intro?.haloTarjeta} />
           {intro?.vidrio}
-          <div className="relative rounded-3xl bg-slate-900/60 p-5 shadow-[0_24px_80px_-20px_rgba(2,132,199,0.45),0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-xl sm:p-8" style={intro?.cuerpo}>
+          <div className="relative rounded-3xl bg-slate-900/60 p-4 shadow-[0_24px_80px_-20px_rgba(2,132,199,0.45),0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-xl sm:p-8" style={intro?.cuerpo}>
             {children}
           </div>
         </div>
@@ -201,7 +202,7 @@ export function BotonAcceso({ cargando, children, cargandoTexto, intro }: {
 }) {
   return (
     <button ref={intro?.ref} style={intro?.style} type="submit" disabled={cargando}
-      className="group relative mt-2 flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-[#0284c7] to-[#38bdf8] px-5 py-3 font-bold sm:py-3.5 text-white shadow-[0_8px_24px_-8px_rgba(56,189,248,0.6)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_-8px_rgba(56,189,248,0.85)] active:translate-y-0 disabled:cursor-wait disabled:opacity-90 disabled:hover:translate-y-0">
+      className="group relative mt-1 flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-[#0284c7] to-[#38bdf8] px-5 py-2.5 font-bold sm:mt-2 sm:py-3.5 text-white shadow-[0_8px_24px_-8px_rgba(56,189,248,0.6)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_-8px_rgba(56,189,248,0.85)] active:translate-y-0 disabled:cursor-wait disabled:opacity-90 disabled:hover:translate-y-0">
       <span aria-hidden="true" className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
       {cargando ? (
         <>
