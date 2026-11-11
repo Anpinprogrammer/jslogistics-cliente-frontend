@@ -97,8 +97,10 @@ const Navbar: React.FC<{ hero?: boolean }> = ({ hero = false }) => {
           <span className="font-display text-lg font-800 uppercase tracking-wide text-white">JS Logistics</span>
         </Link>
         <button ref={cerrarRef} type="button" onClick={cerrarMenu} aria-label="Cerrar menú"
-          className="grid min-h-[44px] min-w-[44px] place-items-center rounded-xl border border-slate-800 bg-slate-900 p-2.5 text-slate-400 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400">
-          <X className="h-5 w-5" aria-hidden="true" />
+          className="group relative grid h-11 w-11 shrink-0 cursor-pointer place-items-center rounded-xl bg-gradient-to-tr from-sky-500 via-cyan-400 to-indigo-500 p-[2px] shadow-md shadow-sky-500/25 transition-[transform,box-shadow] duration-200 hover:scale-105 hover:shadow-sky-500/40 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400 motion-reduce:transform-none motion-reduce:transition-none">
+          <span className="grid h-full w-full place-items-center rounded-[10px] bg-slate-900 transition-colors group-hover:bg-slate-800">
+            <X className="h-5 w-5 text-sky-300 transition-transform duration-300 group-hover:rotate-90 motion-reduce:transform-none" strokeWidth={2.5} aria-hidden="true" />
+          </span>
         </button>
       </div>
 

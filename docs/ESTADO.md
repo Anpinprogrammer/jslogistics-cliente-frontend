@@ -188,7 +188,7 @@ Por petición explícita del dueño, `Home.tsx` sustituye la composición anteri
 
 18. **La barra inferior del portal en celular (`.pestanas`) es de vidrio y va de borde a borde.** Fondo `--papel` al 85 % con `backdrop-filter: blur(20px)`, borde superior `--linea` y sombra hacia arriba (más fuerte en oscuro); ya no es una píldora flotante y se quitó el degradado que la acompañaba. Sin `backdrop-filter` cae a `--papel` sólido. El acceso activo conserva su fondo `--mango-claro`. Sigue oculta desde 960 px.
 19. **El botón de cerrar de JSBot es una cápsula circular de 44 px con borde degradado `sky-500 → cyan-400 → indigo-500`** (el mismo halo del avatar), relleno `slate-900` y la X en `sky-300`. La cabecera del panel es oscura en claro y en oscuro, así que es igual en los dos temas. Al pasar el mouse la X gira 90° (se desactiva con `motion-reduce`).
-20. **El botón de hamburguesa del Navbar es la misma cápsula de JSBot** (decisión 19): 44 px, `rounded-xl`, borde degradado `sky-500 → cyan-400 → indigo-500`, relleno oscuro y ícono `Menu` en `sky-300`. No alterna a una X: el menú abre una pantalla completa que ya trae su propio botón de cerrar y tapa la barra.
+20. **El botón de hamburguesa del Navbar es la misma cápsula de JSBot** (decisión 19): 44 px, `rounded-xl`, borde degradado `sky-500 → cyan-400 → indigo-500`, relleno oscuro y ícono `Menu` en `sky-300`. No alterna a una X: el menú abre una pantalla completa que tapa la barra y trae su propio botón de cerrar, que usa **la misma cápsula** (ícono `X`).
 
 ## Trampas del entorno
 
