@@ -138,7 +138,7 @@ const Navbar: React.FC<{ hero?: boolean }> = ({ hero = false }) => {
               </Link>
               <Link to="/register" onClick={cerrarMenu}
                 className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-sky-400 py-3.5 text-xs font-bold text-slate-950 shadow-lg shadow-sky-500/20 transition-all hover:bg-sky-300 active:scale-95">
-                <UserPlus className="h-4 w-4" aria-hidden="true" /> Registrarse
+                <UserPlus className="h-4 w-4" aria-hidden="true" /> Solicitar envío
               </Link>
             </>
           )}
@@ -262,13 +262,13 @@ const Navbar: React.FC<{ hero?: boolean }> = ({ hero = false }) => {
                 Iniciar Sesión
               </Link>
               <Link to="/register" className="rounded-full bg-sky-500 px-4 py-2 text-xs font-bold text-slate-950 shadow-lg shadow-sky-500/20 transition-all hover:bg-sky-400 active:scale-95">
-                Registrarse
+                Solicitar envío
               </Link>
             </>
           ) : (
             <>
               <Link to="/login" className="btn-ghost btn-sm">Iniciar Sesión</Link>
-              <Link to="/register" className="btn-primary btn-sm">Registrarse</Link>
+              <Link to="/register" className="btn-primary btn-sm">Solicitar envío</Link>
             </>
           )}
         </div>

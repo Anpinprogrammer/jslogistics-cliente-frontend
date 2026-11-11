@@ -101,9 +101,9 @@ const Login: React.FC = () => {
       sinEntrada={salio}
       pie={
         <p className="mt-3 text-center text-[13px] text-slate-400 sm:mt-6 sm:text-sm">
-          ¿Tu empresa aún no tiene acceso?{' '}
+          ¿Quieres enviar con nosotros?{' '}
           <Link to="/register" className={ENLACE}>
-            Registrarse
+            Solicitar envío
           </Link>
         </p>
       }

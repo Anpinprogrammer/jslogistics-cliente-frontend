@@ -704,7 +704,7 @@ export default function Home() {
                       to="/register"
                       className="landing-button landing-button-primary"
                     >
-                      Crear mi cuenta <ArrowRight size={18} />
+                      Solicitar envío <ArrowRight size={18} />
                     </Link>
                     <a
                       href="mailto:info@jslogistics.co?subject=Quiero%20enviar%20con%20JS%20Logistics"

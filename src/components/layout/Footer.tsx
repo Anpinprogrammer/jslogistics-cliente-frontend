@@ -40,7 +40,7 @@ const Footer: React.FC = () => (
           <ul className="space-y-2.5">
             {[
               { to: '/login', label: 'Iniciar Sesión' },
-              { to: '/register', label: 'Registrarse' },
+              { to: '/register', label: 'Solicitar envío' },
               { to: '/track', label: 'Rastrear Envío' },
             ].map(l => (
               <li key={l.to}><Link to={l.to} className="text-sm dark:text-silver-500 dark:hover:text-silver-200 text-gray-600 hover:text-gray-900 transition-colors">{l.label}</Link></li>

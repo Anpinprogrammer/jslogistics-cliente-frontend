@@ -1,5 +1,12 @@
 # Estado del proyecto y memoria para agentes de IA
 
+## Solicitar envío (`/register`) — 2026-11-11
+
+- `/register` (y su alias `/solicitar-envio`) ya no es el registro empresarial con contraseña: es el formulario público **Solicitar envío**, sin cuenta. Campos: nombre, teléfono, correo, dirección de recogida, cantidad de paquetes, peso total (opcional), nombre y teléfono (opcional) de quien recibe y dirección de entrega. Se manda a `POST /api/solicitudes/publico` con `src/api/solicitudes.ts`; en la oficina aparece en la campanita de `js-logistics/frontend`, y administración responde por WhatsApp con el valor del domicilio.
+- La página dibuja su propio `Navbar hero` y `LandingFooter`, igual que `/track`; por eso `App.tsx` la excluye del marco general (`esSolicitud`). Mismo estilo de tarjeta que el rastreo.
+- Tiene un campo trampa `sitio` (fuera de pantalla, `tabIndex -1`): si un robot lo llena, el backend descarta la solicitud. No lo quites. El backend limita por IP (5/hora, 15/día), así que un 429 se muestra tal cual al usuario.
+- Se quitó `authAPI.register` de `services/api.ts` (apuntaba a un endpoint que no existe). Los textos "Registrarse" / "Crear mi cuenta" de la landing, el menú, el pie y el login pasaron a "Solicitar envío"; las cuentas de cliente las crea administración con "Dar acceso".
+
 ## Mi cuenta — 2026-11-10
 
 - La navegación inferior del portal en móvil vuelve a ser una cápsula flotante a 4 px del borde inferior (más el área segura). Un degradado fijo detrás de ella desvanece el contenido al acercarse y cubre el hueco inferior con el color del tema; el contenido conserva espacio para no quedar tapado.
