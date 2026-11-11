@@ -13,6 +13,7 @@ const Navbar: React.FC<{ hero?: boolean }> = ({ hero = false }) => {
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobilePresent, setMobilePresent] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -23,23 +24,31 @@ const Navbar: React.FC<{ hero?: boolean }> = ({ hero = false }) => {
 
   useEffect(() => { setMobileOpen(false); }, [location.pathname]);
 
-  // Menú móvil: bloquea el scroll del body, cierra con Escape y lleva el foco al botón de cerrar.
+  // Mantener la cortina presente hasta que acabe su salida evita un cierre brusco.
+  useEffect(() => {
+    if (mobileOpen || !mobilePresent) return;
+    const timer = window.setTimeout(() => setMobilePresent(false),
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 480);
+    return () => window.clearTimeout(timer);
+  }, [mobileOpen, mobilePresent]);
+
+  // Menú móvil: bloquea el scroll durante toda la animación y devuelve el foco al terminar.
   const cerrarRef = useRef<HTMLButtonElement>(null);
   const hamburguesaRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
-    if (!mobileOpen) return;
+    if (!mobilePresent) return;
     const overflowAnterior = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMobileOpen(false); };
     document.addEventListener('keydown', onKey);
-    cerrarRef.current?.focus();
     const hamburguesa = hamburguesaRef.current;
     return () => {
       document.body.style.overflow = overflowAnterior;
       document.removeEventListener('keydown', onKey);
       hamburguesa?.focus();
     };
-  }, [mobileOpen]);
+  }, [mobilePresent]);
+  useEffect(() => { if (mobileOpen) cerrarRef.current?.focus(); }, [mobileOpen]);
 
   const handleLogoClick = () => {
     navigate("/");
@@ -67,18 +76,22 @@ const Navbar: React.FC<{ hero?: boolean }> = ({ hero = false }) => {
         { to: '/#contacto', label: 'Contacto' },
         { to: '/track', label: 'Rastrear' },
       ];
+  const mobileNavLinks = [
+    { to: '/', label: 'Inicio' },
+    ...navLinks.map(link => link.to === '/cliente' ? { ...link, label: 'Mi portal' } : link),
+  ];
 
   const activo = (to: string) => to.startsWith('/#') ? location.hash === to.slice(1) : location.pathname === to;
 
   const cerrarMenu = () => setMobileOpen(false);
+  const irPortada = () => { cerrarMenu(); handleLogoClick(); };
 
   const menuMovil = (
     <div id="menu-movil" role="dialog" aria-modal="true" aria-label="Menú de navegación" aria-hidden={!mobileOpen}
       // @ts-expect-error `inert` aún no está en los tipos de React 18: evita el foco en el menú cerrado.
       inert={mobileOpen ? undefined : ''}
-      className={`${hero ? 'lg:hidden' : 'md:hidden'} fixed inset-0 z-[60] flex h-dvh w-screen flex-col overflow-x-hidden overflow-y-auto bg-slate-950/95 backdrop-blur-xl transition-all duration-200 ease-in-out motion-reduce:transition-none ${
-        mobileOpen ? 'visible scale-100 opacity-100' : 'invisible scale-95 opacity-0'
-      }`}>
+      data-open={mobileOpen}
+      className="lg:hidden menu-cortina fixed inset-0 z-[60] flex h-dvh w-screen flex-col overflow-x-hidden overflow-y-auto bg-slate-950/95 backdrop-blur-xl">
       {/* Malla discreta, igual que la portada */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-[0.05]"
         style={{ backgroundImage: 'linear-gradient(rgba(148,176,207,1) 1px, transparent 1px), linear-gradient(90deg, rgba(148,176,207,1) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
@@ -87,7 +100,7 @@ const Navbar: React.FC<{ hero?: boolean }> = ({ hero = false }) => {
       {/* Cabecera */}
       <div className="relative flex min-h-20 shrink-0 items-center justify-between gap-4 px-6"
         style={{ paddingTop: 'env(safe-area-inset-top)' }}>
-        <Link to="/" onClick={cerrarMenu} className="flex items-center gap-3">
+        <Link to="/" onClick={e => { e.preventDefault(); irPortada(); }} className="flex items-center gap-3">
           {/* Badge claro: el isotipo es azul oscuro y el .webp trae el texto en blanco, por eso se recorta. */}
           <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-white to-sky-100 p-1 shadow-[0_0_14px_2px_rgba(56,189,248,0.35)]">
             <span className="relative block h-full w-full overflow-hidden rounded-lg">
@@ -107,10 +120,10 @@ const Navbar: React.FC<{ hero?: boolean }> = ({ hero = false }) => {
       <div className="relative flex flex-1 flex-col px-6" style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
         <nav aria-label="Menú móvil" className="my-auto py-6">
           <ul className="flex flex-col gap-2">
-            {navLinks.map(({ to, label }) => {
-              const Icon = to === '/#nosotros' ? Users : to === '/#servicios' ? Briefcase : to === '/#contacto' ? PhoneCall : to === '/track' ? Search : to === '/cliente' ? Home : to === '/cliente/pedidos' ? Package : to === '/cliente/cuenta' ? UserRound : Briefcase;
+            {mobileNavLinks.map(({ to, label }) => {
+              const Icon = to === '/' || to === '/cliente' ? Home : to === '/#nosotros' ? Users : to === '/#servicios' ? Briefcase : to === '/#contacto' ? PhoneCall : to === '/track' ? Search : to === '/cliente/pedidos' ? Package : to === '/cliente/cuenta' ? UserRound : Briefcase;
               return <li key={to}>
-                <Link to={to} onClick={cerrarMenu} aria-current={activo(to) ? 'page' : undefined}
+                <Link to={to} onClick={e => { if (to === '/') { e.preventDefault(); irPortada(); } else cerrarMenu(); }} aria-current={activo(to) ? 'page' : undefined}
                   className={`group flex min-h-[64px] items-center justify-between gap-3 rounded-2xl border p-3.5 text-base font-semibold transition-all hover:border-sky-500/40 hover:bg-slate-900 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400 ${activo(to) ? 'border-sky-500/40 bg-slate-900 text-sky-300' : 'border-slate-800/60 bg-slate-900/40 text-slate-200'}`}>
                   <span className="flex min-w-0 items-center gap-3.5"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-sky-500/20 bg-sky-500/10 text-sky-400 transition-transform group-hover:scale-110 motion-reduce:transform-none"><Icon className="h-4 w-4" aria-hidden="true" /></span><span>{label}</span></span>
                   <ChevronRight className="h-4 w-4 shrink-0 text-slate-600 transition-all group-hover:translate-x-0.5 group-hover:text-sky-400 motion-reduce:transform-none" aria-hidden="true" />
@@ -120,8 +133,8 @@ const Navbar: React.FC<{ hero?: boolean }> = ({ hero = false }) => {
           </ul>
         </nav>
         <div className="flex flex-col gap-3 border-t border-slate-800/80 pt-4">
-          <button type="button" onClick={toggleTheme}
-            className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900 py-3 text-xs font-semibold text-slate-300 transition-all hover:bg-slate-800">
+          <button type="button" onClick={() => { toggleTheme(); cerrarMenu(); }}
+            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-slate-800 bg-slate-900/90 px-4 py-3 text-xs font-semibold text-slate-300 transition-all hover:bg-slate-800 active:scale-95 sm:text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400">
             {theme === 'dark' ? <Sun className="h-4 w-4 text-amber-400" aria-hidden="true" /> : <Moon className="h-4 w-4 text-sky-400" aria-hidden="true" />}
             <span>{theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}</span>
           </button>
@@ -133,12 +146,12 @@ const Navbar: React.FC<{ hero?: boolean }> = ({ hero = false }) => {
           ) : (
             <>
               <Link to="/login" onClick={cerrarMenu}
-                className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900 py-3 text-xs font-semibold text-slate-200 transition-all hover:bg-slate-800">
-                <LogIn className="h-4 w-4 text-slate-400" aria-hidden="true" /> Iniciar Sesión
+                className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl border border-slate-700/80 bg-slate-900/90 px-4 py-3.5 text-sm font-extrabold text-white shadow-md transition-all hover:bg-slate-800 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400">
+                <LogIn className="h-[18px] w-[18px] text-sky-400" aria-hidden="true" /> Iniciar Sesión
               </Link>
-              <Link to="/register" onClick={cerrarMenu}
-                className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-sky-400 py-3.5 text-xs font-bold text-slate-950 shadow-lg shadow-sky-500/20 transition-all hover:bg-sky-300 active:scale-95">
-                <UserPlus className="h-4 w-4" aria-hidden="true" /> Solicitar envío
+              <Link to="/solicitar-envio" onClick={cerrarMenu}
+                className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-400 via-cyan-400 to-sky-500 px-4 py-3.5 text-sm font-black text-slate-950 shadow-lg shadow-sky-500/25 transition-all hover:shadow-sky-500/40 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">
+                <UserPlus className="h-[18px] w-[18px]" aria-hidden="true" /> Solicitar envío
               </Link>
             </>
           )}
@@ -187,7 +200,7 @@ const Navbar: React.FC<{ hero?: boolean }> = ({ hero = false }) => {
         {/* Desktop nav links */}
         <div className={hero
           ? 'hidden lg:flex items-center gap-8 text-xs font-semibold tracking-wider'
-          : 'hidden md:flex items-center gap-1'}>
+          : 'hidden lg:flex items-center gap-1'}>
           {navLinks.map(({ to, label }) => (
             <Link
               key={to}
@@ -206,7 +219,7 @@ const Navbar: React.FC<{ hero?: boolean }> = ({ hero = false }) => {
         </div>
 
         {/* Right side */}
-        <div className={hero ? 'hidden lg:flex items-center gap-2' : 'hidden md:flex items-center gap-3'}>
+        <div className={`hidden lg:flex items-center ${hero ? 'gap-2' : 'gap-3'}`}>
           {/* Theme toggle */}
           <button
             onClick={toggleTheme}
@@ -258,26 +271,26 @@ const Navbar: React.FC<{ hero?: boolean }> = ({ hero = false }) => {
             )
           ) : hero ? (
             <>
-              <Link to="/login" className="rounded-full border border-slate-700/70 px-4 py-2 text-xs font-semibold text-slate-200 transition-colors hover:border-slate-500 hover:text-white">
+              <Link to="/login" className="inline-flex min-h-11 items-center justify-center rounded-full border border-slate-700/70 px-5 py-2.5 text-sm font-bold text-slate-200 transition-colors hover:border-slate-500 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400">
                 Iniciar Sesión
               </Link>
-              <Link to="/register" className="rounded-full bg-sky-500 px-4 py-2 text-xs font-bold text-slate-950 shadow-lg shadow-sky-500/20 transition-all hover:bg-sky-400 active:scale-95">
+              <Link to="/solicitar-envio" className="inline-flex min-h-11 items-center justify-center rounded-full bg-gradient-to-r from-sky-400 via-cyan-400 to-sky-500 px-5 py-2.5 text-sm font-extrabold text-slate-950 shadow-lg shadow-sky-500/25 transition-all hover:shadow-sky-500/40 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400">
                 Solicitar envío
               </Link>
             </>
           ) : (
             <>
-              <Link to="/login" className="btn-ghost btn-sm">Iniciar Sesión</Link>
-              <Link to="/register" className="btn-primary btn-sm">Solicitar envío</Link>
+              <Link to="/login" className="btn-ghost min-h-11 text-sm font-bold">Iniciar Sesión</Link>
+              <Link to="/solicitar-envio" className="btn-primary min-h-11 text-sm font-extrabold">Solicitar envío</Link>
             </>
           )}
         </div>
 
         {/* Mobile burger */}
         <button ref={hamburguesaRef} type="button"
-          className={`${hero ? 'lg:hidden' : 'md:hidden'} boton-menu group relative grid h-11 w-11 shrink-0 cursor-pointer place-items-center rounded-full bg-gradient-to-tr from-sky-500 via-cyan-400 to-indigo-500 p-[1.5px] shadow-lg shadow-sky-500/10 transition-[transform,box-shadow] duration-200 hover:scale-105 hover:shadow-sky-500/30 active:scale-95 focus-visible:outline-none focus-visible:shadow-lg focus-visible:shadow-sky-400/50 motion-reduce:transform-none motion-reduce:transition-none`}
+          className="lg:hidden boton-menu group relative grid h-11 w-11 shrink-0 cursor-pointer place-items-center rounded-full bg-gradient-to-tr from-sky-500 via-cyan-400 to-indigo-500 p-[1.5px] shadow-lg shadow-sky-500/10 transition-[transform,box-shadow] duration-200 hover:scale-105 hover:shadow-sky-500/30 active:scale-95 focus-visible:outline-none focus-visible:shadow-lg focus-visible:shadow-sky-400/50 motion-reduce:transform-none motion-reduce:transition-none"
           aria-label="Abrir menú" aria-expanded={mobileOpen} aria-controls="menu-movil"
-          onClick={() => setMobileOpen(true)}>
+          onClick={() => { setMobilePresent(true); setMobileOpen(true); }}>
           <span className="grid h-full w-full place-items-center rounded-full bg-slate-950/90 backdrop-blur-md transition-colors group-hover:bg-slate-900">
             <Menu className="h-5 w-5 text-white transition-[transform,color] duration-200 group-hover:scale-110 group-hover:text-sky-300 motion-reduce:transform-none" strokeWidth={2.5} aria-hidden="true" />
           </span>

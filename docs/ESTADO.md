@@ -1,7 +1,14 @@
 # Estado del proyecto y memoria para agentes de IA
 
+## Menú público móvil — 2026-11-11
+
+- Las acciones públicas del Navbar usan áreas táctiles de 48–52 px en el drawer; “Iniciar Sesión” y “Solicitar envío” pasan a 14 px y el CTA lleva gradiente cian. En escritorio ambos botones usan al menos 44 px de alto y 14 px de texto. La CTA apunta al alias público `/solicitar-envio`. Todas las variantes públicas usan el drawer hasta 1023 px para evitar que los enlaces de escritorio se recorten a 768 px.
+- El drawer de `Navbar.tsx` entra desde arriba y sale hacia arriba en 480 ms. Sigue presente durante la salida para que `visibility` no corte la transición; el scroll permanece bloqueado y el foco vuelve al botón hamburguesa al terminar. Respeta `prefers-reduced-motion`.
+- El menú móvil incluye “Inicio” con icono `Home`: lleva a `/` y desplaza al Hero igual que el logo. En sesión de cliente, el enlace del panel se llama “Mi portal” para distinguirlo de la portada. Cambiar entre modo claro y oscuro cierra la cortina con su animación de salida.
+
 ## Solicitar envío (`/register`) — 2026-11-11
 
+- En móvil (`lg:hidden`) el formulario es ahora un **wizard de 3 pasos**: Datos de Recogida, Detalles de Paquetes y Destino y Confirmación. Muestra un solo paso a la vez, barra de progreso, validación antes de avanzar, resumen de la recogida antes de enviar y transiciones horizontales (`registro-paso-der`/`registro-paso-izq`, con `prefers-reduced-motion`). El escritorio (`lg:block`) conserva el formulario completo de una sola página.
 - `/register` (y su alias `/solicitar-envio`) ya no es el registro empresarial con contraseña: es el formulario público **Solicitar envío**, sin cuenta. Campos: nombre, teléfono, correo, dirección de recogida, cantidad de paquetes, peso total (opcional), nombre y teléfono (opcional) de quien recibe y dirección de entrega. Se manda a `POST /api/solicitudes/publico` con `src/api/solicitudes.ts`; en la oficina aparece en la campanita de `js-logistics/frontend`, y administración responde por WhatsApp con el valor del domicilio.
 - La página dibuja su propio `Navbar hero` y `LandingFooter`, igual que `/track`; por eso `App.tsx` la excluye del marco general (`esSolicitud`). Mismo estilo de tarjeta que el rastreo.
 - Tiene un campo trampa `sitio` (fuera de pantalla, `tabIndex -1`): si un robot lo llena, el backend descarta la solicitud. No lo quites. El backend limita por IP (5/hora, 15/día), así que un 429 se muestra tal cual al usuario.
@@ -216,6 +223,7 @@ Por petición explícita del dueño, `Home.tsx` sustituye la composición anteri
 
 ## Registro de sesiones (lo más reciente arriba)
 
+- **2026-11-11:** Solicitar envío: la vista móvil (`lg:hidden`) quedó como wizard de 3 pasos con barra de progreso, validación por paso, resumen de recogida antes de enviar y transiciones horizontales. El escritorio conserva el formulario completo. Revisado a 320, 390, 768 y 1440 px en claro/oscuro, sin desbordes.
 - **2026-11-11:** Mis pedidos: tarjetas con fondo, borde, radio y sombra únicos para todos los estados, y aviso ámbar con más aire en computador (decisión 21). La píldora “Todos” ya estaba alineada con el buscador; se midió y no cambió. Revisado a 320, 390, 768 y 1440 px en claro/oscuro, sin desbordes.
 - **2026-11-11:** Navbar: hamburguesa y X del menú circulares, con borde de degradado e interior oscuro, sin doble borde al cerrar el menú (decisión 20). Revisado a 390 px.
 - **2026-11-11:** JSBot: botón de cerrar rediseñado como cápsula circular con borde degradado (decisión 19). Revisado a 390 y 1440 px.

@@ -236,6 +236,23 @@
 }
 
 /* Hero: zoom lento de la foto */
+/* El drawer público baja como cortina y espera a terminar su salida antes de ocultarse. */
+.menu-cortina {
+  transform: translate3d(0, -100%, 0);
+  opacity: 0;
+  visibility: hidden;
+  transition: transform 480ms cubic-bezier(.4, 0, .2, 1), opacity 340ms ease, visibility 0s linear 480ms;
+}
+.menu-cortina[data-open="true"] {
+  transform: translate3d(0, 0, 0);
+  opacity: 1;
+  visibility: visible;
+  transition: transform 480ms cubic-bezier(.4, 0, .2, 1), opacity 340ms ease, visibility 0s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .menu-cortina, .menu-cortina[data-open="true"] { transition: none; }
+}
+
 @keyframes hero-zoom { from { transform: scale(1); } to { transform: scale(1.08); } }
 .hero-zoom { animation: hero-zoom 8s ease-out forwards; }
 
@@ -247,6 +264,13 @@
   .servicio-reveal { opacity: 1; }
   .servicio-reveal.is-visible { animation: none; }
 }
+
+/* Register móvil: entrada horizontal de cada paso del wizard */
+@keyframes registro-paso-der { from { opacity: 0; transform: translateX(26px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes registro-paso-izq { from { opacity: 0; transform: translateX(-26px); } to { opacity: 1; transform: translateX(0); } }
+.registro-paso-der { animation: registro-paso-der .28s ease-out both; }
+.registro-paso-izq { animation: registro-paso-izq .28s ease-out both; }
+@media (prefers-reduced-motion: reduce) { .registro-paso-der, .registro-paso-izq { animation: none; } }
 
 /* Entrada del badge del Hero (reemplaza tailwindcss-animate, que no está instalado) */
 @keyframes hero-badge-in { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: translateY(0); } }
