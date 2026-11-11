@@ -102,7 +102,7 @@ src/
 2. **El clásico debe verse igual a la app actual, salvo el menú de escritorio y el dashboard.**
    - Su HTML y sus clases salen de `js-logistics/app`.
    - El menú lateral de escritorio sigue el estilo de la app de oficina: logo con separador, grupos con título (`lat-grupo`, `lat-titulo`) y el activo con acento azul. Se puede **colapsar a 76 px** con el botón `plegar` del pie; los accesos conservan `title` y `aria-label`.
-   - El Dashboard de Inicio tiene tema claro/oscuro con botón en la barra superior (`useTheme` + `data-theme` en `.clasico`). El **sidebar de escritorio permanece oscuro** (`slate-900`) en ambos temas, como el de la oficina; la barra superior y las pestañas sí cambian. Las tarjetas tienen borde y el layout es fluido desde 1280 px. No lo devuelvas al estilo fijo anterior.
+   - El Dashboard de Inicio tiene tema claro/oscuro con botón en la barra superior (`useTheme` + `data-theme` en `.clasico`). El **sidebar de escritorio permanece siempre oscuro** (`slate-900`); la barra superior sigue el tema en escritorio (blanca en claro) y **permanece oscura en móvil**; las pestañas móviles sí cambian. Las tarjetas tienen borde y el layout es fluido desde 1280 px. No lo devuelvas al estilo fijo anterior.
    - `clasico.css` es una copia de `js-logistics/app/css/estilos.css`. `postcss.config.js` antepone `.clasico` a todas sus reglas, así que no choca con Tailwind.
    - No metas clases de Tailwind en el clásico ni CSS global fuera de `clasico.css`; los ajustes propios van al final del archivo.
 3. **Nada de lógica de negocio en los componentes.**

@@ -9,6 +9,7 @@ interface Sesion {
   cargando: boolean;
   ingresar: (email: string, clave: string) => Promise<Usuario>;
   salir: () => Promise<void>;
+  refrescar: () => Promise<void>;
 }
 
 const Ctx = createContext<Sesion | undefined>(undefined);
@@ -37,7 +38,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try { await authApi.salir(); } finally { setUsuario(null); qc.clear(); }
   }, [qc]);
 
-  return <Ctx.Provider value={{ usuario, cargando, ingresar, salir }}>{children}</Ctx.Provider>;
+  const refrescar = useCallback(async () => { setUsuario(await authApi.yo()); }, []);
+
+  return <Ctx.Provider value={{ usuario, cargando, ingresar, salir, refrescar }}>{children}</Ctx.Provider>;
 }
 
 export function useSesion() {

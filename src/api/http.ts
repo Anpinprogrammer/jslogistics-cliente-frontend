@@ -8,7 +8,7 @@ export const BASE = (import.meta.env.VITE_API_URL as string | undefined) || '/ap
 export const DEMO = import.meta.env.VITE_DEMO === 'true';
 
 export class ApiError extends Error {
-  constructor(public status: number, public code: string, message: string, public campos?: { campo: string; mensaje: string }[]) {
+  constructor(public status: number, public code: string, message: string, public campos?: { campo: string; mensaje: string }[], public detalle?: unknown) {
     super(message);
   }
 }
@@ -41,7 +41,7 @@ export async function api<T>(ruta: string, init: RequestInit & { json?: unknown 
   if (!r.ok) {
     if (r.status === 401 && ruta !== '/auth/ingresar') alSalir.dispatchEvent(new Event('401'));
     const e = cuerpo?.error;
-    throw new ApiError(r.status, e?.code || 'ERROR', e?.message || `Error ${r.status}`, e?.campos);
+    throw new ApiError(r.status, e?.code || 'ERROR', e?.message || `Error ${r.status}`, e?.campos, e?.detalle);
   }
   return cuerpo as T;
 }
