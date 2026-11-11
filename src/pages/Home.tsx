@@ -14,7 +14,6 @@ import {
   ChevronRight,
   CircleCheck,
   ClipboardList,
-  Clock3,
   Mail,
   MapPin,
   Package,
@@ -167,21 +166,18 @@ export default function Home() {
             className="landing-enter w-full min-w-0 max-w-md shrink-0 lg:col-span-5 lg:col-start-8 lg:row-start-1 lg:row-span-2 lg:max-w-lg lg:self-center"
             style={{ animationDelay: "320ms" }}
           >
-            <div className="landing-tracking relative z-20 flex w-full flex-col justify-between rounded-3xl border border-slate-800/90 bg-slate-900/90 p-6 shadow-2xl backdrop-blur-2xl lg:p-8">
-              <div className="mb-4 flex items-center justify-between">
-                <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-slate-300">
-                  <Route size={18} className="text-sky-300" /> Siempre cerca
-                </span>
-                <span className="rounded-full bg-sky-400/10 px-2.5 py-1 text-[10px] font-semibold text-sky-200">
-                  RASTREO
-                </span>
+            {/* Un solo formulario (sin ids ni formularios repetidos): en celular es una barra de una línea
+                con la lupa dentro; desde lg es la tarjeta con encabezado y botón con texto. */}
+            <div className="landing-tracking relative z-20 w-full lg:rounded-3xl lg:border lg:border-slate-800/90 lg:bg-slate-900/90 lg:p-7 lg:shadow-2xl lg:backdrop-blur-2xl">
+              <div className="mb-4 hidden lg:block">
+                <h2 className="mb-1 text-2xl font-bold text-white">
+                  ¿Dónde va tu envío?
+                </h2>
+                <p className="text-xs leading-relaxed text-slate-400">
+                  Ingresa tu número de guía para conocer el estado en tiempo
+                  real.
+                </p>
               </div>
-              <h2 className="mb-1 text-xl font-bold text-white lg:text-2xl">
-                ¿Dónde va tu envío?
-              </h2>
-              <p className="mb-4 text-xs leading-relaxed text-slate-400">
-                Ingresa tu número de guía para conocer el estado en tiempo real.
-              </p>
               <form
                 onSubmit={(event) => {
                   event.preventDefault();
@@ -189,48 +185,42 @@ export default function Home() {
                   navigate(q ? `/track?n=${encodeURIComponent(q)}` : "/track");
                 }}
               >
-                <label
-                  htmlFor="guiaHero"
-                  className="mb-2 block text-xs font-medium text-slate-300"
-                >
+                <label htmlFor="guiaHero" className="sr-only">
                   Número de guía o pedido
                 </label>
                 <div className="relative">
                   <Package
                     size={19}
-                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                    className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-slate-400 lg:left-3 lg:top-[23px]"
                   />
                   <input
                     id="guiaHero"
                     value={guia}
                     onChange={(e) => setGuia(e.target.value)}
-                    placeholder="Escribe tu número de guía"
-                    className="w-full min-w-0 rounded-xl border border-slate-800 bg-slate-950 py-3 pl-10 pr-4 text-xs text-white placeholder:text-slate-500 transition-all focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm"
+                    placeholder="Número de guía"
+                    enterKeyHint="search"
+                    autoComplete="off"
+                    className="w-full min-w-0 rounded-2xl border border-slate-700/80 bg-slate-900/90 py-3.5 pl-11 pr-14 text-sm font-medium text-white shadow-xl backdrop-blur-md transition-all placeholder:text-slate-400 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400 lg:rounded-xl lg:border-slate-800 lg:bg-slate-950 lg:py-3 lg:pl-10 lg:pr-4 lg:shadow-none lg:placeholder:text-slate-500"
                   />
+                  <button
+                    type="submit"
+                    aria-label="Rastrear envío"
+                    className="absolute right-1.5 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-xl bg-sky-400 text-slate-950 shadow-md shadow-sky-500/20 transition-all hover:bg-sky-300 active:scale-95 lg:static lg:mt-3 lg:flex lg:h-auto lg:min-h-[44px] lg:w-full lg:translate-y-0 lg:items-center lg:justify-center lg:gap-2 lg:py-3 lg:text-sm lg:font-bold"
+                  >
+                    <span className="hidden lg:inline">Rastrear mi envío</span>
+                    <Search size={18} />
+                  </button>
                 </div>
-                <button
-                  className="mt-3 flex w-full min-h-[44px] items-center justify-center gap-2 rounded-xl bg-sky-400 py-3 text-xs font-bold text-slate-950 shadow-md transition-all hover:bg-sky-300 active:scale-95 sm:text-sm"
-                  type="submit"
-                >
-                  Rastrear mi envío <Search size={18} />
-                </button>
               </form>
-              <div className="mt-4 border-t border-slate-800 pt-4">
-                <div className="flex items-center gap-3 text-xs text-slate-400">
-                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-slate-800">
-                    <Clock3 size={15} />
-                  </span>
-                  <p>
-                    ¿Ya eres cliente?{" "}
-                    <Link
-                      to="/login"
-                      className="font-semibold text-sky-200 underline decoration-sky-300/30 underline-offset-4"
-                    >
-                      Ingresa a tu portal
-                    </Link>
-                  </p>
-                </div>
-              </div>
+              <p className="mt-3 text-center text-[11px] text-slate-400 lg:mt-4 lg:border-t lg:border-slate-800 lg:pt-4 lg:text-left lg:text-xs">
+                ¿Ya eres cliente?{" "}
+                <Link
+                  to="/login"
+                  className="font-bold text-sky-300 hover:underline lg:font-semibold lg:text-sky-200 lg:underline lg:decoration-sky-300/30 lg:underline-offset-4"
+                >
+                  Ingresa a tu portal →
+                </Link>
+              </p>
             </div>
           </div>
           <div className="w-full min-w-0 shrink-0 lg:col-span-7 lg:col-start-1 lg:row-start-2">
