@@ -24,12 +24,12 @@ const FilaDemo: React.FC<{ etiqueta: string; valor: string; mono?: boolean }> = 
   };
   return (
     <div className="flex items-center justify-between gap-3">
-      <p className="min-w-0 text-sm">
+      <p className="min-w-0 text-[13px] sm:text-sm">
         <span className="text-slate-400">{etiqueta}: </span>
         <span className={`break-all font-medium text-slate-100 ${mono ? 'font-mono' : ''}`}>{valor}</span>
       </p>
       <button type="button" onClick={copiar} aria-label={`Copiar ${etiqueta.toLowerCase()}`}
-        className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg border transition ${
+        className={`grid h-7 w-7 shrink-0 sm:h-8 sm:w-8 place-items-center rounded-lg border transition ${
           copiado ? 'border-emerald-400/50 bg-emerald-400/10 text-emerald-300' : 'border-sky-500/30 text-sky-300 hover:border-sky-400 hover:bg-sky-500/15'}`}>
         {copiado ? <IcOk /> : <IcCopiar />}
       </button>
@@ -100,7 +100,7 @@ const Login: React.FC = () => {
       intro={intro?.marco}
       sinEntrada={salio}
       pie={
-        <p className="mt-4 text-center text-sm text-slate-400 sm:mt-6">
+        <p className="mt-3 text-center text-[13px] text-slate-400 sm:mt-6 sm:text-sm">
           ¿Tu empresa aún no tiene acceso?{' '}
           <Link to="/register" className={ENLACE}>
             Registrarse
@@ -109,13 +109,13 @@ const Login: React.FC = () => {
       }
     >
       <div style={intro?.encabezado}>
-        <h2 className="font-display text-lg font-700 text-white sm:text-xl">Iniciar sesión</h2>
-        <p className="mb-4 mt-1 text-sm text-slate-400 sm:mb-6">Ingresa con las credenciales de tu empresa</p>
+        <h2 className="font-display text-base font-700 text-white sm:text-xl">Iniciar sesión</h2>
+        <p className="mb-3 mt-0.5 text-xs text-slate-400 sm:mb-6 sm:mt-1 sm:text-sm">Ingresa con las credenciales de tu empresa</p>
       </div>
 
       {DEMO && (
-        <div className="mb-4 rounded-xl border border-sky-500/30 bg-sky-500/10 p-3 sm:mb-6 sm:p-3.5" style={intro?.demo}>
-          <div className="mb-2.5 flex items-center gap-2">
+        <div className="mb-3 rounded-xl border border-sky-500/30 bg-sky-500/10 p-2.5 sm:mb-6 sm:p-3.5" style={intro?.demo}>
+          <div className="mb-2 flex items-center gap-2 sm:mb-2.5">
             <span className="rounded-md bg-sky-400 px-1.5 py-0.5 font-mono text-[10px] font-bold tracking-wider text-slate-950">DEMO</span>
             <span className="text-xs text-slate-300">Credenciales de prueba</span>
             <button type="button" onClick={() => setForm({ email: DEMO_EMAIL, password: DEMO_CLAVE })}
@@ -123,7 +123,7 @@ const Login: React.FC = () => {
               Rellenar
             </button>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1.5 sm:space-y-2">
             <FilaDemo etiqueta="Correo" valor={DEMO_EMAIL} />
             <FilaDemo etiqueta="Clave" valor={DEMO_CLAVE} mono />
           </div>
@@ -132,7 +132,7 @@ const Login: React.FC = () => {
 
       {error && <AvisoError>{error}</AvisoError>}
 
-      <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-2.5 sm:space-y-4">
         <div style={intro?.campos[0].estilo}>
           <label htmlFor={idCorreo} className={ETIQUETA}>Correo electrónico</label>
           <div className="relative">
@@ -150,7 +150,7 @@ const Login: React.FC = () => {
             {intro?.campos[1].escaner}
             <span className={ICONO}><IcCandado /></span>
             <button type="button" onClick={() => setVer(v => !v)} aria-label={ver ? 'Ocultar contraseña' : 'Mostrar contraseña'} aria-pressed={ver}
-              className="absolute right-2 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-lg text-slate-500 transition hover:bg-slate-700/50 hover:text-sky-400">
+              className="absolute right-1.5 top-1/2 grid h-8 w-8 -translate-y-1/2 sm:right-2 sm:h-9 sm:w-9 place-items-center rounded-lg text-slate-500 transition hover:bg-slate-700/50 hover:text-sky-400">
               {ver ? <IcOjoTachado /> : <IcOjo />}
             </button>
           </div>
@@ -160,7 +160,7 @@ const Login: React.FC = () => {
         <BotonAcceso cargando={loading} cargandoTexto="Ingresando…" intro={intro?.boton}>Ingresar al portal</BotonAcceso>
       </form>
 
-      <p className="mt-3 text-center text-sm" style={intro?.enlace}>
+      <p className="mt-2.5 text-center text-[13px] sm:mt-3 sm:text-sm" style={intro?.enlace}>
         <Link to="/recuperar" className={ENLACE}>¿Olvidaste tu contraseña?</Link>
       </p>
     </MarcoAcceso>
