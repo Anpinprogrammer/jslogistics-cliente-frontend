@@ -1,5 +1,10 @@
 # Estado del proyecto y memoria para agentes de IA
 
+## Demo pública para el portafolio — 2026-11-11
+
+- Guía en [`demo-publica.md`](demo-publica.md): cómo publicar este portal junto con la oficina y un backend de pruebas para que el flujo completo se pueda probar. La guía completa vive en `js-logistics/docs/demo-publica.md`.
+- `src/api/solicitudes.ts` ya no tiene rama `DEMO`: el formulario siempre llama a `POST /api/solicitudes/publico`. Las vistas previas de Vercel (modo demo en memoria) envían a la API a la que apunte la reescritura de `vercel.json`.
+
 ## Solicitar envío (`/register`) — 2026-11-11
 
 - `/register` (y su alias `/solicitar-envio`) ya no es el registro empresarial con contraseña: es el formulario público **Solicitar envío**, sin cuenta. Campos: nombre, teléfono, correo, dirección de recogida, cantidad de paquetes, peso total (opcional), nombre y teléfono (opcional) de quien recibe y dirección de entrega. Se manda a `POST /api/solicitudes/publico` con `src/api/solicitudes.ts`; en la oficina aparece en la campanita de `js-logistics/frontend`, y administración responde por WhatsApp con el valor del domicilio.
