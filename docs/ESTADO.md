@@ -2,6 +2,7 @@
 
 ## Mi cuenta — 2026-11-10
 
+- La navegación inferior del portal en móvil es una franja fija de ancho completo, pegada al borde inferior. Su propio padding cubre el área segura del dispositivo y el contenido deja espacio para que no tape las últimas tarjetas.
 - Configuración usa tarjetas de igual altura en escritorio, campos con íconos integrados, dirección como textarea y controles independientes para mostrar u ocultar cada contraseña. La confirmación de contraseña para cambiar el correo mantiene un estado separado del formulario de seguridad.
 - En XL, “Mi cuenta” aprovecha hasta 1600 px: balance y recibo ocupan el tercio izquierdo, y el historial paginado los dos tercios derechos. En móvil y tablet conserva una sola columna; Configuración mantiene dos columnas desde escritorio.
 - El portal clásico separa “Movimientos & Estado Financiero” y “Configuración de Cuenta” en dos pestañas responsivas. Saldo y movimientos siguen usando los cálculos existentes; el recibo por fecha conserva su diálogo.
