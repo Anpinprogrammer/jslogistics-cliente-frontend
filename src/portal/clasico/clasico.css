@@ -723,8 +723,9 @@ dialog.dialogo-pedido::backdrop{background:rgba(2,6,23,.72);backdrop-filter:blur
 @media(prefers-reduced-motion:reduce){.cuenta-panel{animation:none}}
 /* Mi cuenta · movimientos: en celular el detalle sale de la tabla (se cortaba) y se abre desde el botón de info. */
 .mov-info{display:none}
-.mov-info-btn{display:inline-grid;place-items:center;width:40px;height:40px;border:0;border-radius:12px;background:var(--azul-claro);color:var(--azul);cursor:pointer}
-.mov-info-btn:active{transform:scale(.95)}
+.mov-info-btn{display:inline-grid;place-items:center;width:40px;height:40px;border:0;border-radius:12px;background:none;color:var(--azul);cursor:pointer}
+.mov-info-btn:active{transform:scale(.9);opacity:.7}
+.mov-info-btn:focus-visible{outline:2px solid var(--azul);outline-offset:-4px}
 .mov-detalle{padding:12px 14px;border:1px solid var(--linea);border-radius:12px;background:var(--hueco);line-height:1.5;overflow-wrap:anywhere}
 @media(max-width:600px){
   .cuenta-tabla .mov-det{display:none}
