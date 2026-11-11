@@ -115,6 +115,12 @@ export const demo = {
     usuarioDemo = { ...usuarioDemo, email: datos.email.trim().toLowerCase() };
     return clienteDemo;
   },
+  /** En la demo la solicitud no va a ningún lado: solo se valida lo mínimo y se responde como el backend. */
+  async nuevaSolicitud(datos: { nombre: string; direccionRecogida: string; destinatarioNombre: string; direccionEntrega: string }) {
+    await espera(null, 450);
+    if (!datos.nombre.trim() || !datos.direccionRecogida.trim() || !datos.destinatarioNombre.trim() || !datos.direccionEntrega.trim())
+      throw new ApiError(400, 'DATOS_INVALIDOS', 'Completa los campos obligatorios');
+  },
   pedidos: () => espera(pedidosActuales()),
   cliente: () => espera(clienteDemo),
   movimientos: () => espera(generarMovs()),

@@ -1,5 +1,11 @@
 # Estado del proyecto y memoria para agentes de IA
 
+## Nuevo pedido desde el portal — 2026-11-11
+
+- En **Mis pedidos** hay un botón **Nuevo pedido** (arriba a la derecha; ancho completo en celular) que abre un `Dialogo` variante `pedido` con `portal/clasico/NuevoPedido.tsx`. Pide los mismos campos de `/register`, con nombre, teléfono, correo y dirección de recogida tomados de la ficha y la cuenta, editables solo para ese pedido (no cambian la ficha).
+- Manda `POST /api/solicitudes/portal` (`useNuevaSolicitud` en `api/cliente.ts`; demo en `demo.nuevaSolicitud`). Nunca manda `clienteId`: el backend lo toma de la sesión. No crea guía; el pedido aparece en la lista cuando la oficina asigna al mensajero.
+- Estilos en `clasico.css` (clases `pedidos-cab`, `nuevo-*`), reutilizando `cuenta-campos`/`cuenta-input` y la cabecera del modal de pedido. Sin Tailwind.
+
 ## Menú público móvil — 2026-11-11
 
 - Las acciones públicas del Navbar usan áreas táctiles de 48–52 px en el drawer; “Iniciar Sesión” y “Solicitar envío” pasan a 14 px y el CTA lleva gradiente cian. En escritorio ambos botones usan al menos 44 px de alto y 14 px de texto. La CTA apunta al alias público `/solicitar-envio`. Todas las variantes públicas usan el drawer hasta 1023 px para evitar que los enlaces de escritorio se recorten a 768 px.

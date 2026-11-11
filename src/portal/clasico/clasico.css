@@ -752,3 +752,37 @@ dialog.dialogo-pedido::backdrop{background:rgba(2,6,23,.72);backdrop-filter:blur
   .pag>.sub{flex:1;min-width:0;font-size:.8rem}
 }
 
+
+/* ---------- Mis pedidos: "Nuevo pedido" (solicitud a la oficina) ---------- */
+.pedidos-cab{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.pedidos-cab>div{min-width:0}
+.pedidos-cab .btn.nuevo-pedido{flex:none;min-height:44px;margin-top:6px;padding:10px 18px;border-radius:12px;box-shadow:0 6px 16px rgba(31,134,201,.25);cursor:pointer}
+.pedidos-cab .btn.nuevo-pedido:hover{filter:brightness(1.08)}
+.nuevo-form section{min-width:0}
+.nuevo-form .pod-seccion-titulo{margin-bottom:8px}
+.nuevo-ayuda{margin:0 0 12px;color:var(--suave);font-size:.76rem;line-height:1.45}
+.nuevo-form .cuenta-campos{gap:14px}
+.nuevo-form .campo{margin:0}
+.nuevo-form .campo label{margin-bottom:4px}
+.nuevo-form .cuenta-input input[aria-invalid="true"],.nuevo-form .cuenta-input textarea[aria-invalid="true"]{border-color:var(--rojo)}
+.nuevo-form .cuenta-error{margin:0}
+.nuevo-error{margin:4px 0 0;color:var(--rojo);font-size:.72rem;font-weight:600}
+.nuevo-domicilio{margin:0;padding:12px 14px;border:1px solid rgba(31,134,201,.28);border-radius:14px;background:var(--mango-claro);color:var(--tinta);font-size:.8rem;line-height:1.45}
+.nuevo-domicilio b{color:var(--marca)}
+.nuevo-pie{display:flex;justify-content:flex-end;gap:10px;padding-top:16px;border-top:1px solid var(--linea)}
+.nuevo-pie .btn{min-height:44px;cursor:pointer}
+.nuevo-pie .btn:disabled{opacity:.65;cursor:wait}
+.nuevo-listo{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 4px;text-align:center}
+.nuevo-listo-ico{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:var(--verde-claro);color:var(--verde)}
+.nuevo-listo-ico svg{width:28px;height:28px}
+.nuevo-listo .nuevo-listo-titulo{margin:6px 0 0;max-width:none;color:var(--tinta);font-size:1.15rem;font-weight:700}
+.nuevo-valor{white-space:nowrap}
+.nuevo-listo p{margin:0;max-width:440px;color:var(--suave);font-size:.85rem;line-height:1.5}
+.nuevo-listo p b{color:var(--tinta)}
+.nuevo-listo .nuevo-nota{font-size:.76rem}
+@media (max-width:600px){
+  .pedidos-cab{flex-direction:column;gap:4px;margin-bottom:12px}
+  .pedidos-cab .btn.nuevo-pedido{width:100%;margin-top:4px}
+  .nuevo-pie{flex-direction:column-reverse}
+  .nuevo-pie .btn{width:100%}
+}
