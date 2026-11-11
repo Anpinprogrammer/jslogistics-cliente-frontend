@@ -146,11 +146,15 @@ Por petición explícita del dueño, `Home.tsx` sustituye la composición anteri
 
 - ScrollToHash reinicia la posición a 0 de forma instantánea con useLayoutEffect en cada navegación a `/login` (pathname y location.key), evitando heredar el scroll de la landing y el desplazamiento suave global. Los enlaces a secciones de la landing conservan su comportamiento.
 
+## Activación de cuentas en /activar-cuenta — 2026-11-11
+
+- Los correos de activación del backend apuntan a `/activar-cuenta?token=…` (no a `/activar`). La ruta faltaba y el enlace caía en el 404: ahora abre `Restablecer`, igual que `/activar`, que se deja por los enlaces ya enviados. Hace falta para la migración del 16 de noviembre, cuando todos los clientes importados de Firebase reciben su invitación.
+
 ## Qué hay hecho
 
 - **Landing** (`pages/Home.tsx`): Hero a 90vh/100vh con **navbar propio** (`<Navbar hero />`), carrusel de fotos con overlay `slate-950` (90/70/100 %), badge, título de 3xl a 8xl, barra de rastreo que lleva a `/track?n=...`, CTAs e indicador lateral de scroll. Después: estadísticas en tarjetas (`+12,000`, `99.3%`, `+180`, `24/7`), "Quiénes Somos" en bento 7/5 con iconos de **Lucide**, servicios en 3 columnas con iconos Lucide y entrada escalonada, cómo funciona, CTA y contacto.
 - **Menú móvil** (`components/layout/Navbar.tsx`): overlay a pantalla completa, fondo `#070B19`/95 con blur, bloquea el scroll del `body`, cierra con Escape y al tocar un enlace, foco a la X al abrir. Se dibuja con `createPortal` en `document.body` porque el `<header>` usa `backdrop-filter`, que atrapa a los hijos `fixed` y rompería el "pantalla completa".
-- **Login** (`pages/Login.tsx`): oscuro, mapa del mundo real (contorno de Natural Earth, punteado) con rutas animadas y un pin en la sede de Cali, tarjeta de cristal, caja DEMO con botones de copiar y "Rellenar" (solo con `VITE_DEMO=true`). Tiene el enlace "¿Olvidaste tu contraseña?", que abre `/recuperar`; las páginas `/restablecer` y `/activar` abren los enlaces del correo. Las tres comparten el marco de `components/acceso.tsx`.
+- **Login** (`pages/Login.tsx`): oscuro, mapa del mundo real (contorno de Natural Earth, punteado) con rutas animadas y un pin en la sede de Cali, tarjeta de cristal, caja DEMO con botones de copiar y "Rellenar" (solo con `VITE_DEMO=true`). Tiene el enlace "¿Olvidaste tu contraseña?", que abre `/recuperar`; las páginas `/restablecer`, `/activar` y `/activar-cuenta` abren los enlaces del correo. Las tres comparten el marco de `components/acceso.tsx`.
 - **Portal del cliente:** un solo portal (`clasico/`), con el menú lateral de escritorio al estilo de la oficina, tema claro/oscuro con botón en la barra superior y layout fluido en XL/2XL; Mis pedidos pagina en el servidor (8 por página en celular, 20 en computador, `lib/pantalla.ts`) y su detalle tiene stepper, novedades y galería POD con lightbox; Mi cuenta pagina el historial de movimientos en el servidor (5 en celular, 10 en computador) y el recibo carga los movimientos completos solo al abrirlo; cada página se descarga cuando se visita. La vista de propuesta (`mejorado/`) se retiró.
 - **Corrección de desbordes laterales en móvil** (portal y login revisados a 320–430 px).
 

@@ -78,6 +78,8 @@ function Rutas() {
             <Route path="/recuperar" element={<Recuperar />} />
             <Route path="/restablecer" element={<Restablecer />} />
             <Route path="/activar" element={<Restablecer />} />
+            {/* Los correos de activación del backend apuntan aquí (/activar se deja por los enlaces ya enviados). */}
+            <Route path="/activar-cuenta" element={<Restablecer />} />
             <Route path="/register" element={<Register />} />
             <Route path="/track" element={<Track />} />
             <Route path="/rastrear" element={<Track />} />
