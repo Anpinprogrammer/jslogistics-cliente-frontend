@@ -228,9 +228,16 @@ export default function JSBot({ enPortalCliente = false }: { enPortalCliente?: b
               type="button"
               onClick={() => setAbierto(false)}
               aria-label="Cerrar JSBot"
-              className="grid h-11 w-11 shrink-0 place-items-center rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-800/60 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-500"
+              className="group/cerrar relative grid h-11 w-11 shrink-0 cursor-pointer place-items-center rounded-full bg-gradient-to-tr from-sky-500 via-cyan-400 to-indigo-500 p-[2px] shadow-md shadow-sky-500/25 transition-[transform,box-shadow] duration-300 hover:scale-105 hover:shadow-sky-500/40 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400 motion-reduce:transform-none motion-reduce:transition-none"
             >
-              <X size={19} />
+              <span className="grid h-full w-full place-items-center rounded-full bg-slate-900 transition-colors duration-300 group-hover/cerrar:bg-slate-800">
+                <X
+                  size={20}
+                  strokeWidth={2.5}
+                  aria-hidden="true"
+                  className="text-sky-300 transition-[transform,color] duration-300 group-hover/cerrar:rotate-90 group-hover/cerrar:text-white motion-reduce:transform-none motion-reduce:transition-none"
+                />
+              </span>
             </button>
           </header>
           <div className="flex shrink-0 items-center gap-2 border-b border-sky-100 bg-sky-50 px-4 py-2.5 text-[10px] font-medium text-sky-800 dark:border-sky-900/40 dark:bg-sky-950/30 dark:text-sky-200">
