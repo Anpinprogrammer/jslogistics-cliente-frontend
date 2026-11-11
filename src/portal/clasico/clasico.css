@@ -485,8 +485,10 @@ button.kpi:hover{border-color:rgba(31,134,201,.45);box-shadow:0 12px 28px rgba(1
 :root[data-theme="dark"] .kpi.oscuro .lbl,:root[data-theme="dark"] .kpi.oscuro small{color:rgba(226,232,240,.72)}
 
 /* Banner de prendas de cambio: ámbar suave, con contraste en ambos temas. */
-.aviso.alerta{background:rgba(245,158,11,.10);border:1px solid rgba(245,158,11,.30);color:#92400E;border-radius:18px;padding:16px;font-size:.9rem;font-weight:500;box-shadow:0 1px 2px rgba(15,23,42,.04)}
-:root[data-theme="dark"] .aviso.alerta{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.30);color:#FCD34D}
+/* 16 px de aire en celular y 20 × 14 px desde 601 px; texto 12 px en celular y 14 px en computador. */
+.aviso.alerta{display:flex;align-items:center;justify-content:space-between;gap:12px;background:rgba(245,158,11,.10);border:1px solid rgba(245,158,11,.20);color:#78350F;border-radius:16px;padding:16px;font-size:.75rem;line-height:1.5;font-weight:500;box-shadow:none}
+@media (min-width:601px){.aviso.alerta{padding:14px 20px;font-size:.875rem}}
+:root[data-theme="dark"] .aviso.alerta{background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.20);color:#FCD34D}
 
 /* Badges de estado con borde suave. */
 .etq{border:1px solid transparent;padding:3px 9px}
@@ -565,8 +567,9 @@ button.kpi:hover{border-color:rgba(31,134,201,.45);box-shadow:0 12px 28px rgba(1
 .filtros button[aria-pressed="true"] .num{background:rgba(255,255,255,.22);color:#fff}
 
 .lista{display:flex;flex-direction:column;gap:12px}
-.pedido-card{display:flex;align-items:center;gap:14px;width:100%;padding:16px;border:1px solid var(--linea);border-radius:18px;background:var(--papel);box-shadow:0 1px 2px rgba(15,23,42,.04);text-align:left;font:inherit;color:var(--tinta);cursor:pointer;transition:box-shadow .2s,border-color .2s}
-.pedido-card:hover{border-color:rgba(31,134,201,.4);box-shadow:0 10px 24px rgba(15,23,42,.08)}
+/* Todas las tarjetas (en ruta, entregadas, devueltas) comparten fondo, borde, radio y sombra; el estado solo cambia el ícono y la etiqueta. */
+.pedido-card{display:flex;align-items:center;gap:14px;width:100%;padding:16px;border:1px solid rgba(226,232,240,.8);border-radius:16px;background:var(--papel);box-shadow:0 1px 3px rgba(0,0,0,.1),0 1px 2px -1px rgba(0,0,0,.1);text-align:left;font:inherit;color:var(--tinta);cursor:pointer;transition:all .2s ease}
+.pedido-card:hover{box-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -2px rgba(0,0,0,.1)}
 .pedido-card:focus-visible{outline:2px solid var(--marca2);outline-offset:2px}
 .pedido-icono{display:flex;align-items:center;justify-content:center;width:46px;height:46px;flex:none;border-radius:14px;background:var(--mango-claro);border:1px solid rgba(31,134,201,.18);color:var(--marca);transition:transform .2s}
 .pedido-icono svg{width:21px;height:21px}
@@ -585,8 +588,8 @@ button.kpi:hover{border-color:rgba(31,134,201,.45);box-shadow:0 12px 28px rgba(1
 .pedido-flecha{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;color:var(--suave);transition:background .15s,color .15s}
 .pedido-flecha svg{width:18px;height:18px}
 .pedido-card:hover .pedido-flecha{background:var(--hueco);color:var(--marca)}
-:root[data-theme="dark"] .pedido-card{box-shadow:0 1px 2px rgba(0,0,0,.3)}
-:root[data-theme="dark"] .pedido-card:hover{box-shadow:0 12px 26px rgba(0,0,0,.4)}
+:root[data-theme="dark"] .pedido-card{border-color:var(--linea);box-shadow:0 1px 3px rgba(0,0,0,.3),0 1px 2px -1px rgba(0,0,0,.3)}
+:root[data-theme="dark"] .pedido-card:hover{box-shadow:0 4px 6px -1px rgba(0,0,0,.4),0 2px 4px -2px rgba(0,0,0,.4)}
 @media (max-width:600px){
   .pedido-card{flex-wrap:wrap;align-items:flex-start;padding:14px;gap:12px}
   .pedido-icono{width:42px;height:42px;border-radius:12px}
