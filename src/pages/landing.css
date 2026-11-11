@@ -119,6 +119,11 @@
   outline: 3px solid #0ea5e9;
   outline-offset: 4px;
 }
+/* Botones redondos del menú (hamburguesa y X): ya traen su borde de degradado; su foco es un resplandor, no un segundo aro. */
+.landing button.boton-menu:focus-visible,
+button.boton-menu:focus-visible {
+  outline: none;
+}
 .landing-service {
   transition:
     border-color 0.3s,
