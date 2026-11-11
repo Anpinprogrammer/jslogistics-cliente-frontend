@@ -1,4 +1,4 @@
-import { api, DEMO } from './http';
+import { api } from './http';
 
 /** Lo que manda el formulario público "Solicitar envío". Coincide con POST /solicitudes/publico (backend/README.md). */
 export interface DatosSolicitud {
@@ -19,7 +19,6 @@ export interface DatosSolicitud {
 export const solicitudesApi = {
   /** Sin sesión. El backend responde siempre `{ solicitud: { recibida: true } }` y no devuelve lo guardado. */
   async enviar(datos: DatosSolicitud): Promise<void> {
-    if (DEMO) { await new Promise(r => setTimeout(r, 600)); return; }
     await api('/solicitudes/publico', { method: 'POST', json: datos });
   },
 };
