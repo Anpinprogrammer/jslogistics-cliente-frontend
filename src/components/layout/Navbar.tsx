@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Sun, Moon, Users, Briefcase, PhoneCall, Search, LogIn, UserPlus, ChevronRight, X, LogOut, Home, Package, UserRound } from 'lucide-react';
+import { Menu, Sun, Moon, Users, Briefcase, PhoneCall, Search, LogIn, UserPlus, ChevronRight, X, LogOut, Home, Package, UserRound } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSesion } from '../../auth/AuthProvider';
 import { useTheme } from '../../hooks/useTheme';
@@ -97,8 +97,10 @@ const Navbar: React.FC<{ hero?: boolean }> = ({ hero = false }) => {
           <span className="font-display text-lg font-800 uppercase tracking-wide text-white">JS Logistics</span>
         </Link>
         <button ref={cerrarRef} type="button" onClick={cerrarMenu} aria-label="Cerrar menú"
-          className="grid min-h-[44px] min-w-[44px] place-items-center rounded-xl border border-slate-800 bg-slate-900 p-2.5 text-slate-400 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400">
-          <X className="h-5 w-5" aria-hidden="true" />
+          className="group relative grid h-11 w-11 shrink-0 cursor-pointer place-items-center rounded-xl bg-gradient-to-tr from-sky-500 via-cyan-400 to-indigo-500 p-[2px] shadow-md shadow-sky-500/25 transition-[transform,box-shadow] duration-200 hover:scale-105 hover:shadow-sky-500/40 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400 motion-reduce:transform-none motion-reduce:transition-none">
+          <span className="grid h-full w-full place-items-center rounded-[10px] bg-slate-900 transition-colors group-hover:bg-slate-800">
+            <X className="h-5 w-5 text-sky-300 transition-transform duration-300 group-hover:rotate-90 motion-reduce:transform-none" strokeWidth={2.5} aria-hidden="true" />
+          </span>
         </button>
       </div>
 
@@ -273,12 +275,12 @@ const Navbar: React.FC<{ hero?: boolean }> = ({ hero = false }) => {
 
         {/* Mobile burger */}
         <button ref={hamburguesaRef} type="button"
-          className={hero
-            ? 'lg:hidden grid min-h-[44px] min-w-[44px] place-items-center rounded-lg p-2 text-slate-200 transition-colors hover:bg-white/5 hover:text-white'
-            : 'md:hidden grid min-h-[44px] min-w-[44px] place-items-center rounded-lg dark:text-silver-400 dark:hover:text-white text-gray-600 hover:text-gray-900'}
+          className={`${hero ? 'lg:hidden' : 'md:hidden'} group relative grid h-11 w-11 shrink-0 cursor-pointer place-items-center rounded-xl bg-gradient-to-tr from-sky-500 via-cyan-400 to-indigo-500 p-[2px] shadow-md shadow-sky-500/25 transition-[transform,box-shadow] duration-200 hover:scale-105 hover:shadow-sky-500/40 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400 motion-reduce:transform-none motion-reduce:transition-none`}
           aria-label="Abrir menú" aria-expanded={mobileOpen} aria-controls="menu-movil"
           onClick={() => setMobileOpen(true)}>
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+          <span className="grid h-full w-full place-items-center rounded-[10px] bg-slate-900 transition-colors group-hover:bg-slate-800 dark:bg-slate-950 dark:group-hover:bg-slate-900">
+            <Menu className="h-5 w-5 text-sky-300 transition-transform duration-200 group-hover:scale-110 motion-reduce:transform-none" strokeWidth={2.5} aria-hidden="true" />
+          </span>
         </button>
       </nav>
 
