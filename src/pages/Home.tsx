@@ -357,8 +357,16 @@ export default function Home() {
           aria-hidden="true"
           className="pointer-events-none absolute -left-20 top-1/4 -z-10 h-96 w-96 rounded-full bg-sky-500/10 blur-3xl dark:bg-sky-500/15"
         />
-        <div className="landing-shell grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-20">
-          <Reveal className="relative min-w-0">
+        <div className="landing-shell grid grid-cols-1 gap-y-8 lg:grid-cols-2 lg:gap-x-20 lg:gap-y-0">
+          <Reveal className="min-w-0 lg:col-start-2 lg:row-start-1 lg:self-end">
+            <p className="landing-eyebrow">01 / Somos JS Logistics</p>
+            <h2 className="landing-heading mt-4">
+              La logística se trata de{" "}
+              <span className="landing-accent">conectar personas.</span>
+            </h2>
+          </Reveal>
+          {/* En celular la foto va entre el título y el texto; desde lg queda a la izquierda, ocupando las dos filas. */}
+          <Reveal className="relative min-w-0 lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:self-center">
             <div className="relative overflow-hidden rounded-[1.75rem] bg-slate-900">
               <img
                 src="/img/hero/mensajero-1280.webp"
@@ -366,42 +374,42 @@ export default function Home() {
                 loading="lazy"
                 width={1280}
                 height={960}
-                className="aspect-[4/3] w-full object-cover"
+                className="aspect-square w-full object-cover min-[400px]:aspect-[5/4] sm:aspect-[4/3]"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-transparent" />
-              <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between gap-4 text-white sm:bottom-8 sm:left-8 sm:right-8">
+              {/* Antes de lg el texto de la foto sube para dejarle el borde inferior a la tarjeta blanca. */}
+              <div
+                aria-hidden="true"
+                className="absolute inset-x-0 top-0 h-3/5 bg-gradient-to-b from-slate-950/80 to-transparent lg:hidden"
+              />
+              <div className="absolute inset-x-5 top-5 flex items-start justify-between gap-4 text-white sm:inset-x-8 sm:top-8 lg:bottom-8 lg:top-auto lg:items-end">
                 <div>
-                  <p className="mb-2 text-[10px] uppercase tracking-[.2em] text-sky-200">
+                  <p className="mb-2 text-[10px] uppercase tracking-[.14em] text-sky-200 sm:tracking-[.2em]">
                     El origen de cada recorrido
                   </p>
-                  <p className="font-display text-4xl font-bold">
+                  <p className="font-display text-2xl font-bold sm:text-4xl">
                     Cali, Valle del Cauca.
                   </p>
                 </div>
-                <MapPin size={32} className="shrink-0 text-sky-300" />
+                <MapPin size={32} className="h-7 w-7 shrink-0 text-sky-300 sm:h-8 sm:w-8" />
               </div>
             </div>
-            <div className="landing-surface relative mx-4 -mt-5 flex items-center gap-4 rounded-2xl border p-5 shadow-lg sm:mx-8">
+            <div className="landing-surface landing-about-badge absolute inset-x-4 bottom-4 flex items-center gap-3 rounded-2xl border p-3.5 shadow-lg sm:inset-x-6 sm:bottom-6 sm:gap-4 sm:p-4 lg:relative lg:inset-x-auto lg:bottom-auto lg:mx-8 lg:-mt-5 lg:p-5">
               <span className="landing-icon">
                 <ShieldCheck size={24} />
               </span>
-              <div>
-                <p className="font-semibold">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold leading-snug sm:text-base">
                   Tu empresa tiene quién la mueva.
                 </p>
-                <p className="landing-muted mt-1 text-xs sm:text-sm">
+                <p className="landing-muted mt-0.5 text-xs sm:mt-1 sm:text-sm">
                   Una relación cercana, en cada entrega.
                 </p>
               </div>
             </div>
           </Reveal>
-          <Reveal delay={100} className="min-w-0">
-            <p className="landing-eyebrow">01 / Somos JS Logistics</p>
-            <h2 className="landing-heading mt-4">
-              La logística se trata de{" "}
-              <span className="landing-accent">conectar personas.</span>
-            </h2>
-            <p className="landing-muted mt-6 text-base leading-relaxed sm:text-lg">
+          <Reveal delay={100} className="min-w-0 lg:col-start-2 lg:row-start-2 lg:self-start">
+            <p className="landing-muted text-base leading-relaxed sm:text-lg lg:mt-6">
               Tus clientes esperan más que un paquete. Esperan que cumplas.
               Acompañamos a las empresas en la gestión de sus envíos, con
               información organizada y una atención cercana.
