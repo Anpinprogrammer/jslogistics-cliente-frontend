@@ -325,3 +325,16 @@
 }
 
 @media (min-width: 1024px) { .landing .landing-section { scroll-margin-top: 112px; } }
+/* "Nosotros" antes de lg: la tarjeta blanca va dentro de la foto, con vidrio para no tapar del todo la van. */
+@media (max-width: 1023.98px) {
+  .landing-about-badge {
+    background: color-mix(in srgb, var(--lp-surface) 95%, transparent);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+  .landing-about-badge .landing-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+}
