@@ -3,9 +3,8 @@
  *
  * Estado del backend (rama del backend, backend/README.md):
  * - Listo: GET /pedidos (el cliente solo ve los suyos), GET /pedidos/:guia, POST /pedidos/:guia/cambio-recibido, GET /clientes/:id.
- * - Listo también: GET /clientes/:id/movimientos y GET /pedidos/:guia/archivos (fotos firmadas de Storage, vencen en 1 hora).
+ * - Listo también: GET /clientes/:id/cuenta (saldo e historial paginado) y GET /pedidos/:guia/archivos (fotos firmadas de Storage, vencen en 1 hora).
  *   Si el backend desplegado aún no los tiene, un 404 se toma como lista vacía.
- * - Pendiente: saldos calculados en el servidor. Mientras tanto se calculan aquí con lib/negocio.ts, igual que la app actual.
  */
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Archivo, Cliente, Movimiento, PaginaPedidos, Pedido } from '../types/dominio';
@@ -95,12 +94,81 @@ export function useFichaCliente() {
   });
 }
 
-export function useMovimientosCliente() {
+export interface CambiosPerfilCliente {
+  nombre: string;
+  telefono: string;
+  direccionRecogida: string;
+  email: string;
+  claveActual?: string;
+}
+
+export function useActualizarPerfilCliente() {
+  const qc = useQueryClient();
+  const { usuario } = useSesion();
+  return useMutation({
+    mutationFn: (datos: CambiosPerfilCliente) =>
+      DEMO ? demo.actualizarPerfil(datos)
+        : api<{ cliente: Cliente }>('/clientes/mi-perfil', { method: 'PATCH', json: datos }).then(r => r.cliente),
+    onSuccess: cliente => qc.setQueryData(['cliente', 'ficha', usuario?.clienteId], cliente),
+  });
+}
+
+/** Una fila del historial de Mi cuenta (pedido cerrado o movimiento). */
+export interface FilaCuentaCliente {
+  fecha: string;
+  det: string;
+  v: number;
+  guia?: string;
+  nom: string;
+}
+
+/** Respuesta paginada de GET /clientes/:id/cuenta. */
+export interface CuentaCliente {
+  cliente?: Cliente;
+  saldo: number;
+  filas: FilaCuentaCliente[];
+  enRuta: number;
+  pagina: number;
+  porPagina: number;
+  total: number;
+  paginas: number;
+}
+
+/** Página del historial y saldo del cliente. El servidor corta las filas. */
+export function useCuentaCliente(pagina: number, porPagina: number) {
+  const { usuario } = useSesion();
+  const id = usuario?.clienteId;
+  return useQuery<CuentaCliente>({
+    queryKey: ['cliente', 'cuenta', id, pagina, porPagina],
+    enabled: !!id,
+    placeholderData: keepPreviousData,
+    queryFn: () => {
+      if (DEMO) return demo.cuenta(pagina, porPagina);
+      return opcional(
+        () => api<CuentaCliente>(`/clientes/${id}/cuenta?pagina=${pagina}&porPagina=${porPagina}`).then(r => {
+          const filas = r.filas ?? [];
+          const total = r.total ?? filas.length;
+          const actual = r.pagina ?? pagina;
+          const paginas = r.paginas ?? Math.max(1, Math.ceil(total / porPagina));
+          // Compatibilidad con un backend anterior que devolvía todas las filas.
+          return {
+            ...r, saldo: r.saldo ?? 0, enRuta: r.enRuta ?? 0,
+            filas: r.total === undefined ? filas.slice((actual - 1) * porPagina, actual * porPagina) : filas,
+            pagina: actual, porPagina: r.porPagina ?? porPagina, total, paginas,
+          };
+        }),
+        { saldo: 0, filas: [], enRuta: 0, pagina, porPagina, total: 0, paginas: 1 }
+      );
+    },
+  });
+}
+
+export function useMovimientosCliente(enabled = true) {
   const { usuario } = useSesion();
   const id = usuario?.clienteId;
   return useQuery({
     queryKey: ['cliente', 'movimientos', id],
-    enabled: !!id,
+    enabled: !!id && enabled,
     queryFn: () =>
       DEMO ? demo.movimientos()
         : opcional(() => api<{ movimientos: Movimiento[] }>(`/clientes/${id}/movimientos?limite=1000`).then(r => r.movimientos), []),
@@ -122,6 +190,9 @@ export function useConfirmarCambio() {
   return useMutation({
     mutationFn: (guia: string) =>
       DEMO ? demo.confirmarCambio(guia) : api<{ pedido: Pedido }>(`/pedidos/${guia}/cambio-recibido`, { method: 'POST' }).then(() => undefined),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['cliente', 'pedidos'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['cliente', 'pedidos'] });
+      qc.invalidateQueries({ queryKey: ['cliente', 'cuenta'] });
+    },
   });
 }

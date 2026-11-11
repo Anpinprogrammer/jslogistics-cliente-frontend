@@ -62,12 +62,13 @@ function Rutas() {
   const sinMarco = pathname.startsWith('/cliente');
   // La portada trae su propio navbar dentro del Hero, para que el fondo llegue hasta arriba.
   const esPortada = pathname === '/';
+  const esRastreo = pathname === '/track' || pathname === '/rastrear' || pathname === '/tracking';
   // En el ingreso se va bajando el portal, para que al entrar no haya que esperarlo.
   useEffect(() => { if (pathname === '/login') import('./portal/PortalCliente').catch(() => { /* se reintenta al abrirlo */ }); }, [pathname]);
   return (
     <div className="flex flex-col min-h-screen">
-      {!sinMarco && !esPortada && <Navbar hero={pathname === '/login'} />}
-      {(esPortada || pathname === '/login') && <JSBot />}
+      {!sinMarco && !esPortada && !esRastreo && <Navbar hero={pathname === '/login'} />}
+      {(esPortada || pathname === '/login' || esRastreo || sinMarco) && <JSBot enPortalCliente={sinMarco} />}
       <main className="flex-grow">
         <ScrollToHash />
         <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Spinner size="lg" /></div>}>
@@ -79,6 +80,8 @@ function Rutas() {
             <Route path="/activar" element={<Restablecer />} />
             <Route path="/register" element={<Register />} />
             <Route path="/track" element={<Track />} />
+            <Route path="/rastrear" element={<Track />} />
+            <Route path="/tracking" element={<Track />} />
             <Route path="/cliente/*" element={<RequireRole roles={['cliente']}><PortalCliente /></RequireRole>} />
             <Route path="/equipo" element={<RequireRole roles={['admin', 'asistente', 'mensajero']}><Equipo /></RequireRole>} />
             <Route path="*" element={
@@ -91,7 +94,7 @@ function Rutas() {
           </Routes>
         </Suspense>
       </main>
-      {!sinMarco && !esPortada && (pathname === '/login' ? <LandingFooter /> : <Footer />)}
+      {!sinMarco && !esPortada && !esRastreo && (pathname === '/login' ? <LandingFooter /> : <Footer />)}
     </div>
   );
 }

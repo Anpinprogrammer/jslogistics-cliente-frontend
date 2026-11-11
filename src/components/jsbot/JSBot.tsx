@@ -1,30 +1,67 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
-import { ArrowUpRight, Send, ShieldCheck, Sparkles, X } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ArrowUpRight, MessageCircle, Send, ShieldCheck, Sparkles, X } from "lucide-react";
+import { useSesion } from "../../auth/AuthProvider";
+import { ApiError, DEMO } from "../../api/http";
+import { derivacionDeError, enlaceWhatsApp, enviarChat, type DerivacionChat, type MensajeChat } from "../../api/chatbot";
 
 interface Mensaje {
   id: number;
   autor: "bot" | "usuario";
   texto: string;
 }
+const SALUDO: Mensaje = {
+  id: 0,
+  autor: "bot",
+  texto: "¡Hola! Soy JSBot, tu asistente de JS Logistics. ¿En qué puedo ayudarte hoy?",
+};
 const FOTO = "/img/jsbot/jsbot_4.webp";
+export const JSBOT_ABRIR = "jsbot:abrir";
 
-export default function JSBot() {
+export default function JSBot({ enPortalCliente = false }: { enPortalCliente?: boolean }) {
+  const { usuario, cargando: cargandoSesion } = useSesion();
+  const esCliente = usuario?.rol === "cliente";
+  const puedeConversar = !cargandoSesion;
   const [abierto, setAbierto] = useState(false);
   const [texto, setTexto] = useState("");
-  const [mensajes, setMensajes] = useState<Mensaje[]>([
-    {
-      id: 0,
-      autor: "bot",
-      texto:
-        "¡Hola! Soy JSBot, tu asistente de JS Logistics. ¿En qué puedo ayudarte hoy?",
-    },
-  ]);
+  const [enviando, setEnviando] = useState(false);
+  const [error, setError] = useState("");
+  const [derivacion, setDerivacion] = useState<DerivacionChat | null>(null);
+  const [mensajes, setMensajes] = useState<Mensaje[]>([SALUDO]);
   const burbuja = useRef<HTMLButtonElement>(null);
   const panel = useRef<HTMLElement>(null);
   const cerrar = useRef<HTMLButtonElement>(null);
   const historial = useRef<HTMLDivElement>(null);
   const entrada = useRef<HTMLInputElement>(null);
+  const origenApertura = useRef<HTMLElement | null>(null);
+  const controlador = useRef<AbortController | null>(null);
+  const siguienteId = useRef(1);
+  const usuarioAnterior = useRef(usuario?.id ?? null);
+
+  useEffect(() => () => controlador.current?.abort(), []);
+  useEffect(() => {
+    const id = usuario?.id ?? null;
+    if (usuarioAnterior.current === id) return;
+    usuarioAnterior.current = id;
+    controlador.current?.abort();
+    controlador.current = null;
+    siguienteId.current = 1;
+    setMensajes([SALUDO]);
+    setTexto("");
+    setError("");
+    setDerivacion(null);
+    setEnviando(false);
+  }, [usuario?.id]);
+
+  useEffect(() => {
+    const abrirDesdeHeader = () => {
+      origenApertura.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      setAbierto(true);
+    };
+    window.addEventListener(JSBOT_ABRIR, abrirDesdeHeader);
+    return () => window.removeEventListener(JSBOT_ABRIR, abrirDesdeHeader);
+  }, []);
 
   useEffect(() => {
     if (panel.current) panel.current.inert = !abierto;
@@ -51,9 +88,14 @@ export default function JSBot() {
     };
     document.addEventListener("keydown", alTeclado);
     return () => {
+      controlador.current?.abort();
       document.body.style.overflow = overflow;
       document.removeEventListener("keydown", alTeclado);
-      requestAnimationFrame(() => burbuja.current?.focus());
+      requestAnimationFrame(() => {
+        const origen = origenApertura.current;
+        (origen?.isConnected ? origen : burbuja.current)?.focus();
+        origenApertura.current = null;
+      });
     };
   }, [abierto]);
 
@@ -62,32 +104,57 @@ export default function JSBot() {
     if (el) el.scrollTop = mensajes.length === 1 ? 0 : el.scrollHeight;
   }, [mensajes, abierto]);
 
-  const enviar = (mensaje: string) => {
+  const enviar = async (mensaje: string) => {
     const limpio = mensaje.trim();
-    if (!limpio) return;
-    setMensajes((actuales) => [
-      ...actuales,
-      { id: actuales.length, autor: "usuario", texto: limpio },
-      {
-        id: actuales.length + 1,
-        autor: "bot",
-        texto:
-          "Esta es una vista previa de mi interfaz. El asistente aún no está conectado, pero ya puedes explorar cómo será nuestra conversación.",
-      },
-    ]);
+    if (!limpio || !puedeConversar || controlador.current) return;
+    const historial: MensajeChat[] = mensajes.slice(1).slice(-18).map(m => ({
+      rol: m.autor === "usuario" ? "user" : "assistant",
+      contenido: m.texto,
+    }));
+    while (historial[0]?.rol === "assistant") historial.shift();
+    const idUsuario = siguienteId.current++;
+    const abortar = new AbortController();
+    controlador.current = abortar;
+    setMensajes(actuales => [...actuales, { id: idUsuario, autor: "usuario", texto: limpio }]);
     setTexto("");
-    entrada.current?.focus();
+    setError("");
+    setDerivacion(null);
+    setEnviando(true);
+    try {
+      const respuesta = await enviarChat([...historial, { rol: "user", contenido: limpio }], esCliente, abortar.signal);
+      if (abortar.signal.aborted) return;
+      setMensajes(actuales => [...actuales, { id: siguienteId.current++, autor: "bot", texto: respuesta.respuesta }]);
+      setDerivacion(respuesta.derivar);
+    } catch (fallo) {
+      if (controlador.current !== abortar) return;
+      setMensajes(actuales => actuales.filter(m => m.id !== idUsuario));
+      setTexto(limpio);
+      if (!abortar.signal.aborted) {
+        setDerivacion(derivacionDeError(fallo));
+        setError(fallo instanceof ApiError && fallo.status === 429
+          ? fallo.message
+          : esCliente && fallo instanceof ApiError && (fallo.status === 401 || fallo.status === 403)
+            ? "Tu sesión de cliente terminó. Inicia sesión de nuevo para consultar tus pedidos."
+            : fallo instanceof Error ? fallo.message : "No pudimos enviar el mensaje. Intenta de nuevo.");
+      }
+    } finally {
+      if (controlador.current === abortar) {
+        controlador.current = null;
+        setEnviando(false);
+        if (panel.current && !panel.current.inert) entrada.current?.focus();
+      }
+    }
   };
   const alEnviar = (event: FormEvent) => {
     event.preventDefault();
-    enviar(texto);
+    void enviar(texto);
   };
+  const whatsappUrl = enlaceWhatsApp(derivacion);
 
   return createPortal(
     <>
-      <div
-        className={`group fixed bottom-6 right-5 z-50 flex items-center gap-3 sm:right-6 ${abierto ? "invisible pointer-events-none" : "visible"}`}
-        style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))" }}
+      {!enPortalCliente && <div
+        className={`group fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] right-5 z-50 flex items-center gap-3 sm:right-6 ${abierto ? "invisible pointer-events-none" : "visible"}`}
       >
         <div
           aria-hidden="true"
@@ -104,7 +171,7 @@ export default function JSBot() {
           <button
             ref={burbuja}
             type="button"
-            onClick={() => setAbierto((actual) => !actual)}
+            onClick={() => { origenApertura.current = burbuja.current; setAbierto((actual) => !actual); }}
             aria-label="Abrir JSBot"
             aria-expanded={abierto}
             aria-controls="jsbot-panel"
@@ -123,7 +190,7 @@ export default function JSBot() {
             />
           </button>
         </div>
-      </div>
+      </div>}
       <div
         className={`fixed inset-0 z-[70] overflow-hidden transition-[visibility] duration-300 motion-reduce:transition-none ${abierto ? "visible" : "invisible pointer-events-none"}`}
       >
@@ -167,8 +234,8 @@ export default function JSBot() {
             </button>
           </header>
           <div className="flex shrink-0 items-center gap-2 border-b border-sky-100 bg-sky-50 px-4 py-2.5 text-[10px] font-medium text-sky-800 dark:border-sky-900/40 dark:bg-sky-950/30 dark:text-sky-200">
-            <Sparkles size={13} className="shrink-0" /> Vista previa · Asistente
-            sin conectar
+            <Sparkles size={13} className="shrink-0" />
+            {DEMO ? "Vista previa de demostración" : cargandoSesion ? "Comprobando tu sesión…" : esCliente ? "Asistente para clientes de JS Logistics" : "Información general y estado de envíos"}
           </div>
           <div
             ref={historial}
@@ -190,13 +257,6 @@ export default function JSBot() {
                       />
                     </div>
                   </div>
-                  <span className="absolute bottom-1 right-1 flex items-center gap-1 rounded-full border border-slate-800 bg-slate-900 px-2 py-0.5 text-[10px] font-bold text-emerald-400 shadow-md">
-                    <span
-                      aria-hidden="true"
-                      className="h-1.5 w-1.5 rounded-full bg-emerald-400 motion-safe:animate-pulse"
-                    />
-                    Demo
-                  </span>
                 </div>
                 <h3 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">
                   JSBot
@@ -209,7 +269,7 @@ export default function JSBot() {
                 </p>
               </div>
             )}
-            {mensajes.length === 1 && (
+            {mensajes.length === 1 && puedeConversar && (
               <div
                 className="my-4 flex flex-col gap-2.5 px-2"
                 aria-label="Preguntas sugeridas"
@@ -222,13 +282,19 @@ export default function JSBot() {
                   <button
                     key={pregunta}
                     type="button"
-                    onClick={() => enviar(pregunta)}
-                    className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white p-3 text-left text-xs font-medium text-slate-600 transition-colors hover:border-sky-400 hover:text-sky-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-sky-500 dark:hover:text-sky-300"
+                    onClick={() => void enviar(pregunta)}
+                    disabled={enviando}
+                    className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white p-3 text-left text-xs font-medium text-slate-600 transition-colors hover:border-sky-400 hover:text-sky-700 disabled:cursor-wait disabled:opacity-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-sky-500 dark:hover:text-sky-300"
                   >
                     {pregunta}
                     <ArrowUpRight size={14} className="shrink-0" />
                   </button>
                 ))}
+              </div>
+            )}
+            {!cargandoSesion && !esCliente && mensajes.length === 1 && (
+              <div className="mx-2 mt-4 rounded-2xl border border-sky-200 bg-sky-50 p-3 text-center dark:border-sky-900/50 dark:bg-sky-950/30">
+                <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-300">Puedo ayudarte con información general y el estado de una guía. Para ver detalles de tus pedidos, <Link to="/login" onClick={() => setAbierto(false)} className="font-bold text-sky-700 underline underline-offset-2 dark:text-sky-300">inicia sesión</Link>.</p>
               </div>
             )}
             <div
@@ -253,9 +319,12 @@ export default function JSBot() {
                   </div>
                 </div>
               ))}
+              {enviando && <div className="flex justify-start" role="status"><div className="rounded-2xl rounded-tl-sm border border-slate-200 bg-white px-3.5 py-3 text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">JSBot está escribiendo…</div></div>}
             </div>
           </div>
           <footer className="shrink-0 border-t border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
+            {error && <p role="alert" className="mb-2 rounded-xl border border-rose-200 bg-rose-50 p-2.5 text-xs leading-relaxed text-rose-800 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-200">{error}</p>}
+            {whatsappUrl && <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="mb-2 flex min-h-10 items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 text-xs font-bold text-emerald-700 hover:bg-emerald-500/20 dark:text-emerald-300"><MessageCircle size={15} /> Hablar con una persona por WhatsApp</a>}
             <form
               onSubmit={alEnviar}
               className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-500/15 dark:border-slate-700 dark:bg-slate-950"
@@ -269,13 +338,14 @@ export default function JSBot() {
                 value={texto}
                 onChange={(event) => setTexto(event.target.value)}
                 maxLength={2000}
-                placeholder="Escribe aquí…"
+                placeholder={puedeConversar ? "Escribe aquí…" : "Comprobando tu sesión…"}
                 autoComplete="off"
+                disabled={!puedeConversar || cargandoSesion || enviando}
                 className="min-w-0 flex-1 bg-transparent px-2 py-2 text-sm outline-none placeholder:text-slate-500"
               />
               <button
                 type="submit"
-                disabled={!texto.trim()}
+                disabled={!texto.trim() || !puedeConversar || enviando}
                 aria-label="Enviar mensaje"
                 className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-sky-400 text-slate-950 transition-colors hover:bg-sky-300 disabled:cursor-not-allowed disabled:opacity-40"
               >
@@ -283,7 +353,7 @@ export default function JSBot() {
               </button>
             </form>
             <p className="mt-2 flex items-center justify-center gap-1.5 text-[9px] text-slate-500 dark:text-slate-400">
-              <ShieldCheck size={11} /> JS Logistics · Interfaz de demostración
+              <ShieldCheck size={11} /> {DEMO ? "JS Logistics · Datos de demostración" : esCliente ? "JS Logistics · Conversación de cliente" : "JS Logistics · Consulta pública"}
             </p>
           </footer>
         </aside>
