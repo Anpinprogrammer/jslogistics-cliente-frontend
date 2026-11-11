@@ -187,6 +187,7 @@ Por petición explícita del dueño, `Home.tsx` sustituye la composición anteri
 17. **El `Paginador` es de solo flechas en celular (≤ 600 px).** Los botones miden 44 × 44 px con `ChevronLeft`/`ChevronRight` y el indicador (“Página 1 de 15 / 1–5 de 74”) ocupa el resto; desde 601 px sigue siendo “‹ Anterior … Siguiente ›” idéntico a antes (comparado píxel a píxel). Antes, en Mi cuenta a 320 px el paginador se salía de su tarjeta. El texto del botón va en `.pag-txt` y el ícono en `.pag-ico`; el nombre accesible sale del `aria-label`. Lo usan Mis pedidos y Mi cuenta.
 
 18. **La barra inferior del portal en celular (`.pestanas`) es de vidrio y va de borde a borde.** Fondo `--papel` al 85 % con `backdrop-filter: blur(20px)`, borde superior `--linea` y sombra hacia arriba (más fuerte en oscuro); ya no es una píldora flotante y se quitó el degradado que la acompañaba. Sin `backdrop-filter` cae a `--papel` sólido. El acceso activo conserva su fondo `--mango-claro`. Sigue oculta desde 960 px.
+19. **El botón de cerrar de JSBot es una cápsula circular de 44 px con borde degradado `sky-500 → cyan-400 → indigo-500`** (el mismo halo del avatar), relleno `slate-900` y la X en `sky-300`. La cabecera del panel es oscura en claro y en oscuro, así que es igual en los dos temas. Al pasar el mouse la X gira 90° (se desactiva con `motion-reduce`).
 
 ## Trampas del entorno
 
@@ -205,6 +206,7 @@ Por petición explícita del dueño, `Home.tsx` sustituye la composición anteri
 
 ## Registro de sesiones (lo más reciente arriba)
 
+- **2026-11-11:** JSBot: botón de cerrar rediseñado como cápsula circular con borde degradado (decisión 19). Revisado a 390 y 1440 px.
 - **2026-11-11:** barra inferior del portal en celular con vidrio, borde superior y sombra (decisión 18); se distingue de las tarjetas en claro y del fondo en oscuro. Revisada a 320 y 390 px en Mis pedidos, Mi cuenta e Inicio; escritorio sin cambios (la barra no se muestra).
 - **2026-11-11:** `Paginador` compacto en celular (decisión 17): flechas de 44 px e indicador de dos líneas; corrige el desborde de Mi cuenta a 320 px. Revisado a 320, 390 y 1440 px en claro/oscuro en Mis pedidos y Mi cuenta; escritorio idéntico.
 - **2026-11-11:** Mi cuenta: la tabla de movimientos en celular pasa a Fecha · Valor · botón de info, con el detalle completo en una hoja inferior (decisión 16). Revisado a 320, 390 y 1440 px en claro/oscuro, sin desbordes; a 320 px la fecha baja a dos líneas para que quepa el botón.
