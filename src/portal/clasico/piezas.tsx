@@ -1,4 +1,5 @@
 /** Piezas de la vista del cliente de la app actual, con el mismo HTML y las mismas clases de estilos.css. */
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useRef, type ReactNode } from 'react';
 import type { Pedido } from '../../types/dominio';
 import { diaCorto, hoy, moverDia } from '../../lib/formato';
@@ -87,10 +88,10 @@ export function Paginador({ pagina, paginas, total, porPagina, ir, cargando }: {
   if (paginas <= 1) return null;
   const desde = (pagina - 1) * porPagina + 1, hasta = Math.min(total, pagina * porPagina);
   return (
-    <nav className="acciones" aria-label="Páginas de envíos" style={{ justifyContent: 'space-between', alignItems: 'center', flexWrap: 'nowrap', marginTop: 14 }}>
-      <button className="btn sec" style={{ minHeight: 44 }} disabled={pagina <= 1 || cargando} onClick={() => ir(pagina - 1)} aria-label="Página anterior">‹ Anterior</button>
+    <nav className="acciones pag" aria-label="Páginas de envíos" style={{ justifyContent: 'space-between', alignItems: 'center', flexWrap: 'nowrap', marginTop: 14 }}>
+      <button className="btn sec pag-btn" style={{ minHeight: 44 }} disabled={pagina <= 1 || cargando} onClick={() => ir(pagina - 1)} aria-label="Página anterior"><ChevronLeft className="pag-ico" size={20} aria-hidden="true" /><span className="pag-txt" aria-hidden="true">‹ Anterior</span></button>
       <span className="sub" aria-live="polite" style={{ textAlign: 'center', margin: 0 }}>Página <b>{pagina}</b> de {paginas}<br />{desde}–{hasta} de {total}</span>
-      <button className="btn sec" style={{ minHeight: 44 }} disabled={pagina >= paginas || cargando} onClick={() => ir(pagina + 1)} aria-label="Página siguiente">Siguiente ›</button>
+      <button className="btn sec pag-btn" style={{ minHeight: 44 }} disabled={pagina >= paginas || cargando} onClick={() => ir(pagina + 1)} aria-label="Página siguiente"><span className="pag-txt" aria-hidden="true">Siguiente ›</span><ChevronRight className="pag-ico" size={20} aria-hidden="true" /></button>
     </nav>
   );
 }

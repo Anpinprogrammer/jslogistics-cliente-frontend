@@ -733,3 +733,13 @@ dialog.dialogo-pedido::backdrop{background:rgba(2,6,23,.72);backdrop-filter:blur
   .cuenta-tabla td:first-child{white-space:normal}
 }
 .mov-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* Paginador: en celular los botones son solo la flecha (44 px) y el indicador usa el espacio que sobra; así no se sale a 320 px. */
+.pag-ico{display:none}
+@media(max-width:600px){
+  .pag{gap:8px}
+  .pag .pag-btn{flex:none;width:44px;min-width:44px;padding:0;display:inline-grid;place-items:center}
+  .pag .pag-txt{display:none}
+  .pag .pag-ico{display:block}
+  .pag>.sub{flex:1;min-width:0;font-size:.8rem}
+}
+
