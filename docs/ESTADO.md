@@ -186,6 +186,8 @@ Por petición explícita del dueño, `Home.tsx` sustituye la composición anteri
 
 17. **El `Paginador` es de solo flechas en celular (≤ 600 px).** Los botones miden 44 × 44 px con `ChevronLeft`/`ChevronRight` y el indicador (“Página 1 de 15 / 1–5 de 74”) ocupa el resto; desde 601 px sigue siendo “‹ Anterior … Siguiente ›” idéntico a antes (comparado píxel a píxel). Antes, en Mi cuenta a 320 px el paginador se salía de su tarjeta. El texto del botón va en `.pag-txt` y el ícono en `.pag-ico`; el nombre accesible sale del `aria-label`. Lo usan Mis pedidos y Mi cuenta.
 
+18. **La barra inferior del portal en celular (`.pestanas`) es de vidrio y va de borde a borde.** Fondo `--papel` al 85 % con `backdrop-filter: blur(20px)`, borde superior `--linea` y sombra hacia arriba (más fuerte en oscuro); ya no es una píldora flotante y se quitó el degradado que la acompañaba. Sin `backdrop-filter` cae a `--papel` sólido. El acceso activo conserva su fondo `--mango-claro`. Sigue oculta desde 960 px.
+
 ## Trampas del entorno
 
 - **Backend en el puerto 4000:** el proxy de `npm run dev` va a `http://localhost:4000`. Si otro proyecto ocupa ese puerto verás 403/404 que no son de nuestro backend (el nuestro responde `{ error: { code, message } }`). Se cambia con `VITE_PROXY_API` (ojo: en `js-logistics/frontend` la variable se llama `VITE_API_PROXY`).
@@ -203,6 +205,7 @@ Por petición explícita del dueño, `Home.tsx` sustituye la composición anteri
 
 ## Registro de sesiones (lo más reciente arriba)
 
+- **2026-11-11:** barra inferior del portal en celular con vidrio, borde superior y sombra (decisión 18); se distingue de las tarjetas en claro y del fondo en oscuro. Revisada a 320 y 390 px en Mis pedidos, Mi cuenta e Inicio; escritorio sin cambios (la barra no se muestra).
 - **2026-11-11:** `Paginador` compacto en celular (decisión 17): flechas de 44 px e indicador de dos líneas; corrige el desborde de Mi cuenta a 320 px. Revisado a 320, 390 y 1440 px en claro/oscuro en Mis pedidos y Mi cuenta; escritorio idéntico.
 - **2026-11-11:** Mi cuenta: la tabla de movimientos en celular pasa a Fecha · Valor · botón de info, con el detalle completo en una hoja inferior (decisión 16). Revisado a 320, 390 y 1440 px en claro/oscuro, sin desbordes; a 320 px la fecha baja a dos líneas para que quepa el botón.
 - **2026-11-11:** Hero: jerarquía tipográfica en celular (< 640 px): H1 de 32 px con interlineado 1,08, badge de 10 px más liviano (`py-1`, `sky-400/90`), bajada de 13 px, CTA en `text-xs` con `tracking-wide` y micro-badges `font-medium` con iconos de 14 px. Desde `sm` todo queda como antes (comparado píxel a píxel a 768 y 1440 px). El campo de rastreo se dejó en `text-sm`: bajo 16 px iOS ya hace zoom al enfocar, y `text-xs` lo empeoraría.
