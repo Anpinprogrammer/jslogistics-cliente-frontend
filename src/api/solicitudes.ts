@@ -16,6 +16,10 @@ export interface DatosSolicitud {
   sitio: string;
 }
 
+/** Lo que manda un cliente con sesión desde su portal (POST /solicitudes/portal). Su ficha la pone el backend
+    con la sesión: aquí nunca se manda el clienteId. Si `email` va vacío, el backend usa el de la cuenta. */
+export type DatosSolicitudPortal = Omit<DatosSolicitud, 'sitio'>;
+
 export const solicitudesApi = {
   /** Sin sesión. El backend responde siempre `{ solicitud: { recibida: true } }` y no devuelve lo guardado. */
   async enviar(datos: DatosSolicitud): Promise<void> {

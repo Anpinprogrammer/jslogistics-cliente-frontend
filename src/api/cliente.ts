@@ -3,6 +3,7 @@
  *
  * Estado del backend (rama del backend, backend/README.md):
  * - Listo: GET /pedidos (el cliente solo ve los suyos), GET /pedidos/:guia, POST /pedidos/:guia/cambio-recibido, GET /clientes/:id.
+ * - Listo: POST /solicitudes/portal (pedir un envío nuevo desde el portal; la oficina lo aprueba).
  * - Listo también: GET /clientes/:id/cuenta (saldo e historial paginado) y GET /pedidos/:guia/archivos (fotos firmadas de Storage, vencen en 1 hora).
  *   Si el backend desplegado aún no los tiene, un 404 se toma como lista vacía.
  */
@@ -12,6 +13,7 @@ import { cambioPendiente, delDia } from '../lib/negocio';
 import { api, ApiError, DEMO } from './http';
 import { demo } from '../demo/datos';
 import { useSesion } from '../auth/AuthProvider';
+import type { DatosSolicitudPortal } from './solicitudes';
 
 const MAX_PAGINAS = 20; // 20 × 200 = 4.000 pedidos: suficiente mientras el backend no devuelva el saldo
 
@@ -194,5 +196,14 @@ export function useConfirmarCambio() {
       qc.invalidateQueries({ queryKey: ['cliente', 'pedidos'] });
       qc.invalidateQueries({ queryKey: ['cliente', 'cuenta'] });
     },
+  });
+}
+
+/** "Nuevo pedido" del portal: manda la solicitud a la oficina. No crea la guía: la crea la oficina al asignar el mensajero. */
+export function useNuevaSolicitud() {
+  return useMutation({
+    mutationFn: (datos: DatosSolicitudPortal) =>
+      DEMO ? demo.nuevaSolicitud(datos)
+        : api('/solicitudes/portal', { method: 'POST', json: datos }).then(() => undefined),
   });
 }

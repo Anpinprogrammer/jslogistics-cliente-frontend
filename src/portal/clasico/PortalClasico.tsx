@@ -5,7 +5,7 @@
  */
 import { useEffect, useState, type FormEvent } from 'react';
 import { Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { AlertTriangle, Bot, Calendar, CheckCircle2, ChevronRight, Eye, EyeOff, FileText, Image as ImageIcon, Info, KeyRound, Lock, Mail, MapPin, Maximize2, Moon, PackageCheck, Phone, Receipt, RotateCcw, Save, Search, Settings, ShieldCheck, Store, Sun, Truck, Undo2, X } from 'lucide-react';
+import { AlertTriangle, Bot, Calendar, CheckCircle2, ChevronRight, Eye, EyeOff, FileText, Image as ImageIcon, Info, KeyRound, Lock, Mail, MapPin, Maximize2, Moon, PackageCheck, Phone, Plus, Receipt, RotateCcw, Save, Search, Settings, ShieldCheck, Store, Sun, Truck, Undo2, X } from 'lucide-react';
 import './clasico.css';
 import { useSesion } from '../../auth/AuthProvider';
 import { useActualizarPerfilCliente, useConfirmarCambio, useCuentaCliente, useMovimientosCliente, usePaginaPedidos, usePruebas, type FiltroPedidos } from '../../api/cliente';
@@ -21,6 +21,7 @@ import { useTheme } from '../../hooks/useTheme';
 import { JSBOT_ABRIR } from '../../components/jsbot/JSBot';
 import { Icono } from './iconos';
 import { Cabecera, Columnas, Dialogo, Dona, EtqCambio, EtqDash, Foto, Paginador } from './piezas';
+import NuevoPedido from './NuevoPedido';
 
 const VERDE = 'var(--verde)', ROJO = 'var(--rojo)';
 const LOGO = '/img/clasico/logo.png';
@@ -183,6 +184,8 @@ const lineaPedido = (p: DatosCliente['pedidos'][number]) =>
 /* ---------------------------- Mis pedidos ---------------------------- */
 function Pedidos({ d, abrir }: { d: DatosCliente; abrir: (g: string) => void }) {
   const [sp, setSp] = useSearchParams();
+  const { usuario } = useSesion();
+  const [nuevo, setNuevo] = useState(false);
   const f = (sp.get('f') || 'todos') as FiltroPedidos;
   const [buscar, setBuscarT] = useState(''), [dia, setDiaT] = useState(''), [pagina, setPagina] = useState(1), porPagina = usePorPagina();
   // Cambiar un filtro vuelve a la primera página.
@@ -200,7 +203,13 @@ function Pedidos({ d, abrir }: { d: DatosCliente; abrir: (g: string) => void }) 
   const ir = (n: number) => { setPagina(n); window.scrollTo({ top: 0, behavior: 'smooth' }); };
   return (
     <>
-      <h1>Hola, {d.cliente!.nombre}</h1><p className="sub">Tus envíos con JS Logistics y sus pruebas de entrega.</p>
+      <div className="pedidos-cab">
+        <div><h1>Hola, {d.cliente!.nombre}</h1><p className="sub">Tus envíos con JS Logistics y sus pruebas de entrega.</p></div>
+        <button type="button" className="btn nuevo-pedido" onClick={() => setNuevo(true)}><Plus size={18} aria-hidden="true" />Nuevo pedido</button>
+      </div>
+      <Dialogo abierto={nuevo} alCerrar={() => setNuevo(false)} variante="pedido">
+        <NuevoPedido cliente={d.cliente} email={usuario?.email ?? ''} alCerrar={() => setNuevo(false)} />
+      </Dialogo>
       {cambios.length > 0 && <div className="aviso alerta">Tienes {cambios.length === 1 ? '1 prenda de cambio' : cambios.length + ' prendas de cambio'} por recibir ({cambios.map(p => p.guia).join(', ')}). Cuando te la entreguen, ábrela y confirma que la recibiste.</div>}
 
       <div className="pedidos-toolbar">
