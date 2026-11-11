@@ -97,8 +97,8 @@ const Navbar: React.FC<{ hero?: boolean }> = ({ hero = false }) => {
           <span className="font-display text-lg font-800 uppercase tracking-wide text-white">JS Logistics</span>
         </Link>
         <button ref={cerrarRef} type="button" onClick={cerrarMenu} aria-label="Cerrar menú"
-          className="group relative grid h-11 w-11 shrink-0 cursor-pointer place-items-center rounded-xl bg-gradient-to-tr from-sky-500 via-cyan-400 to-indigo-500 p-[1.5px] shadow-lg shadow-sky-500/10 transition-[transform,box-shadow] duration-200 hover:scale-105 hover:shadow-sky-500/30 active:scale-95 focus-visible:outline-none focus-visible:shadow-lg focus-visible:shadow-sky-400/50 motion-reduce:transform-none motion-reduce:transition-none">
-          <span className="grid h-full w-full place-items-center rounded-[10px] bg-slate-950/90 backdrop-blur-md transition-colors group-hover:bg-slate-900">
+          className="group relative grid h-11 w-11 shrink-0 cursor-pointer place-items-center rounded-full bg-gradient-to-tr from-sky-500 via-cyan-400 to-indigo-500 p-[1.5px] shadow-lg shadow-sky-500/10 transition-[transform,box-shadow] duration-200 hover:scale-105 hover:shadow-sky-500/30 active:scale-95 focus-visible:outline-none focus-visible:shadow-lg focus-visible:shadow-sky-400/50 motion-reduce:transform-none motion-reduce:transition-none">
+          <span className="grid h-full w-full place-items-center rounded-full bg-slate-950/90 backdrop-blur-md transition-colors group-hover:bg-slate-900">
             <X className="h-5 w-5 text-sky-300 transition-[transform,color] duration-300 group-hover:rotate-90 group-hover:text-white motion-reduce:transform-none" strokeWidth={2.5} aria-hidden="true" />
           </span>
         </button>
@@ -275,10 +275,10 @@ const Navbar: React.FC<{ hero?: boolean }> = ({ hero = false }) => {
 
         {/* Mobile burger */}
         <button ref={hamburguesaRef} type="button"
-          className={`${hero ? 'lg:hidden' : 'md:hidden'} group relative grid h-11 w-11 shrink-0 cursor-pointer place-items-center rounded-xl bg-gradient-to-tr from-sky-500 via-cyan-400 to-indigo-500 p-[1.5px] shadow-lg shadow-sky-500/10 transition-[transform,box-shadow] duration-200 hover:scale-105 hover:shadow-sky-500/30 active:scale-95 focus-visible:outline-none focus-visible:shadow-lg focus-visible:shadow-sky-400/50 motion-reduce:transform-none motion-reduce:transition-none`}
+          className={`${hero ? 'lg:hidden' : 'md:hidden'} group relative grid h-11 w-11 shrink-0 cursor-pointer place-items-center rounded-full bg-gradient-to-tr from-sky-500 via-cyan-400 to-indigo-500 p-[1.5px] shadow-lg shadow-sky-500/10 transition-[transform,box-shadow] duration-200 hover:scale-105 hover:shadow-sky-500/30 active:scale-95 focus-visible:outline-none focus-visible:shadow-lg focus-visible:shadow-sky-400/50 motion-reduce:transform-none motion-reduce:transition-none`}
           aria-label="Abrir menú" aria-expanded={mobileOpen} aria-controls="menu-movil"
           onClick={() => setMobileOpen(true)}>
-          <span className="grid h-full w-full place-items-center rounded-[10px] bg-slate-950/90 backdrop-blur-md transition-colors group-hover:bg-slate-900">
+          <span className="grid h-full w-full place-items-center rounded-full bg-slate-950/90 backdrop-blur-md transition-colors group-hover:bg-slate-900">
             <Menu className="h-5 w-5 text-white transition-[transform,color] duration-200 group-hover:scale-110 group-hover:text-sky-300 motion-reduce:transform-none" strokeWidth={2.5} aria-hidden="true" />
           </span>
         </button>
