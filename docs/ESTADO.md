@@ -199,6 +199,7 @@ Por petición explícita del dueño, `Home.tsx` sustituye la composición anteri
 
 ## Registro de sesiones (lo más reciente arriba)
 
+- **2026-11-11:** Hero: jerarquía tipográfica en celular (< 640 px): H1 de 32 px con interlineado 1,08, badge de 10 px más liviano (`py-1`, `sky-400/90`), bajada de 13 px, CTA en `text-xs` con `tracking-wide` y micro-badges `font-medium` con iconos de 14 px. Desde `sm` todo queda como antes (comparado píxel a píxel a 768 y 1440 px). El campo de rastreo se dejó en `text-sm`: bajo 16 px iOS ya hace zoom al enfocar, y `text-xs` lo empeoraría.
 - **2026-11-11:** Hero: el rastreo en celular pasa de una tarjeta de ~300 px a una barra de una línea con lupa (decisión 15); en escritorio la tarjeta pierde el rótulo “Siempre cerca”, la etiqueta RASTREO y el reloj, y queda más ligera. Revisado a 320, 390, 768 y 1440 px, sin desbordes; Enter y lupa llevan a `/track?n=…`.
 - **2026-11-11:** landing, sección “Nosotros” en celular: el título va antes de la foto, la tarjeta blanca queda dentro de la foto (vidrio, sin desbordarse) y el texto de Cali sube arriba (decisión 14). Foto cuadrada bajo 400 px y 5:4 hasta `sm` para que quepan. Revisado a 320, 390, 768 y 1024 px en claro/oscuro sin desbordes; a 1440 px idéntico píxel a píxel a antes.
 - **2026-11-11:** login en celular más compacto: tarjeta de 320 px como máximo (antes casi todo el ancho) y unos 60 px más baja; la animación de entrada se mide sola sobre el nuevo tamaño. Revisado a 320, 360, 390 y 430 px; desde 640 px queda idéntico a antes.

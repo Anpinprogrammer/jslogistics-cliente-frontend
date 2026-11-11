@@ -139,12 +139,12 @@ export default function Home() {
         />
         <div className="landing-shell relative z-20 flex flex-1 flex-col items-center justify-center gap-6 py-6 lg:grid lg:grid-cols-12 lg:gap-x-12 lg:gap-y-6 lg:py-8 lg:content-center">
           <div className="w-full min-w-0 shrink-0 lg:col-span-7 lg:col-start-1 lg:row-start-1">
-            <div className="landing-enter mb-4 inline-flex items-center gap-2.5 rounded-full border border-sky-400/30 bg-sky-400/10 px-3 py-2 text-[10px] font-bold uppercase tracking-[.16em] text-sky-200 sm:text-xs">
+            <div className="landing-enter mb-2 inline-flex items-center gap-2 rounded-full border border-sky-400/30 bg-sky-400/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-sky-400/90 sm:mb-4 sm:gap-2.5 sm:py-2 sm:text-xs sm:tracking-[.16em] sm:text-sky-200">
               <span className="h-1.5 w-1.5 rounded-full bg-sky-300" /> Desde
               Cali. Conectados contigo.
             </div>
             <h1
-              className="landing-enter text-3xl font-black uppercase tracking-tight leading-none text-white sm:text-5xl lg:text-6xl xl:text-7xl"
+              className="landing-enter mt-3 text-[32px] font-black uppercase tracking-tight leading-[1.08] text-white sm:mt-0 sm:text-5xl sm:leading-none lg:text-6xl xl:text-7xl"
               style={{ animationDelay: "80ms" }}
             >
               Tu negocio avanza.
@@ -155,7 +155,7 @@ export default function Home() {
               </span>
             </h1>
             <p
-              className="landing-enter mt-4 max-w-lg text-sm leading-relaxed text-slate-300 sm:text-base lg:mt-6 lg:text-lg"
+              className="landing-enter mt-3 max-w-lg text-[13px] leading-relaxed text-slate-300 sm:mt-4 sm:text-base lg:mt-6 lg:text-lg"
               style={{ animationDelay: "160ms" }}
             >
               Detrás de cada envío hay una promesa. Conecta tu empresa con sus
@@ -230,24 +230,24 @@ export default function Home() {
             >
               <Link
                 to="/register"
-                className="flex w-full min-h-[44px] items-center justify-center gap-2 rounded-2xl bg-sky-400 px-5 py-3.5 text-sm font-bold text-slate-950 shadow-lg shadow-sky-500/20 transition-all hover:bg-sky-300 active:scale-95 lg:w-auto"
+                className="flex w-full min-h-[44px] items-center justify-center gap-2 rounded-2xl bg-sky-400 px-5 py-3.5 text-xs font-bold tracking-wide text-slate-950 shadow-lg shadow-sky-500/20 sm:text-sm sm:tracking-normal transition-all hover:bg-sky-300 active:scale-95 lg:w-auto"
               >
                 Quiero enviar <ArrowRight size={18} />
               </Link>
               <a
                 href="#nosotros"
-                className="flex w-full min-h-[44px] items-center justify-center gap-2 rounded-2xl border border-slate-800 bg-slate-900/60 px-5 py-3 text-xs font-semibold text-slate-300 transition-colors hover:bg-slate-800 lg:w-auto"
+                className="flex w-full min-h-[44px] items-center justify-center gap-2 rounded-2xl border border-slate-800 bg-slate-900/60 px-5 py-3 text-xs font-bold tracking-wide text-slate-300 transition-colors sm:font-semibold sm:tracking-normal hover:bg-slate-800 lg:w-auto"
               >
                 Conoce JS Logistics <ArrowDown size={16} />
               </a>
             </div>
-            <div className="mt-5 flex flex-wrap gap-x-6 gap-y-3 text-xs text-slate-300">
+            <div className="mt-5 flex flex-wrap gap-x-6 gap-y-3 text-xs font-medium text-slate-300 sm:font-normal">
               <span className="flex items-center gap-2">
-                <ShieldCheck size={16} className="text-sky-300" /> Atención a
+                <ShieldCheck size={16} className="h-3.5 w-3.5 text-sky-400 sm:h-4 sm:w-4 sm:text-sky-300" /> Atención a
                 empresas
               </span>
               <span className="flex items-center gap-2">
-                <MapPin size={16} className="text-sky-300" /> Cali, Colombia
+                <MapPin size={16} className="h-3.5 w-3.5 text-sky-400 sm:h-4 sm:w-4 sm:text-sky-300" /> Cali, Colombia
               </span>
             </div>
           </div>
