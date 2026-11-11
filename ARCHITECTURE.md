@@ -71,9 +71,9 @@ El token nunca llega al JavaScript. La versión de sesión vive en el JWT, y el 
 
 Después de iniciar sesión, el cliente ve el portal clásico: el de la app actual, con el mismo HTML, las mismas clases y
 su `estilos.css`. En escritorio el menú lateral adopta el estilo de la app de oficina (logo con separador, accesos
-agrupados por sección y el activo con acento azul); en el celular se mantienen las pestañas de abajo. El Dashboard de
-Inicio tiene tema claro/oscuro con botón en la barra superior y usa todo el ancho desde 1280 px (tope de 1600 px en
-monitores muy anchos).
+agrupados por sección y el activo con acento azul); en el celular se mantienen las pestañas de abajo. El menú lateral
+**permanece oscuro** en ambos temas; la barra superior sigue el tema en escritorio y **es oscura en móvil**. El Dashboard
+de Inicio usa todo el ancho desde 1280 px (tope de 1600 px en monitores muy anchos).
 
 - `PortalCliente.tsx` carga el portal con `lazy()`, así que su CSS y su código solo se descargan al entrar.
 - **CSS del clásico.** `postcss.config.js` antepone `.clasico` a cada regla de `clasico.css` y convierte `:root`, `html` y `body` en `.clasico`. Gracias a eso, el CSS original se puede copiar casi sin tocarlo y no afecta a Tailwind ni a la landing. Si la app actual cambia su `estilos.css`, se vuelve a copiar; los ajustes propios van al final del archivo.

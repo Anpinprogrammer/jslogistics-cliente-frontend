@@ -79,6 +79,7 @@ export interface Cliente {
   id: string;
   nombre: string;
   telefono: string;
+  direccionRecogida: string;
   tarifa: number;
 }
 

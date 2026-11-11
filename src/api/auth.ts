@@ -21,6 +21,10 @@ export const authApi = {
     if (DEMO) return demo.salir();
     await api('/auth/salir', { method: 'POST' });
   },
+  async cambiarClave(claveActual: string, claveNueva: string): Promise<void> {
+    if (DEMO) return demo.cambiarClave(claveActual, claveNueva);
+    await api('/auth/clave', { method: 'POST', json: { claveActual, claveNueva } });
+  },
   /** Pide el enlace. El backend responde 204 exista o no la cuenta, para no revelar correos. */
   async recuperar(email: string): Promise<void> {
     if (DEMO) { await new Promise(r => setTimeout(r, 250)); return; }

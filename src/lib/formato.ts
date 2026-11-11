@@ -5,6 +5,7 @@ export const ms = (iso: string | number | null | undefined) =>
   iso == null ? 0 : typeof iso === 'number' ? iso : new Date(iso).getTime();
 
 export const pesos = (n: number) => '$ ' + Math.round(Number(n) || 0).toLocaleString('es-CO');
+export const pesosConSigno = (n: number) => '$ ' + (n > 0 ? '+' : '') + Math.round(Number(n) || 0).toLocaleString('es-CO');
 
 /** Día AAAA-MM-DD en hora de Colombia. */
 export const diaDe = (f: string | number) => new Date(ms(f)).toLocaleDateString('en-CA', { timeZone: ZONA });

@@ -18,11 +18,13 @@ Variables en `.env.example`. Si `npm run dev` da 403 o 404 raros, revisa que el 
 
 Después de iniciar sesión desde la landing, el cliente ve el **portal clásico**: la misma vista de la app actual
 (inicio con indicadores, mis pedidos con filtros y pruebas de entrega, confirmar prenda de cambio, mi cuenta con saldo,
-movimientos y recibo de cuadre del día). En escritorio el menú lateral sigue el estilo de la app de oficina (logo con
+movimientos y recibo de cuadre del día). Mi cuenta pagina el historial de movimientos en el servidor (5 en celular y
+10 en computador) y el recibo carga los movimientos completos solo al abrirlo. En escritorio el menú lateral sigue el estilo de la app de oficina (logo con
 separador, accesos agrupados por sección y el activo con acento azul); en el celular se usan las pestañas de abajo.
 El dashboard permite cambiar entre **modo claro y oscuro** desde la barra superior, y desde 1280 px aprovecha todo el
-ancho disponible (con un tope de 1600 px en monitores muy anchos). En escritorio el menú lateral **siempre es oscuro**
-(como el de la oficina) y se puede **colapsar a solo íconos** con el botón del pie.
+ancho disponible (con un tope de 1600 px en monitores muy anchos). El menú lateral de escritorio **siempre es oscuro**;
+la barra superior sigue el tema en escritorio y **permanece oscura en móvil**. El menú se puede **colapsar a solo
+íconos** con el botón del pie.
 
 El CSS del portal clásico es una copia de `js-logistics/app/css/estilos.css`. `postcss.config.js` encierra todas sus reglas
 dentro de `.clasico`, así que no choca con Tailwind ni con la landing.
@@ -54,7 +56,8 @@ El contrato de la API está en `js-logistics/backend/README.md`: cualquier cambi
 
 ## Lo que falta del backend
 
+- Antes de activar JSBot en producción, reemplazar los ejemplos entre corchetes de `js-logistics/backend/chatbot/informacion-empresa.md` por horarios, cobertura y políticas confirmadas; configurar `ANTHROPIC_API_KEY` y, si se quiere derivación directa, `CHATBOT_WHATSAPP` en el backend.
 - Saldos calculados en el servidor: por ahora el portal descarga los pedidos del cliente y calcula el saldo con `lib/negocio.ts`.
 - Subida de fotos y firmas a Storage: la lectura (`GET /api/pedidos/:guia/archivos`) ya existe; si el backend desplegado aún no la tiene, el portal muestra el pedido sin fotos.
 - Tiempo real (SSE): mientras tanto, los pedidos se refrescan cada 60 segundos.
-- `/register` y `/track` siguen siendo las páginas de la landing original y no tienen endpoint todavía.
+- `/register` no tiene endpoint todavía. La vista `/track` ya está rediseñada y funciona con guías de demostración en modo demo; en producción conserva la consulta heredada `GET /api/track/:guia`, pero el backend aún no documenta ni implementa ese endpoint público. Hace falta definir una respuesta pública segura antes de habilitar el rastreo real.

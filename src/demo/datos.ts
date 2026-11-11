@@ -4,12 +4,14 @@
  * Credenciales: cliente@demo.co / demo1234
  */
 import type { Archivo, Cliente, Movimiento, Motivo, Pedido, Usuario } from '../types/dominio';
+import { filasCuenta, saldoCliente } from '../lib/negocio';
 import { ApiError } from '../api/http';
 
 const CLAVE_SESION = 'jsl_demo_sesion';
 const CLAVE_CAMBIOS = 'jsl_demo_cambios';
 const USUARIO: Usuario = { id: 'u-demo', email: 'cliente@demo.co', nombre: 'Laura Gómez', rol: 'cliente', clienteId: 'c-luna', mensajeroId: null };
-const CLIENTE: Cliente = { id: 'c-luna', nombre: 'Tienda Luna', telefono: '3001234567', tarifa: 8000 };
+const CLIENTE: Cliente = { id: 'c-luna', nombre: 'Tienda Luna', telefono: '3001234567', direccionRecogida: '', tarifa: 8000 };
+let clienteDemo = { ...CLIENTE }, usuarioDemo = { ...USUARIO }, claveDemo = 'demo1234';
 
 const leer = (k: string) => { try { return localStorage.getItem(k); } catch { return null; } };
 const guardar = (k: string, v: string | null) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch { /* sin almacenamiento */ } };
@@ -90,18 +92,44 @@ function pedidosActuales() {
 }
 
 export const demo = {
-  sesion: () => espera(leer(CLAVE_SESION) ? USUARIO : null, 150),
+  sesion: () => espera(leer(CLAVE_SESION) ? usuarioDemo : null, 150),
   async ingresar(email: string, clave: string) {
     await espera(null, 400);
-    if (email.trim().toLowerCase() !== USUARIO.email || clave !== 'demo1234')
+    if (email.trim().toLowerCase() !== usuarioDemo.email || clave !== claveDemo)
       throw new ApiError(401, 'CREDENCIALES', 'Correo o contraseña incorrectos. En la demo usa cliente@demo.co / demo1234.');
     guardar(CLAVE_SESION, '1');
-    return USUARIO;
+    return usuarioDemo;
   },
   salir: async () => { guardar(CLAVE_SESION, null); },
+  async cambiarClave(claveActual: string, claveNueva: string) {
+    await espera(null, 250);
+    if (claveActual !== claveDemo) throw new ApiError(400, 'DATOS_INVALIDOS', 'La contraseña actual no es correcta');
+    if (claveNueva.length < 10) throw new ApiError(400, 'DATOS_INVALIDOS', 'La nueva contraseña debe tener al menos 10 caracteres');
+    claveDemo = claveNueva;
+  },
+  async actualizarPerfil(datos: { nombre: string; telefono: string; direccionRecogida: string; email: string; claveActual?: string }) {
+    await espera(null, 250);
+    if (datos.email !== usuarioDemo.email && datos.claveActual !== claveDemo)
+      throw new ApiError(400, 'DATOS_INVALIDOS', 'Escribe tu contraseña actual para cambiar el correo');
+    clienteDemo = { ...clienteDemo, nombre: datos.nombre.trim(), telefono: datos.telefono.trim(), direccionRecogida: datos.direccionRecogida.trim() };
+    usuarioDemo = { ...usuarioDemo, email: datos.email.trim().toLowerCase() };
+    return clienteDemo;
+  },
   pedidos: () => espera(pedidosActuales()),
-  cliente: () => espera(CLIENTE),
+  cliente: () => espera(clienteDemo),
   movimientos: () => espera(generarMovs()),
+  cuenta: (pagina: number, porPagina: number) => {
+    const pedidos = pedidosActuales(), movs = generarMovs();
+    const filas = filasCuenta(pedidos, movs);
+    const total = filas.length, paginas = Math.max(1, Math.ceil(total / porPagina));
+    const actual = Math.min(Math.max(1, pagina), paginas);
+    return espera({
+      saldo: saldoCliente(pedidos, movs),
+      enRuta: pedidos.filter(p => p.estado === 'pendiente').length,
+      filas: filas.slice((actual - 1) * porPagina, actual * porPagina),
+      pagina: actual, porPagina, total, paginas,
+    });
+  },
   archivos: (guia: string) => {
     const p = pedidosActuales().find(x => x.guia === guia);
     const a: Archivo[] = [{ tipo: 'salida', url: svg('#25508e', 'Salida ' + guia, CAJA) }];
