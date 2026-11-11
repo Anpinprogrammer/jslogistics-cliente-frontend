@@ -203,6 +203,7 @@ export function useConfirmarCambio() {
 export function useNuevaSolicitud() {
   return useMutation({
     mutationFn: (datos: DatosSolicitudPortal) =>
-      api('/solicitudes/portal', { method: 'POST', json: datos }).then(() => undefined),
+      DEMO ? demo.nuevaSolicitud(datos)
+        : api('/solicitudes/portal', { method: 'POST', json: datos }).then(() => undefined),
   });
 }
