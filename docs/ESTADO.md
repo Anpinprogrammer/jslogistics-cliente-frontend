@@ -188,7 +188,7 @@ Por petición explícita del dueño, `Home.tsx` sustituye la composición anteri
 
 18. **La barra inferior del portal en celular (`.pestanas`) es de vidrio y va de borde a borde.** Fondo `--papel` al 85 % con `backdrop-filter: blur(20px)`, borde superior `--linea` y sombra hacia arriba (más fuerte en oscuro); ya no es una píldora flotante y se quitó el degradado que la acompañaba. Sin `backdrop-filter` cae a `--papel` sólido. El acceso activo conserva su fondo `--mango-claro`. Sigue oculta desde 960 px.
 19. **El botón de cerrar de JSBot es una cápsula circular de 44 px con borde degradado `sky-500 → cyan-400 → indigo-500`** (el mismo halo del avatar), relleno `slate-900` y la X en `sky-300`. La cabecera del panel es oscura en claro y en oscuro, así que es igual en los dos temas. Al pasar el mouse la X gira 90° (se desactiva con `motion-reduce`).
-20. **El botón de hamburguesa del Navbar es la misma cápsula de JSBot** (decisión 19): 44 px, `rounded-xl`, borde degradado `sky-500 → cyan-400 → indigo-500`, relleno oscuro y ícono `Menu` en `sky-300`. No alterna a una X: el menú abre una pantalla completa que tapa la barra y trae su propio botón de cerrar, que usa **la misma cápsula** (ícono `X`).
+20. **La hamburguesa del Navbar y la X del menú abierto son círculos rellenos con el degradado de JSBot** (`sky-500 → cyan-400 → indigo-500`, 44 px, ícono blanco), sin borde. Antes eran un anillo con relleno oscuro y, al cerrar el menú, el foco volvía a la hamburguesa y el anillo de foco (`outline-offset`) hacía un doble borde. Ahora el foco con teclado solo agranda el resplandor (`focus-visible:shadow`), no dibuja un segundo anillo. Los dos botones comparten las mismas clases. El menú es de pantalla completa, por eso el botón no alterna a X.
 
 ## Trampas del entorno
 
@@ -207,7 +207,7 @@ Por petición explícita del dueño, `Home.tsx` sustituye la composición anteri
 
 ## Registro de sesiones (lo más reciente arriba)
 
-- **2026-11-11:** Navbar: botón de hamburguesa en cápsula con borde degradado (decisión 20). Revisado a 390 px en inicio, rastreo y login.
+- **2026-11-11:** Navbar: hamburguesa y X del menú como círculos rellenos con degradado; se corrige el doble borde al cerrar el menú (decisión 20). Revisado a 390 px.
 - **2026-11-11:** JSBot: botón de cerrar rediseñado como cápsula circular con borde degradado (decisión 19). Revisado a 390 y 1440 px.
 - **2026-11-11:** barra inferior del portal en celular con vidrio, borde superior y sombra (decisión 18); se distingue de las tarjetas en claro y del fondo en oscuro. Revisada a 320 y 390 px en Mis pedidos, Mi cuenta e Inicio; escritorio sin cambios (la barra no se muestra).
 - **2026-11-11:** `Paginador` compacto en celular (decisión 17): flechas de 44 px e indicador de dos líneas; corrige el desborde de Mi cuenta a 320 px. Revisado a 320, 390 y 1440 px en claro/oscuro en Mis pedidos y Mi cuenta; escritorio idéntico.
