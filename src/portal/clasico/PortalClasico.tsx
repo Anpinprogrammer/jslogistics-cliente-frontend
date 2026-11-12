@@ -243,7 +243,7 @@ function Pedidos({ d, abrir }: { d: DatosCliente; abrir: (g: string) => void }) 
         <div><h1>Hola, {d.cliente!.nombre}</h1><p className="sub">Tus envíos con JS Logistics y sus pruebas de entrega.</p></div>
         <button type="button" className="btn nuevo-pedido" onClick={() => setNuevo(true)}><Plus size={18} aria-hidden="true" />Nuevo pedido</button>
       </div>
-      <Dialogo abierto={nuevo} alCerrar={() => setNuevo(false)} variante="pedido">
+      <Dialogo abierto={nuevo} alCerrar={() => setNuevo(false)} variante="nuevo">
         <NuevoPedido cliente={d.cliente} email={usuario?.email ?? ''} alCerrar={() => setNuevo(false)} />
       </Dialogo>
       <div className="cuenta-tabs pedidos-tabs" role="tablist" aria-label="Pedidos y solicitudes">
