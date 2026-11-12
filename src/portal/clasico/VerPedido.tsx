@@ -1,7 +1,9 @@
 /* Detalle de un envío (verPedidoCliente de la app actual). Se descarga y se monta solo al abrir un pedido. */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, CheckCircle2, ClipboardCheck, Image as ImageIcon, Maximize2, RotateCcw, Truck, X } from 'lucide-react';
 import { useConfirmarCambio, usePedidoDetalle, usePedirReintento, usePruebas } from '../../api/cliente';
+import { invalidar } from '../../utils/queryCache';
 import { diaCorto, diaDe, hora, pesos } from '../../lib/formato';
 import { cadenaGuias, cerrado, ESTADO_PEDIDO, gastoDe, metodoTxt, MOTIVOS, pagoDomi, saldoPedido, servicio } from '../../lib/negocio';
 import type { DatosCliente } from '../useDatosCliente';
@@ -9,9 +11,16 @@ import { CargandoVista } from './piezas';
 
 export default function VerPedido({ guia, d, alCerrar, alVer, toast }: { guia: string; d: DatosCliente; alCerrar: () => void; alVer: (g: string) => void; toast: (t: string) => void }) {
   const enLista = d.pedidos.find(x => x.guia === guia);
-  const detalle = usePedidoDetalle(guia, enLista);
-  const p = enLista ?? detalle.data ?? undefined;
-  const pruebas = usePruebas(p ? guia : null);
+  const detalle = usePedidoDetalle(guia);
+  // Manda el detalle (se revisa solo); la lista completa solo sirve mientras llega la primera respuesta.
+  const p = detalle.data ?? enLista ?? undefined;
+  const pruebas = usePruebas(p ? guia : null, p?.estado);
+  const qc = useQueryClient();
+  // Si el detalle trae un estado distinto al de la lista, se refrescan las listas para que la tabla y el detalle coincidan.
+  const estadoLista = enLista?.estado, estadoDetalle = detalle.data?.estado;
+  useEffect(() => {
+    if (estadoLista && estadoDetalle && estadoLista !== estadoDetalle) void invalidar(qc, 'pedidos');
+  }, [estadoLista, estadoDetalle, qc]);
   const confirmar = useConfirmarCambio();
   const [preguntar, setPreguntar] = useState(false);
   const pedirReintento = usePedirReintento();

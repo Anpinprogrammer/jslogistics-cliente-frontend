@@ -1,6 +1,12 @@
 # Estado del proyecto y memoria para agentes de IA
 
 
+## Detalle del pedido que se actualiza solo — 2026-11-12
+
+- **Causa:** `VerPedido` tomaba el pedido de la lista completa (`d.pedidos`, que se refresca cada 1 a 5 min) y desactivaba la consulta propia del detalle cuando lo encontraba ahí. La tabla de "Mis pedidos" usa la página (cada 60 s), así que mostraba el estado nuevo mientras la barra de rastreo seguía con el viejo hasta varios F5.
+- **Ahora:** `usePedidoDetalle(guia)` siempre pide `GET /pedidos/:guia` (`staleTime: 0`; lo que hay en memoria solo se muestra mientras llega), revisa cada 15 s mientras el pedido no esté cerrado o tenga cambio por recibir, y también al volver a la pestaña. TanStack no consulta con la pestaña oculta. Si el estado del detalle difiere del de la lista, se invalidan las listas. Las fotos (`usePruebas`) llevan el estado en la clave y se vuelven a pedir cuando cambia.
+- El backend no cachea respuestas (no hay `Cache-Control` ni ETag propios en `/pedidos`); no hizo falta tocarlo.
+
 ## Carga bajo demanda y pestaña que sobrevive al F5 — 2026-11-12
 
 - **Portal dividido por pestaña.** `PortalClasico.tsx` es solo el marco (menú, barra, campanita y rutas). `Inicio.tsx`, `Pedidos.tsx`, `MisSolicitudes.tsx`, `Cuenta.tsx`, `VerPedido.tsx` y `NuevoPedido.tsx` se cargan con `React.lazy` solo al abrirlos (fallback `CargandoVista` de `piezas.tsx`, estilos `esq-*` al final de `clasico.css`); el menú y el botón "Nuevo pedido" adelantan la descarga al pasar el puntero o el foco. `HojaFiltros.tsx` es la hoja de filtros compartida. `lineaPedido` y `LOGO` viven en `piezas.tsx`. Si agregas una pestaña, sigue el mismo patrón (`cargar` en el marco).
