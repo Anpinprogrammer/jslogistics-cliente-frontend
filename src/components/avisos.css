@@ -1,0 +1,3 @@
+/* Avisos (react-toastify): esquinas redondeadas y la tipografía del sitio. Se carga después del CSS de la librería. */
+.Toastify__toast.jsl-toast { border-radius: 1rem; font-family: inherit; font-size: 0.875rem; font-weight: 600; }
+@media (max-width: 480px) { .Toastify__toast-container.Toastify__toast-container { padding: 0.75rem; } }

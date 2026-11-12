@@ -3,7 +3,8 @@ import { useSearchParams } from 'react-router-dom';
 import { CheckCircle2, FileText, MapPin, Navigation, Search, Truck, Warehouse } from 'lucide-react';
 import { ordersAPI } from '../services/api';
 import { DEMO } from '../api/http';
-import { demo } from '../demo/datos';
+// Los datos de prueba solo se descargan en el modo demo.
+const pedidosDemo = () => import('../demo/datos').then(m => m.demo.pedidos());
 import type { Pedido } from '../types/dominio';
 import type { Order } from '../types';
 import { serviceLabel, statusLabel } from '../utils/format';
@@ -70,7 +71,7 @@ export default function Track() {
   useEffect(() => {
     if (!DEMO) return;
     let activo = true;
-    demo.pedidos().then(pedidos => {
+    pedidosDemo().then(pedidos => {
       if (!activo) return;
       const muestra = [pedidos.find(p => p.estado === 'pendiente'), pedidos.find(p => p.estado === 'entregado'), pedidos.find(p => p.estado === 'devuelto')];
       setEjemplos(muestra.filter((p): p is Pedido => !!p).map(p => p.guia));
@@ -94,7 +95,7 @@ export default function Track() {
     setCargando(true);
     try {
       if (DEMO) {
-        const pedido = (await demo.pedidos()).find(p => p.guia.toUpperCase() === limpia);
+        const pedido = (await pedidosDemo()).find(p => p.guia.toUpperCase() === limpia);
         if (!pedido) throw new Error('No encontramos esa guía en la demostración. Prueba uno de los ejemplos.');
         setResultado(dePedidoDemo(pedido));
       } else {

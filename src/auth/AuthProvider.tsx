@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { Usuario } from '../types/dominio';
 import { authApi } from '../api/auth';
 import { alSalir } from '../api/http';
+import { limpiarNavCliente } from '../hooks/usePersistedTab';
 
 interface Sesion {
   usuario: Usuario | null;
@@ -35,7 +36,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [qc]);
 
   const salir = useCallback(async () => {
-    try { await authApi.salir(); } finally { setUsuario(null); qc.clear(); }
+    // Al cerrar sesión también se olvida en qué pestaña del portal estaba (usePersistedTab).
+    try { await authApi.salir(); } finally { limpiarNavCliente(); setUsuario(null); qc.clear(); }
   }, [qc]);
 
   const refrescar = useCallback(async () => { setUsuario(await authApi.yo()); }, []);

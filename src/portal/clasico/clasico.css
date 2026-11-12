@@ -1155,3 +1155,14 @@ dialog.dialogo-nuevo[open]{animation:np-entra .2s ease-out}
 .np-pie .btn{min-width:0;flex:0 1 auto}
 .np-pie .btn:last-child{flex:1 1 0}
 @media (max-width:379px){.np-pie .btn{padding:0 10px}}
+
+/* Mientras baja el código de una pestaña o de un modal (CargandoVista en piezas.tsx): barras grises que laten. */
+.esqueleto{display:grid;gap:14px;padding:4px 0 24px}
+.esqueleto-modal{padding:22px}
+.esq-linea,.esq-bloque{display:block;border-radius:12px;background:var(--hueco);animation:esq-latido 1.2s ease-in-out infinite}
+.esq-titulo{height:26px;width:min(320px,70%)}
+.esq-sub{height:14px;width:min(220px,50%)}
+.esq-bloque{height:120px}
+.esqueleto-modal .esq-bloque{height:90px}
+@keyframes esq-latido{50%{opacity:.45}}
+@media (prefers-reduced-motion:reduce){.esq-linea,.esq-bloque{animation:none}}

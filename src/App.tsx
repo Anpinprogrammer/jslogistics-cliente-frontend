@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useLayoutEffect } from 'react';
+import { lazy, Suspense, useEffect, useLayoutEffect, useState } from 'react';
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './auth/AuthProvider';
@@ -10,8 +10,7 @@ import { Spinner } from './components/ui';
 import Home from './pages/Home';
 import JSBot from './components/jsbot/JSBot';
 import { ApiError } from './api/http';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { FRESCO, EN_MEMORIA } from './utils/queryCache';
 
 // La portada va en el archivo principal porque es lo que más se abre. El resto de páginas se descarga solo cuando se visita:
 // quien entra a la portada no baja el portal, y quien entra al portal no baja el registro ni el rastreo (ni axios, que solo usan ellos).
@@ -22,11 +21,24 @@ const Equipo = lazy(() => import('./pages/Equipo'));
 const Recuperar = lazy(() => import('./pages/Recuperar'));
 const Restablecer = lazy(() => import('./pages/Restablecer'));
 const PortalCliente = lazy(() => import('./portal/PortalCliente'));
+// Los avisos (react-toastify y su CSS) tampoco van en el archivo principal: se montan cuando el navegador queda libre.
+const Avisos = lazy(() => import('./components/Avisos'));
+
+function AvisosDiferidos() {
+  const [listo, setListo] = useState(false);
+  useEffect(() => {
+    if ('requestIdleCallback' in window) { const id = requestIdleCallback(() => setListo(true), { timeout: 2500 }); return () => cancelIdleCallback(id); }
+    const t = setTimeout(() => setListo(true), 1200); return () => clearTimeout(t);
+  }, []);
+  return listo ? <Suspense fallback={null}><Avisos /></Suspense> : null;
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 30_000,
+      // Caché en memoria (utils/queryCache.ts): lo recién pedido no se vuelve a pedir al ir y volver entre pestañas.
+      staleTime: FRESCO.corto,
+      gcTime: EN_MEMORIA,
       refetchOnWindowFocus: true,
       retry: (n, e) => !(e instanceof ApiError && e.status >= 400 && e.status < 500) && n < 2,
     },
@@ -112,8 +124,7 @@ const App = () => (
       <BrowserRouter>
         <Rutas />
       </BrowserRouter>
-      {/* El tema de cada aviso se toma de la clase `dark` al mostrarlo (utils/clientToast.ts). */}
-      <ToastContainer position="top-right" autoClose={3500} pauseOnHover newestOnTop limit={3} />
+      <AvisosDiferidos />
     </AuthProvider>
   </QueryClientProvider>
 );
