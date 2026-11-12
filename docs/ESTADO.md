@@ -1,5 +1,10 @@
 # Estado del proyecto y memoria para agentes de IA
 
+## Filtros en Mis solicitudes — 2026-11-12
+
+- "Mis solicitudes" tiene el mismo sistema de filtros que "Mis pedidos": buscador (con retraso de 400 ms), fecha con `SingleDatePicker` + "Hoy" y píldoras de estado en escritorio (Todas, Pendientes, Por confirmar, Aprobadas por JS, Rechazadas); en el celular, buscador + botón Filtros con contador y la misma hoja inferior (`HojaFiltros`, ahora genérica: recibe los textos y los estados). Los grupos salen de `estado`: pendientes = `pendiente`, por confirmar = `cotizada`, aprobadas = `confirmada` + `asignada`.
+- **Se filtra en el navegador**: `GET /solicitudes/mias` todavía no acepta búsqueda, estado ni fecha (esos filtros solo existen en el `GET /solicitudes` de la oficina). Con algún filtro puesto se usan las últimas 50 solicitudes (`useSolicitudesRecientes`, la misma consulta de la campanita) y se pagina en el cliente; sin filtros se sigue paginando en el servidor. Los contadores de las píldoras solo se muestran si el cliente tiene menos de 50 (si no, serían inexactos) y, si hay 50, se avisa "Buscando entre tus últimas 50 solicitudes". Pendiente en el backend: `search`, `status` y `date` en `/solicitudes/mias`; cuando existan, pasarlos a la consulta y quitar el filtrado local (`filtrarSolicitudes`).
+
 ## Barra inferior y filtros de Mis pedidos en el celular — 2026-11-12
 
 - **Barra inferior (`.pestanas`, < 960 px):** pegada abajo con las esquinas de arriba redondeadas (24 px), fondo `--papel` al 95 % con desenfoque, sombra hacia arriba y área segura (`max(.65rem, safe-area)`). Es un grid de 3 columnas de máximo 448 px centrado; el activo va en azul cielo (`rgba(14,165,233,.12)`, texto `#0284c7` / `#38bdf8` en oscuro) con el ícono más grueso. La burbuja roja va pegada al ícono con un anillo del color del fondo. Reglas al final de `clasico.css`. Ojo: como esas reglas van al final, el `display:none` de escritorio se repite ahí; si cambias el `display` de `.pestanas`, revisa que no aparezca en 1440 px.
