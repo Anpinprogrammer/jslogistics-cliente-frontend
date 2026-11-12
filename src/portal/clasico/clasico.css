@@ -836,3 +836,11 @@ dialog.dialogo-pedido::backdrop{background:rgba(2,6,23,.72);backdrop-filter:blur
   .sol-datos > div{grid-template-columns:minmax(0,1fr);gap:2px}
   .sol-guia{align-self:stretch;justify-content:center}
 }
+
+/* Reintento de un pedido devuelto: la cadena de guías de una misma entrega. */
+.enlace-guia{border:0;background:none;padding:0;font:inherit;font-weight:700;color:var(--marca2);text-decoration:underline;cursor:pointer;min-height:32px}
+.pod-cadena{padding:14px 16px;border:1px solid var(--linea);border-radius:16px;background:var(--hueco)}
+.pod-cadena ol{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.pod-cadena li{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--linea);border-radius:10px;background:var(--papel,transparent)}
+.pod-cadena li.actual{border-color:var(--marca2)}
+.pod-cadena .sub{margin:0;font-size:.78rem}

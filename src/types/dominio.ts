@@ -81,6 +81,13 @@ export interface Pedido {
   motivoDev: '' | Motivo;
   notaDev: string;
   cobrarDev: boolean;
+  /** Devuelto: dónde quedó el paquete. "por_definir" hasta que el mensajero lo diga; "" = devuelto de antes del cambio. */
+  destinoDev?: '' | 'por_definir' | 'cliente' | 'oficina' | 'reintento';
+  /** Si este pedido es el reintento de otro (la guía de origen) y los reintentos que tiene él. */
+  reintentoDe?: string | null;
+  reintentos?: { guia: string; estado: EstadoPedido }[];
+  /** Cuándo pediste el reintento (la oficina lo asigna a un mensajero). */
+  reintentoPedido?: string | null;
   cambio: boolean;
   cambioRecibido: string | null;
   gasto: number;

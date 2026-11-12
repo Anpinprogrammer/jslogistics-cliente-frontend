@@ -159,3 +159,13 @@ export function resumenCliente(pedidos: Pedido[], hoyD: string, desde: string) {
     entMes, devMes, efectividad: entMes + devMes ? Math.round((entMes * 100) / (entMes + devMes)) : null,
   };
 }
+
+/** Todas las guías de una misma entrega, de la primera a la última: la original y sus reintentos, para que el cliente no se pierda entre números. */
+export function cadenaGuias(pedidos: Pedido[], guia: string): string[] {
+  const por = new Map(pedidos.map(p => [p.guia, p]));
+  let g = guia; const vistos = new Set<string>();
+  while (por.get(g)?.reintentoDe && !vistos.has(g)) { vistos.add(g); g = por.get(g)!.reintentoDe!; }
+  const cadena = [g];
+  for (let p = por.get(g); p?.reintentos?.length;) { const sig = p.reintentos[p.reintentos.length - 1].guia; if (cadena.includes(sig)) break; cadena.push(sig); p = por.get(sig); }
+  return cadena;
+}

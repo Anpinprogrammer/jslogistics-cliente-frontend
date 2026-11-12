@@ -201,6 +201,17 @@ export function useConfirmarCambio() {
   });
 }
 
+/** Pide el reintento de un pedido devuelto. No crea la guía: la oficina lo asigna a un mensajero y la crea enlazada a la original.
+    El reintento se cobra como un domicilio normal; la devolución se sigue cobrando como siempre. */
+export function usePedirReintento() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (guia: string) =>
+      DEMO ? demo.pedirReintento(guia) : api<{ pedido: Pedido }>(`/pedidos/${guia}/pedir-reintento`, { method: 'POST' }).then(() => undefined),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['cliente', 'pedidos'] }); },
+  });
+}
+
 /** "Nuevo pedido" del portal: manda la solicitud a la oficina. No crea la guía: la crea la oficina al asignar el mensajero. */
 export function useNuevaSolicitud() {
   const qc = useQueryClient();
