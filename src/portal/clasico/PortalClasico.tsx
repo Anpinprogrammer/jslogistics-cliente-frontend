@@ -5,7 +5,7 @@
  */
 import { useEffect, useState, type FormEvent } from 'react';
 import { Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { AlertTriangle, Bot, Calendar, CheckCircle2, ChevronRight, ClipboardCheck, ClipboardList, XCircle, Eye, EyeOff, FileText, Image as ImageIcon, Info, KeyRound, Lock, Mail, MapPin, Maximize2, Moon, PackageCheck, Phone, Plus, Receipt, RotateCcw, Save, Search, Settings, ShieldCheck, Store, Sun, Truck, Undo2, X } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Bot, Calendar, CheckCircle2, ChevronRight, ClipboardCheck, ClipboardList, Clock, XCircle, Eye, EyeOff, FileText, Image as ImageIcon, Info, KeyRound, Lock, Mail, MapPin, Maximize2, Moon, PackageCheck, Phone, Plus, Receipt, RotateCcw, Save, Search, Settings, ShieldCheck, Store, Sun, Truck, Undo2, X } from 'lucide-react';
 import './clasico.css';
 import { useSesion } from '../../auth/AuthProvider';
 import { useActualizarPerfilCliente, useConfirmarCambio, useCuentaCliente, useMisSolicitudes, useMovimientosCliente, usePaginaPedidos, usePruebas, type FiltroPedidos } from '../../api/cliente';
@@ -22,6 +22,7 @@ import { JSBOT_ABRIR } from '../../components/jsbot/JSBot';
 import { Icono } from './iconos';
 import { Cabecera, Columnas, Dialogo, Dona, EtqCambio, EtqDash, Foto, Paginador } from './piezas';
 import NuevoPedido from './NuevoPedido';
+import type { SolicitudCliente } from '../../types/dominio';
 
 const VERDE = 'var(--verde)', ROJO = 'var(--rojo)';
 const LOGO = '/img/clasico/logo.png';
@@ -286,56 +287,76 @@ function Pedidos({ d, abrir }: { d: DatosCliente; abrir: (g: string) => void }) 
 }
 
 /* ---------------------------- Mis solicitudes ---------------------------- */
-/** Las solicitudes de envío del cliente, cada una con su tracker: Solicitado → Pendiente de aprobación → Aprobada / Rechazada. */
+/** Lista compacta: el seguimiento y las direcciones completas viven en el detalle. */
 function MisSolicitudes({ abrir }: { abrir: (g: string) => void }) {
   const [pagina, setPagina] = useState(1), porPagina = usePorPagina();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const consulta = useMisSolicitudes(pagina, porPagina);
   const pag = consulta.data, ss = pag?.solicitudes ?? [];
-  const ir = (n: number) => { setPagina(n); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+  const selected = ss.find(s => s.id === selectedId) ?? null;
+  const ir = (n: number) => { setSelectedId(null); setPagina(n); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+  const verGuia = (guia: string) => { setSelectedId(null); requestAnimationFrame(() => abrir(guia)); };
   if (consulta.isError) return <div className="vacio">No se pudieron traer tus solicitudes. Revisa tu conexión e intenta de nuevo.</div>;
   if (!pag) return <div className="vacio">Cargando solicitudes…</div>;
   if (!ss.length) return <div className="vacio">Todavía no tienes solicitudes. Pide un envío con “Nuevo pedido” y aquí verás si la oficina lo aprueba.</div>;
   return <>
     <p className="sub sol-intro">Cuando la oficina aprueba una solicitud y le asigna mensajero, aparece en “Mis pedidos” con su número de guía.</p>
-    <div className="sol-lista" style={consulta.isPlaceholderData ? { opacity: .6 } : undefined}>{ss.map(s => {
-      const e = estadoSolicitud(s), pasos = pasosSolicitud(s);
-      const progreso = s.estado === 'pendiente' || s.estado === 'cotizada' ? '33.333%' : '66.666%';
-      return (
-        <article key={s.id} className={`sol-card es-${s.estado}`} aria-label={`Solicitud del ${hora(s.creado)}: ${e.texto}`}>
-          <header className="sol-cab">
-            <span className={`etq ${e.clase}`}>{e.texto}</span>
-            <small className="sub">Pedida {hora(s.creado)}</small>
-          </header>
-          <div className="pod-stepper sol-stepper">
-            <div className="pod-stepper-track">
-              <span className="pod-stepper-linea" />
-              <span className="pod-stepper-progreso" style={{ width: progreso }} />
-              {pasos.map((p, i) => {
-                const Ic = i === 0 ? FileText : i === 1 ? ClipboardCheck : p.rechazado ? XCircle : CheckCircle2;
-                return (
-                  <div key={i} className={`pod-paso${p.completado ? ' completado' : ''}${p.actual ? ' actual' : ''}${p.rechazado ? ' rechazado' : ''}`}>
-                    <span className="pod-dot"><Ic aria-hidden="true" /></span>
-                    <span className="pod-paso-label">{p.label}</span>
-                    <span className="pod-paso-fecha">{i === 2 && p.rechazado ? hora(s.actualizado) : p.detalle}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-          {s.estado === 'rechazada' && <div className="sol-rechazo" role="note"><b>Razón del rechazo</b><p>{s.motivoRechazo || 'La oficina no registró la razón. Escríbenos por WhatsApp.'}</p></div>}
-          {s.estado === 'cotizada' && <div className="sol-aviso">Te escribimos por WhatsApp con el valor{s.valor ? ` (${pesos(s.valor)})` : ''}. Respóndenos para aprobarlo.</div>}
-          <dl className="sol-datos">
-            <div><dt><MapPin size={14} aria-hidden="true" /> Recoger en</dt><dd>{s.direccionRecogida}</dd></div>
-            <div><dt><Truck size={14} aria-hidden="true" /> Entregar a</dt><dd>{s.destinatarioNombre}{s.destinatarioTelefono ? ' · ' + s.destinatarioTelefono : ''}<br />{s.direccionEntrega}</dd></div>
-            <div><dt>Paquetes</dt><dd>{s.paquetes}{s.pesoKg ? ` · ${s.pesoKg} kg` : ''}</dd></div>
-            {s.valor ? <div><dt>Domicilio</dt><dd>{pesos(s.valor)}</dd></div> : null}
-          </dl>
-          {s.guia && <button type="button" className="btn sec chico sol-guia" onClick={() => abrir(s.guia!)}>
-            Ver guía {s.guia}{s.pedidoEstado ? ' · ' + ESTADO_PEDIDO[s.pedidoEstado].texto : ''}<ChevronRight size={16} aria-hidden="true" /></button>}
-        </article>
-      );
-    })}</div>
+    <div className="sol-rows-desktop" style={consulta.isPlaceholderData ? { opacity: .6 } : undefined}>
+      {ss.map(s => {
+        const estado = estadoSolicitud(s);
+        const EstadoIcono = s.estado === 'rechazada' ? XCircle : s.estado === 'confirmada' || s.estado === 'asignada' ? CheckCircle2 : Clock;
+        return <button key={s.id} type="button" className={`sol-row es-${s.estado}`} onClick={() => setSelectedId(s.id)} aria-label={`Ver seguimiento de solicitud para ${s.destinatarioNombre}: ${estado.texto}`}>
+          <span className="sol-row-estado"><span className="sol-row-icono"><EstadoIcono aria-hidden="true" /></span><span className="sol-row-identidad"><span className={`etq ${estado.clase}`}>{estado.texto}</span>{s.guia && <b>{s.guia}</b>}<small>Pedida {hora(s.creado)}</small></span></span>
+          <span className="sol-row-ruta"><span className="sol-row-ruta-linea"><span>{s.direccionRecogida}</span><ArrowRight aria-hidden="true" /><strong>{s.destinatarioNombre} · {s.direccionEntrega}</strong></span><small>{s.paquetes} paquete{s.paquetes === 1 ? '' : 's'}{s.pesoKg ? ` · ${s.pesoKg} kg` : ''}</small></span>
+          <span className="sol-row-valor"><b>{s.valor != null ? pesos(s.valor) : 'Por definir'}</b><small>Domicilio</small></span>
+          <span className="sol-row-accion">Ver seguimiento <ChevronRight aria-hidden="true" /></span>
+        </button>;
+      })}
+    </div>
+    <div className="sol-rows-mobile" style={consulta.isPlaceholderData ? { opacity: .6 } : undefined}>
+      {ss.map(s => {
+        const estado = estadoSolicitud(s);
+        return <button key={s.id} type="button" className={`sol-row-movil es-${s.estado}`} onClick={() => setSelectedId(s.id)} aria-label={`Ver seguimiento de solicitud para ${s.destinatarioNombre}: ${estado.texto}`}>
+          <span className="sol-movil-info"><span className="sol-movil-nombre"><i aria-hidden="true" /> <b>{s.destinatarioNombre}</b></span><span className="sol-movil-meta"><span>{estado.texto}</span><span aria-hidden="true">·</span><span>{new Date(s.creado).toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}</span>{s.guia && <span className="sol-movil-guia">{s.guia}</span>}</span></span>
+          <span className="sol-movil-final"><b>{s.valor != null ? pesos(s.valor) : 'Por definir'}</b><small>{s.paquetes} paquete{s.paquetes === 1 ? '' : 's'}</small></span>
+          <span className="sol-movil-flecha"><Info aria-hidden="true" /></span>
+        </button>;
+      })}
+    </div>
     <Paginador pagina={pag.pagina} paginas={pag.paginas} total={pag.total} porPagina={pag.porPagina} ir={ir} cargando={consulta.isPlaceholderData} />
+    <Dialogo abierto={!!selected} alCerrar={() => setSelectedId(null)} variante="solicitud">
+      {selected && <DetalleSolicitud sol={selected} alCerrar={() => setSelectedId(null)} verGuia={verGuia} />}
+    </Dialogo>
+  </>;
+}
+
+function DetalleSolicitud({ sol, alCerrar, verGuia }: { sol: SolicitudCliente; alCerrar: () => void; verGuia: (guia: string) => void }) {
+  const estado = estadoSolicitud(sol), pasos = pasosSolicitud(sol);
+  const progreso = sol.estado === 'pendiente' || sol.estado === 'cotizada' ? '33.333%' : '66.666%';
+  return <>
+    <header className="sol-modal-cab"><div><span className={`etq ${estado.clase}`}>{estado.texto}</span><p>Solicitada {hora(sol.creado)}</p></div><button type="button" className="pedido-modal-cerrar" onClick={alCerrar} aria-label="Cerrar detalle de solicitud"><X aria-hidden="true" /></button></header>
+    <div className="sol-modal-cuerpo">
+      <div className="pod-stepper sol-stepper" aria-label="Seguimiento de la solicitud">
+        <div className="pod-stepper-track"><span className="pod-stepper-linea" /><span className="pod-stepper-progreso" style={{ width: progreso }} />
+          {pasos.map((p, i) => {
+            const Ic = i === 0 ? FileText : i === 1 ? ClipboardCheck : p.rechazado ? XCircle : CheckCircle2;
+            return <div key={i} className={`pod-paso${p.completado ? ' completado' : ''}${p.actual ? ' actual' : ''}${p.rechazado ? ' rechazado' : ''}`}>
+              <span className="pod-dot"><Ic aria-hidden="true" /></span><span className="pod-paso-label">{p.label}</span><span className="pod-paso-fecha">{i === 2 && p.rechazado ? hora(sol.actualizado) : p.detalle}</span>
+            </div>;
+          })}
+        </div>
+      </div>
+      {sol.estado === 'rechazada' && <div className="sol-rechazo" role="note"><b>Razón del rechazo</b><p>{sol.motivoRechazo || 'La oficina no registró la razón. Escríbenos por WhatsApp.'}</p></div>}
+      {sol.estado === 'cotizada' && <div className="sol-aviso">Te escribimos por WhatsApp con el valor{sol.valor != null ? ` (${pesos(sol.valor)})` : ''}. Respóndenos para aprobarlo.</div>}
+      <dl className="sol-datos">
+        <div><dt><MapPin size={14} aria-hidden="true" /> Recoger en</dt><dd>{sol.direccionRecogida}</dd></div>
+        <div><dt><Truck size={14} aria-hidden="true" /> Entregar a</dt><dd>{sol.destinatarioNombre}{sol.destinatarioTelefono ? ' · ' + sol.destinatarioTelefono : ''}<br />{sol.direccionEntrega}</dd></div>
+        <div><dt>Paquetes</dt><dd>{sol.paquetes}{sol.pesoKg ? ` · ${sol.pesoKg} kg` : ''}</dd></div>
+        <div><dt>Domicilio</dt><dd>{sol.valor != null ? pesos(sol.valor) : 'Por definir'}</dd></div>
+      </dl>
+      {sol.guia ? <button type="button" className="btn sol-modal-accion" onClick={() => verGuia(sol.guia!)}>Ver guía {sol.guia}{sol.pedidoEstado ? ` · ${ESTADO_PEDIDO[sol.pedidoEstado].texto}` : ''}<ChevronRight size={17} aria-hidden="true" /></button>
+        : <button type="button" className="btn sec sol-modal-accion" onClick={alCerrar}>Cerrar</button>}
+    </div>
   </>;
 }
 

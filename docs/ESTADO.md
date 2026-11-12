@@ -241,6 +241,7 @@ Por petición explícita del dueño, `Home.tsx` sustituye la composición anteri
 
 ## Registro de sesiones (lo más reciente arriba)
 
+- **2026-11-11:** Mis solicitudes: la lista paginada usa filas compactas en escritorio y dos líneas por solicitud en móvil. El seguimiento de tres pasos, direcciones, paquetes, valor y motivo de rechazo aparecen en un modal centrado o una hoja inferior; las solicitudes con guía enlazan al detalle del pedido. Se mantienen los estados y reglas existentes.
 - **2026-11-11:** Solicitar envío: la vista móvil (`lg:hidden`) quedó como wizard de 3 pasos con barra de progreso, validación por paso, resumen de recogida antes de enviar y transiciones horizontales. El escritorio conserva el formulario completo. Revisado a 320, 390, 768 y 1440 px en claro/oscuro, sin desbordes.
 - **2026-11-11:** Mis pedidos: tarjetas con fondo, borde, radio y sombra únicos para todos los estados, y aviso ámbar con más aire en computador (decisión 21). La píldora “Todos” ya estaba alineada con el buscador; se midió y no cambió. Revisado a 320, 390, 768 y 1440 px en claro/oscuro, sin desbordes.
 - **2026-11-11:** Navbar: hamburguesa y X del menú circulares, con borde de degradado e interior oscuro, sin doble borde al cerrar el menú (decisión 20). Revisado a 390 px.

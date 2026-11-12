@@ -795,11 +795,18 @@ dialog.dialogo-pedido::backdrop{background:rgba(2,6,23,.72);backdrop-filter:blur
 .pedidos-tabs{margin-bottom:16px}
 .pedidos-tabs button{flex:1 1 0;white-space:nowrap}
 .sol-intro{margin:0 0 12px}
-.sol-lista{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
-@media (min-width:1100px){.sol-lista{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}}
-.sol-card{display:flex;flex-direction:column;gap:12px;min-width:0;padding:16px;border:1px solid var(--linea);border-radius:16px;background:var(--papel);box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.sol-cab{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
-.sol-cab .etq{white-space:normal;text-align:left}
+.sol-rows-desktop{display:none}
+.sol-rows-mobile{display:grid;gap:8px}
+.sol-row,.sol-row-movil{width:100%;min-width:0;border:1px solid var(--linea);background:var(--papel);color:var(--tinta);text-align:left;box-shadow:var(--sombra);cursor:pointer;transition:border-color .18s,box-shadow .18s,transform .18s}
+.sol-row:hover,.sol-row-movil:hover{border-color:rgba(31,134,201,.42);box-shadow:0 8px 20px rgba(15,23,42,.09)}
+.sol-row:active,.sol-row-movil:active{transform:scale(.995)}
+.sol-row{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1.5fr) minmax(88px,.55fr) auto;align-items:center;gap:14px;padding:14px 16px;border-radius:16px}
+.sol-row-estado{display:flex;align-items:center;gap:12px;min-width:0}.sol-row-icono{display:grid;place-items:center;width:40px;height:40px;flex:none;border:1px solid rgba(245,158,11,.25);border-radius:12px;background:var(--amarillo-claro);color:var(--amarillo)}.sol-row-icono svg{width:19px;height:19px}.sol-row.es-confirmada .sol-row-icono,.sol-row.es-asignada .sol-row-icono{border-color:rgba(22,121,74,.25);background:var(--verde-claro);color:var(--verde)}.sol-row.es-rechazada .sol-row-icono{border-color:rgba(192,57,43,.25);background:var(--rojo-claro);color:var(--rojo)}
+.sol-row-identidad{display:flex;align-items:center;gap:5px;min-width:0;flex-wrap:wrap}.sol-row-identidad .etq{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.62rem}.sol-row-identidad b{font-size:.7rem}.sol-row-identidad small{flex-basis:100%;color:var(--suave);font-size:.68rem}
+.sol-row-ruta{display:flex;flex-direction:column;min-width:0;gap:4px}.sol-row-ruta-linea{display:flex;align-items:center;gap:7px;min-width:0;font-size:.77rem}.sol-row-ruta-linea span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:36%;color:var(--suave)}.sol-row-ruta-linea strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}.sol-row-ruta-linea svg{width:14px;height:14px;flex:none;color:var(--marca2)}.sol-row-ruta small,.sol-row-valor small{color:var(--suave);font-size:.68rem}.sol-row-valor{display:flex;flex-direction:column;align-items:flex-end;white-space:nowrap;font-variant-numeric:tabular-nums}.sol-row-valor b{font-size:.78rem}.sol-row-accion{display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:36px;padding:7px 10px;border:1px solid var(--linea);border-radius:10px;background:var(--hueco);color:var(--tinta);font-size:.7rem;font-weight:700;white-space:nowrap}.sol-row:hover .sol-row-accion{border-color:var(--marca2);background:var(--mango-claro);color:var(--marca)}.sol-row-accion svg{width:15px;height:15px}
+.sol-row-movil{display:grid;grid-template-columns:minmax(0,1fr) auto 28px;align-items:center;gap:9px;padding:12px;border-radius:16px}.sol-movil-info{display:flex;flex-direction:column;min-width:0;gap:4px}.sol-movil-nombre{display:flex;align-items:center;gap:7px;min-width:0}.sol-movil-nombre i{width:8px;height:8px;flex:none;border-radius:50%;background:var(--amarillo)}.sol-row-movil.es-confirmada .sol-movil-nombre i,.sol-row-movil.es-asignada .sol-movil-nombre i{background:var(--verde)}.sol-row-movil.es-rechazada .sol-movil-nombre i{background:var(--rojo)}.sol-movil-nombre b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.82rem}.sol-movil-meta{display:flex;align-items:center;gap:4px;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:var(--suave);font-size:.66rem}.sol-movil-meta>span{flex:none}.sol-movil-meta>span:first-child{max-width:45%;overflow:hidden;text-overflow:ellipsis}.sol-movil-guia{padding:1px 4px;border-radius:5px;background:var(--mango-claro);color:var(--marca);font-weight:700}.sol-movil-final{display:flex;flex-direction:column;align-items:flex-end;white-space:nowrap;font-variant-numeric:tabular-nums}.sol-movil-final b{font-size:.75rem}.sol-movil-final small{color:var(--suave);font-size:.65rem}.sol-movil-flecha{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--hueco);color:var(--suave)}.sol-movil-flecha svg{width:15px;height:15px}
+@media (min-width:768px){.sol-rows-desktop{display:grid;gap:10px}.sol-rows-mobile{display:none}}
+@media (min-width:768px) and (max-width:1100px){.sol-row{gap:9px;padding:12px}.sol-row-icono{width:34px;height:34px}.sol-row-estado{gap:8px}.sol-row-accion{font-size:.65rem;padding:7px}}
 .sol-stepper{padding:14px 10px 14px}
 .pod-paso.rechazado .pod-dot{background:var(--rojo);border-color:var(--rojo);color:#fff;box-shadow:0 4px 12px rgba(192,57,43,.22)}
 .pod-paso.rechazado .pod-paso-label{color:var(--rojo)}
@@ -812,6 +819,19 @@ dialog.dialogo-pedido::backdrop{background:rgba(2,6,23,.72);backdrop-filter:blur
 .sol-datos dt{display:flex;align-items:center;gap:5px;color:var(--suave);font-size:.82rem}
 .sol-datos dd{margin:0;font-weight:600;font-size:.9rem;overflow-wrap:anywhere;min-width:0}
 .sol-guia{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;min-height:40px}
+.dialogo-solicitud{width:min(560px,calc(100vw - 20px))}
+.dialogo-solicitud::backdrop{background:rgba(2,6,23,.68);backdrop-filter:blur(4px)}
+.dlg.dlg-solicitud{padding:0;max-height:calc(100dvh - 30px);overflow-y:auto}
+.dlg.dlg-solicitud::before{display:none}
+.sol-modal-cab{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;margin:0!important;border-bottom:1px solid var(--linea);background:var(--papel)}
+.sol-modal-cab p{margin:6px 0 0;color:var(--suave);font-size:.76rem}
+.sol-modal-cuerpo{display:grid;gap:16px;padding:18px 20px 24px}
+.sol-modal-cuerpo .sol-datos{padding:14px;border:1px solid var(--linea);border-radius:14px;background:var(--hueco)}
+.sol-modal-accion{width:100%;min-height:44px;display:flex;align-items:center;justify-content:center;gap:8px}
+@media (max-width:767px){
+  .dialogo-solicitud{width:100%;max-width:100%;margin:auto 0 0;border-radius:24px 24px 0 0;max-height:calc(100dvh - 12px)}
+  .dlg.dlg-solicitud{max-height:calc(100dvh - 12px);padding-bottom:env(safe-area-inset-bottom,0px)}
+}
 @media (max-width:600px){
   .sol-datos > div{grid-template-columns:minmax(0,1fr);gap:2px}
   .sol-guia{align-self:stretch;justify-content:center}
