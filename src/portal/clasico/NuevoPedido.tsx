@@ -11,6 +11,7 @@ import { ApiError } from '../../api/http';
 import type { Cliente } from '../../types/dominio';
 import { pesos } from '../../lib/formato';
 import { clientToast } from '../../utils/clientToast';
+import { WhatsAppIcon } from '../../components/icons/WhatsAppIcon';
 
 const VACIO = { nombre: '', telefono: '', email: '', direccionRecogida: '', paquetes: '1', pesoKg: '', destinatarioNombre: '', destinatarioTelefono: '', direccionEntrega: '' };
 type Formulario = typeof VACIO;
@@ -173,7 +174,7 @@ export default function NuevoPedido({ cliente, email, alCerrar }: { cliente: Cli
               <Campo id="np-nombre" etiqueta="Nombre de quien entrega *" error={campos.nombre} icono={<Store aria-hidden="true" />}>
                 <input {...props('nombre')} maxLength={120} autoComplete="organization" />
               </Campo>
-              <Campo id="np-telefono" etiqueta="Teléfono / WhatsApp *" error={campos.telefono} icono={<Phone aria-hidden="true" />}>
+              <Campo id="np-telefono" etiqueta="Teléfono / WhatsApp *" error={campos.telefono} icono={<WhatsAppIcon className="" />}>
                 <input {...props('telefono')} type="tel" inputMode="tel" maxLength={30} autoComplete="tel" />
               </Campo>
               <Campo id="np-email" etiqueta="Correo" nota="Opcional" error={campos.email} ancho icono={<Mail aria-hidden="true" />}>

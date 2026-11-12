@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
-import { ArrowUpRight, MessageCircle, Send, ShieldCheck, Sparkles, X } from "lucide-react";
+import { ArrowUpRight, Send, ShieldCheck, Sparkles, X } from "lucide-react";
 import { useSesion } from "../../auth/AuthProvider";
 import { ApiError, DEMO } from "../../api/http";
+import { WhatsAppIcon } from "../icons/WhatsAppIcon";
 import { derivacionDeError, enlaceWhatsApp, enviarChat, type DerivacionChat, type MensajeChat } from "../../api/chatbot";
 
 interface Mensaje {
@@ -331,7 +332,7 @@ export default function JSBot({ enPortalCliente = false }: { enPortalCliente?: b
           </div>
           <footer className="shrink-0 border-t border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
             {error && <p role="alert" className="mb-2 rounded-xl border border-rose-200 bg-rose-50 p-2.5 text-xs leading-relaxed text-rose-800 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-200">{error}</p>}
-            {whatsappUrl && <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="mb-2 flex min-h-10 items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 text-xs font-bold text-emerald-700 hover:bg-emerald-500/20 dark:text-emerald-300"><MessageCircle size={15} /> Hablar con una persona por WhatsApp</a>}
+            {whatsappUrl && <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="mb-2 flex min-h-10 items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 text-xs font-bold text-emerald-700 hover:bg-emerald-500/20 dark:text-emerald-300"><WhatsAppIcon className="w-4 h-4 shrink-0" /> Hablar con una persona por WhatsApp</a>}
             <form
               onSubmit={alEnviar}
               className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-500/15 dark:border-slate-700 dark:bg-slate-950"
