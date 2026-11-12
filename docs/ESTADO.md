@@ -1,5 +1,10 @@
 # Estado del proyecto y memoria para agentes de IA
 
+
+## Logo de WhatsApp — 2026-11-12
+
+- `src/components/icons/WhatsAppIcon.tsx` es el logotipo oficial de WhatsApp (SVG relleno con `currentColor`, `aria-hidden`). Lucide no trae logos de marcas: **todo botón, enlace o campo de WhatsApp usa este componente**, no `MessageCircle` ni `Phone`.
+- Dónde está: el enlace "Hablar con una persona por WhatsApp" de JSBot (`className="w-4 h-4 shrink-0"`) y los campos "Teléfono / WhatsApp" de Mi cuenta y de Nuevo pedido. En el clásico se pasa `className=""` para no meter Tailwind: el tamaño lo da `.cuenta-input>svg` de `clasico.css`. El teléfono de quien recibe sigue con `Phone` (no es un WhatsApp).
 ## Nuevo pedido en 3 pasos — 2026-11-12
 
 - `NuevoPedido.tsx` ya no es un formulario largo: son 3 pasos de a uno por pantalla (**Recogida** → **Entrega** → **Paquetes**) con indicador de progreso (barras y "1. Recogida"…; los pasos ya hechos se pueden tocar para volver). Pie fijo: Cancelar / "Siguiente: Entrega"; Atrás / "Siguiente: Paquetes"; Atrás / "Solicitar pedido" (con "Enviando…"). Enter en un campo avanza de paso; solo el último envía.

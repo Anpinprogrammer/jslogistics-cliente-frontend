@@ -5,7 +5,7 @@
  */
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { AlertTriangle, ArrowRight, Bot, LogOut, Calendar, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, ClipboardCheck, ClipboardList, Clock, XCircle, Eye, EyeOff, FileText, Image as ImageIcon, Info, KeyRound, Lock, Mail, MapPin, Maximize2, Moon, PackageCheck, Phone, Plus, Receipt, RotateCcw, Save, Search, Settings, ShieldCheck, SlidersHorizontal, Store, Sun, Truck, Undo2, X } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Bot, LogOut, Calendar, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, ClipboardCheck, ClipboardList, Clock, XCircle, Eye, EyeOff, FileText, Image as ImageIcon, Info, KeyRound, Lock, Mail, MapPin, Maximize2, Moon, PackageCheck, Plus, Receipt, RotateCcw, Save, Search, Settings, ShieldCheck, SlidersHorizontal, Store, Sun, Truck, Undo2, X } from 'lucide-react';
 import './clasico.css';
 import { useSesion } from '../../auth/AuthProvider';
 import { useActualizarPerfilCliente, useConfirmarCambio, usePedirReintento, useCuentaCliente, useMisSolicitudes, useSolicitudesRecientes, useMovimientosCliente, usePaginaPedidos, usePruebas, type FiltroPedidos } from '../../api/cliente';
@@ -26,6 +26,7 @@ import { CampanitaCliente, RespuestaPropuesta } from './Notificaciones';
 import NuevoPedido from './NuevoPedido';
 import type { SolicitudCliente } from '../../types/dominio';
 import { clientToast } from '../../utils/clientToast';
+import { WhatsAppIcon } from '../../components/icons/WhatsAppIcon';
 
 const VERDE = 'var(--verde)', ROJO = 'var(--rojo)';
 const LOGO = '/img/clasico/logo.png';
@@ -816,7 +817,7 @@ function Cuenta({ d, toast }: { d: DatosCliente; toast: (t: string) => void }) {
           <div className="cuenta-campos">
             <div className="campo"><label htmlFor="cuenta-nombre">Nombre de la tienda</label><div className="cuenta-input"><Store aria-hidden="true" /><input id="cuenta-nombre" required maxLength={120} value={perfil.nombre} onChange={e => setPerfil({ ...perfil, nombre: e.target.value })} /></div></div>
             <div className="campo"><label htmlFor="cuenta-email">Correo electrónico</label><div className="cuenta-input"><Mail aria-hidden="true" /><input id="cuenta-email" type="email" required maxLength={254} value={perfil.email} onChange={e => setPerfil({ ...perfil, email: e.target.value })} /></div></div>
-            <div className="campo cuenta-campo-ancho"><label htmlFor="cuenta-telefono">Teléfono / WhatsApp de contacto</label><div className="cuenta-input"><Phone aria-hidden="true" /><input id="cuenta-telefono" type="tel" maxLength={30} value={perfil.telefono} onChange={e => setPerfil({ ...perfil, telefono: e.target.value })} /></div></div>
+            <div className="campo cuenta-campo-ancho"><label htmlFor="cuenta-telefono">Teléfono / WhatsApp de contacto</label><div className="cuenta-input"><WhatsAppIcon className="" /><input id="cuenta-telefono" type="tel" maxLength={30} value={perfil.telefono} onChange={e => setPerfil({ ...perfil, telefono: e.target.value })} /></div></div>
             <div className="campo cuenta-campo-ancho"><label htmlFor="cuenta-direccion">Dirección habitual de recogida <small>Cali, Valle del Cauca</small></label><div className="cuenta-input cuenta-input-area"><MapPin aria-hidden="true" /><textarea id="cuenta-direccion" rows={2} maxLength={200} value={perfil.direccionRecogida} onChange={e => setPerfil({ ...perfil, direccionRecogida: e.target.value })} placeholder="Ej: Calle 13 # 45-22, Barrio Granada, Bodega 3" /></div></div>
             {perfil.email.trim().toLowerCase() !== usuario?.email.toLowerCase() && <div className="campo cuenta-campo-ancho"><label htmlFor="cuenta-clave-email">Contraseña actual para confirmar el correo</label><div className="cuenta-input cuenta-input-clave"><Lock aria-hidden="true" /><input id="cuenta-clave-email" type={mostrarClave.email ? 'text' : 'password'} autoComplete="current-password" required value={claveCorreo} onChange={e => setClaveCorreo(e.target.value)} /><button type="button" aria-label={mostrarClave.email ? 'Ocultar contraseña para correo' : 'Mostrar contraseña para correo'} aria-pressed={mostrarClave.email} onClick={() => setMostrarClave(v => ({ ...v, email: !v.email }))}>{mostrarClave.email ? <EyeOff /> : <Eye />}</button></div></div>}
           </div>
