@@ -9,6 +9,7 @@ import { ApiError } from '../api/http';
 
 const CLAVE_SESION = 'jsl_demo_sesion';
 const CLAVE_CAMBIOS = 'jsl_demo_cambios';
+const CLAVE_REINTENTOS = 'jsl_demo_reintentos';
 const USUARIO: Usuario = { id: 'u-demo', email: 'cliente@demo.co', nombre: 'Laura Gómez', rol: 'cliente', clienteId: 'c-luna', mensajeroId: null };
 const CLIENTE: Cliente = { id: 'c-luna', nombre: 'Tienda Luna', telefono: '3001234567', direccionRecogida: '', tarifa: 8000 };
 let clienteDemo = { ...CLIENTE }, usuarioDemo = { ...USUARIO }, claveDemo = 'demo1234';
@@ -106,7 +107,19 @@ let pedidosMem: Pedido[] | null = null;
 function pedidosActuales() {
   if (!pedidosMem) pedidosMem = generar();
   const confirmados: Record<string, string> = JSON.parse(leer(CLAVE_CAMBIOS) || '{}');
-  return pedidosMem.map(p => (confirmados[p.guia] ? { ...p, cambioRecibido: confirmados[p.guia] } : p));
+  const pedidosReintento: Record<string, string> = JSON.parse(leer(CLAVE_REINTENTOS) || '{}');
+  // Devueltos de ejemplo: uno por confirmar, uno que quedó con el cliente (puede pedir reintento), uno en la oficina y uno ya reintentado
+  // (su reintento es la guía "aceptado" de hoy), para ver cada caso del portal.
+  const devueltos = pedidosMem.filter(p => p.estado === 'devuelto').sort((a, b) => b.n - a.n), aceptado = pedidosMem.find(p => p.estado === 'aceptado');
+  const marca: Record<string, Partial<Pedido>> = {};
+  if (devueltos[0]) marca[devueltos[0].guia] = { destinoDev: 'por_definir' };
+  if (devueltos[1]) marca[devueltos[1].guia] = { destinoDev: 'cliente' };
+  if (devueltos[2]) marca[devueltos[2].guia] = { destinoDev: 'oficina' };
+  if (devueltos[3] && aceptado) {
+    marca[devueltos[3].guia] = { destinoDev: 'cliente', reintentos: [{ guia: aceptado.guia, estado: 'aceptado' }] };
+    marca[aceptado.guia] = { reintentoDe: devueltos[3].guia };
+  }
+  return pedidosMem.map(p => ({ ...p, ...marca[p.guia], ...(confirmados[p.guia] ? { cambioRecibido: confirmados[p.guia] } : {}), ...(pedidosReintento[p.guia] ? { reintentoPedido: pedidosReintento[p.guia] } : {}) }));
 }
 
 export const demo = {
@@ -171,6 +184,12 @@ export const demo = {
     if (p?.estado === 'entregado') a.push({ tipo: 'entrega', url: svg('#16794A', 'Entrega ' + guia, CAJA) }, { tipo: 'firma', url: svg('#f4f6f9', '', FIRMA) });
     if (p?.estado === 'devuelto') a.push({ tipo: 'entrega', url: svg('#C0392B', 'Evidencia ' + guia, CAJA) });
     return espera(a, 350);
+  },
+  async pedirReintento(guia: string) {
+    const c = JSON.parse(leer(CLAVE_REINTENTOS) || '{}');
+    c[guia] = new Date().toISOString();
+    guardar(CLAVE_REINTENTOS, JSON.stringify(c));
+    await espera(null, 400);
   },
   async confirmarCambio(guia: string) {
     const c = JSON.parse(leer(CLAVE_CAMBIOS) || '{}');

@@ -8,12 +8,12 @@ import { Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-
 import { AlertTriangle, Bot, Calendar, CheckCircle2, ChevronRight, ClipboardCheck, ClipboardList, XCircle, Eye, EyeOff, FileText, Image as ImageIcon, Info, KeyRound, Lock, Mail, MapPin, Maximize2, Moon, PackageCheck, Phone, Plus, Receipt, RotateCcw, Save, Search, Settings, ShieldCheck, Store, Sun, Truck, Undo2, X } from 'lucide-react';
 import './clasico.css';
 import { useSesion } from '../../auth/AuthProvider';
-import { useActualizarPerfilCliente, useConfirmarCambio, useCuentaCliente, useMisSolicitudes, useMovimientosCliente, usePaginaPedidos, usePruebas, type FiltroPedidos } from '../../api/cliente';
+import { useActualizarPerfilCliente, useConfirmarCambio, usePedirReintento, useCuentaCliente, useMisSolicitudes, useMovimientosCliente, usePaginaPedidos, usePruebas, type FiltroPedidos } from '../../api/cliente';
 import { authApi } from '../../api/auth';
 import { usePorPagina, usePorPaginaCuenta } from '../../lib/pantalla';
 import { diaCorto, diaDe, fechaLarga, hoy, hora, moverDia, pct, pesos, pesosConSigno } from '../../lib/formato';
 import {
-  cambioPendiente, cerrado, EMPRESA, entregasPorDia, ESTADO_PEDIDO, estadoSolicitud, gastoDe, metodoTxt, MOTIVOS, pagoDomi, pasosSolicitud,
+  cadenaGuias, cambioPendiente, cerrado, EMPRESA, entregasPorDia, ESTADO_PEDIDO, estadoSolicitud, gastoDe, metodoTxt, MOTIVOS, pagoDomi, pasosSolicitud,
   reciboDelDia, resumenCliente, saldoPedido, servicio, textoDomi, textoSaldo, ultimaActividad, type Recibo,
 } from '../../lib/negocio';
 import { useDatosCliente, type DatosCliente } from '../useDatosCliente';
@@ -122,7 +122,7 @@ export default function PortalClasico() {
       <main>{vista}</main>
       <nav className="pestanas" aria-label="Secciones">{botones}</nav>
       <Dialogo abierto={!!ver} alCerrar={cerrar} variante="pedido">
-        {ver && <VerPedido guia={ver} d={d} alCerrar={cerrar} toast={toast} />}
+        {ver && <VerPedido guia={ver} d={d} alCerrar={cerrar} alVer={abrir} toast={toast} />}
       </Dialogo>
       {toastNodo}
     </div>
@@ -340,11 +340,13 @@ function MisSolicitudes({ abrir }: { abrir: (g: string) => void }) {
 }
 
 /* ---------------------------- Detalle (verPedidoCliente) ---------------------------- */
-function VerPedido({ guia, d, alCerrar, toast }: { guia: string; d: DatosCliente; alCerrar: () => void; toast: (t: string) => void }) {
+function VerPedido({ guia, d, alCerrar, alVer, toast }: { guia: string; d: DatosCliente; alCerrar: () => void; alVer: (g: string) => void; toast: (t: string) => void }) {
   const p = d.pedidos.find(x => x.guia === guia);
   const pruebas = usePruebas(p ? guia : null);
   const confirmar = useConfirmarCambio();
   const [preguntar, setPreguntar] = useState(false);
+  const pedirReintento = usePedirReintento();
+  const [preguntarReintento, setPreguntarReintento] = useState(false);
   const [visor, setVisor] = useState<{ url: string; titulo: string } | null>(null);
 
   if (!p) return (
@@ -361,6 +363,7 @@ function VerPedido({ guia, d, alCerrar, toast }: { guia: string; d: DatosCliente
   const valorCab = p.estado === 'entregado' ? p.valorCobrado : p.aCobrar;
   const cambioPend = p.cambio && !p.cambioRecibido;
   const cambioOk = p.cambio && !!p.cambioRecibido;
+  const cadena = cadenaGuias(d.pedidos, guia);
 
   const pasoFinal = cambioPend
     ? { label: 'Cambio por recibir', fecha: 'Pendiente', Icono: RotateCcw, completado: false, actual: cerrado(p) }
@@ -432,6 +435,53 @@ function VerPedido({ guia, d, alCerrar, toast }: { guia: string; d: DatosCliente
             <ul>
               {novedades.map((n, i) => <li key={i}><span>{n.obs}</span><span>{n.fecha}</span></li>)}
             </ul>
+          </section>
+        )}
+
+        {p.estado === 'devuelto' && (
+          p.reintentos?.length ? (
+            <section className="pod-aviso ok">
+              <span className="pod-aviso-titulo"><RotateCcw aria-hidden="true" /> Reintento en camino</span>
+              <p>Este pedido se volvió a intentar con la guía <button type="button" className="enlace-guia" onClick={() => alVer(p.reintentos![p.reintentos!.length - 1].guia)}>{p.reintentos[p.reintentos.length - 1].guia}</button>.</p>
+            </section>
+          ) : p.reintentoPedido ? (
+            <section className="pod-aviso">
+              <span className="pod-aviso-titulo"><RotateCcw aria-hidden="true" /> Pediste el reintento</span>
+              <p>Lo pediste el {hora(p.reintentoPedido)}, y JS Logistics lo va a asignar a un mensajero. Verás aquí la guía nueva.</p>
+            </section>
+          ) : p.destinoDev === 'por_definir' ? (
+            <section className="pod-aviso">
+              <span className="pod-aviso-titulo"><RotateCcw aria-hidden="true" /> Estamos confirmando tu paquete</span>
+              <p>El mensajero todavía no nos dice dónde quedó el paquete de esta devolución. Cuando lo haga podrás pedir un reintento desde aquí.</p>
+            </section>
+          ) : (
+            <section className="pod-aviso">
+              <span className="pod-aviso-titulo"><RotateCcw aria-hidden="true" /> {preguntarReintento ? 'Confirmar reintento' : '¿Quieres que lo intentemos de nuevo?'}</span>
+              <p>{preguntarReintento
+                ? `El reintento tiene un cobro igual al del domicilio (${pesos(p.valorServicio)}). La devolución de este pedido se cobra como siempre. ¿Pedimos el reintento?`
+                : `Este pedido se devolvió${p.destinoDev === 'oficina' ? ' y está en la oficina de JS Logistics' : p.destinoDev === 'cliente' ? ' y el paquete quedó contigo' : ''}. Puedes pedir un reintento de entrega.`}</p>
+              <div className="pod-aviso-acciones">
+                {preguntarReintento ? (
+                  <>
+                    <button type="button" className="btn sec chico" onClick={() => setPreguntarReintento(false)}>Cancelar</button>
+                    <button type="button" className="btn ok chico" disabled={pedirReintento.isPending} onClick={() => pedirReintento.mutate(guia, {
+                      onSuccess: () => toast('Listo, pedimos el reintento. JS Logistics lo asigna a un mensajero.'), onError: () => toast('No se pudo pedir el reintento. Revisa la conexión.'),
+                      onSettled: () => setPreguntarReintento(false) })}>Sí, pedir reintento</button>
+                  </>
+                ) : <button type="button" className="btn ok chico" onClick={() => setPreguntarReintento(true)}>Reintentar entrega</button>}
+              </div>
+            </section>
+          )
+        )}
+
+        {cadena.length > 1 && (
+          <section className="pod-cadena">
+            <span className="pod-seccion-titulo">Guías de esta entrega</span>
+            <ol>{cadena.map(g => { const x = d.pedidos.find(q => q.guia === g); return (
+              <li key={g} className={g === guia ? 'actual' : ''}>
+                {g === guia ? <b>{g}</b> : <button type="button" className="enlace-guia" onClick={() => alVer(g)}>{g}</button>}
+                {x && <><span className={`etq ${ESTADO_PEDIDO[x.estado].clase}`}>{ESTADO_PEDIDO[x.estado].texto}</span><span className="sub">{hora(x.creado)}</span></>}
+              </li>); })}</ol>
           </section>
         )}
 
