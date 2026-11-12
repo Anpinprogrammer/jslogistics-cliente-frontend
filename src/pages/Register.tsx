@@ -103,7 +103,7 @@ export default function Register() {
   const [currentStep, setCurrentStep] = useState(1);
   const [direccion, setDireccion] = useState<1 | -1>(1);
   const pasoRef = useRef<HTMLFormElement>(null);
-  const primerPaso = useRef(true);
+  const pasoAnterior = useRef(currentStep);
 
   const poner: Poner = (k) => (e) => {
     const valor = e.target.value;
@@ -168,7 +168,8 @@ export default function Register() {
   };
 
   useEffect(() => {
-    if (primerPaso.current) { primerPaso.current = false; return; }
+    if (pasoAnterior.current === currentStep) return;
+    pasoAnterior.current = currentStep;
     pasoRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [currentStep]);
 
@@ -238,15 +239,15 @@ export default function Register() {
             </div>
           ) : (
             <>
-              {/* Vista móvil: wizard de un paso a la vez */}
+              {/* Un solo formulario de tres pasos para celular, tablet y escritorio. */}
               <form
                 ref={pasoRef}
                 onSubmit={enviar}
                 noValidate
                 onKeyDown={e => { if (e.key === 'Enter' && currentStep < 3 && (e.target as HTMLElement).tagName === 'INPUT') { e.preventDefault(); siguiente(); } }}
-                className={`block scroll-mt-24 space-y-5 overflow-hidden lg:hidden ${TARJETA_FORM}`}
+                className={`block scroll-mt-24 space-y-5 overflow-hidden ${TARJETA_FORM}`}
               >
-                <div className="block w-full lg:hidden">
+                <div className="block w-full">
                   <div className="mb-2 flex items-center justify-between gap-3 text-[11px] font-bold">
                     <span className="text-sky-600 dark:text-sky-400">Paso {currentStep} de 3</span>
                     <span className="text-right text-slate-500 dark:text-slate-400">{TITULOS_PASO[currentStep]}</span>
@@ -304,17 +305,7 @@ export default function Register() {
                 <Trampa sitio={sitio} setSitio={setSitio} />
               </form>
 
-              {/* Escritorio: el formulario completo, igual que antes */}
-              <form onSubmit={enviar} noValidate={false} className={`hidden space-y-8 lg:block ${TARJETA_FORM}`}>
-                <CamposRecogida f={f} campos={campos} poner={poner} enviando={enviando} />
-                <CamposPaquetes f={f} campos={campos} poner={poner} enviando={enviando} />
-                <CamposDestino f={f} campos={campos} poner={poner} enviando={enviando} />
-                <button type="submit" disabled={enviando} className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl bg-sky-400 px-8 py-3.5 text-sm font-extrabold text-slate-950 shadow-lg shadow-sky-500/20 transition-all hover:bg-sky-300 active:scale-95 disabled:cursor-wait disabled:opacity-60">
-                  <Send className="h-4 w-4" aria-hidden="true" />{enviando ? 'Enviando…' : 'Enviar solicitud'}
-                </button>
-                <PieFormulario />
-                <Trampa sitio={sitio} setSitio={setSitio} />
-              </form>
+
             </>
           )}
         </div>

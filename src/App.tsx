@@ -48,7 +48,7 @@ const queryClient = new QueryClient({
 function ScrollToHash() {
   const location = useLocation();
   useLayoutEffect(() => {
-    if (location.pathname === '/login') {
+    if (['/login', '/register', '/solicitar-envio'].includes(location.pathname)) {
       const root = document.documentElement;
       const anterior = root.style.scrollBehavior;
       root.style.scrollBehavior = 'auto';
