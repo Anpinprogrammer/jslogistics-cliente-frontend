@@ -104,7 +104,7 @@ const Navbar: React.FC<{ hero?: boolean }> = ({ hero = false }) => {
           {/* Badge claro: el isotipo es azul oscuro y el .webp trae el texto en blanco, por eso se recorta. */}
           <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-white to-sky-100 p-1 shadow-[0_0_14px_2px_rgba(56,189,248,0.35)]">
             <span className="relative block h-full w-full overflow-hidden rounded-lg">
-              <img src="/img/icono-96.webp" alt="" width={96} height={96} className="absolute left-[-10%] top-[3%] w-[120%] max-w-none" />
+              <img src="/img/logo_JS_sin_texto.webp" alt="" width={96} height={96} className="absolute left-[-10%] top-[3%] w-[120%] max-w-none" />
             </span>
           </span>
           <span className="font-display text-lg font-800 uppercase tracking-wide text-white">JS Logistics</span>

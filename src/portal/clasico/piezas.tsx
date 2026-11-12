@@ -5,7 +5,7 @@ import type { Pedido } from '../../types/dominio';
 import { diaCorto, hora, hoy, moverDia } from '../../lib/formato';
 import { MOTIVOS } from '../../lib/negocio';
 
-export const LOGO = '/img/clasico/logo.png';
+export const LOGO = '/img/logo_JS_sin_texto.webp';
 
 /** Una línea con lo último que pasó con el pedido (Inicio y Mis pedidos). */
 export const lineaPedido = (p: Pedido) =>
