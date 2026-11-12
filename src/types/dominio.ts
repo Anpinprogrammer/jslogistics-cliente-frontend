@@ -22,7 +22,39 @@ export interface EnlaceCorreo {
   expira: string;
 }
 
-export type EstadoPedido = 'pendiente' | 'entregado' | 'devuelto';
+/** aceptado: la oficina aprobó tu solicitud y asignó un mensajero, pero todavía no lo recoge; pendiente: en ruta. */
+export type EstadoPedido = 'aceptado' | 'pendiente' | 'entregado' | 'devuelto';
+
+/** Estados de una solicitud (GET /solicitudes/mias). cotizada = la oficina propuso un valor y espera tu respuesta. */
+export type EstadoSolicitud = 'pendiente' | 'cotizada' | 'confirmada' | 'asignada' | 'rechazada';
+/** Una solicitud de envío del cliente, como la responde GET /solicitudes/mias (solo los campos que el cliente puede ver). */
+export interface SolicitudCliente {
+  id: string;
+  estado: EstadoSolicitud;
+  origen: 'publico' | 'portal';
+  direccionRecogida: string;
+  paquetes: number;
+  pesoKg: number | null;
+  destinatarioNombre: string;
+  destinatarioTelefono: string;
+  direccionEntrega: string;
+  /** Domicilio que propuso o acordó la oficina (null mientras no lo revisa). */
+  valor: number | null;
+  /** Razón del rechazo (vacía si no se rechazó). */
+  motivoRechazo: string;
+  /** Guía creada al asignar el mensajero, y su estado. */
+  guia: string | null;
+  pedidoEstado: EstadoPedido | null;
+  creado: string;
+  actualizado: string;
+}
+export interface PaginaSolicitudes {
+  solicitudes: SolicitudCliente[];
+  pagina: number;
+  porPagina: number;
+  total: number;
+  paginas: number;
+}
 export type MetodoPago = '' | 'efectivo' | 'transf_js' | 'transf_cliente' | 'devuelto';
 export type Motivo = 'no_contesta' | 'direccion' | 'rechazo' | 'reprogramar' | 'otro';
 

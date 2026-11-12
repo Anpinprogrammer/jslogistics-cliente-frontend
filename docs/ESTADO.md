@@ -1,5 +1,12 @@
 # Estado del proyecto y memoria para agentes de IA
 
+## Estado "Aceptado" y Mis solicitudes — 2026-11-12
+
+- El pedido tiene un estado nuevo antes de "En ruta": `aceptado` (la oficina aprobó la solicitud y asignó mensajero, pero todavía no la recoge). Pasa a `pendiente` ("En ruta") cuando el mensajero le toma la foto al paquete. Textos y clases en `ESTADO_PEDIDO` de `lib/negocio.ts` (clase `etq acep`). El tracker del detalle es Aceptado → En ruta → Entregado/Devuelto, y "Mis pedidos" tiene el filtro "Aceptados".
+- **Mis pedidos** tiene dos sub-pestañas (`cuenta-tabs pedidos-tabs`, en la URL `?v=solicitudes`): "Mis pedidos" y "Mis solicitudes". Las solicitudes vienen de `GET /api/solicitudes/mias` (`useMisSolicitudes`, con `opcional()` por si el backend aún no la tiene) y cada tarjeta reutiliza el `pod-stepper`: Solicitado → Pendiente de aprobación JS / Pendiente de tu aprobación → Aprobada por JS / Rechazada (con la razón). Los pasos salen de `pasosSolicitud()` en `lib/negocio.ts`.
+- `useNuevaSolicitud` ya tiene rama demo (antes llamaba a la API también en demo) y refresca "Mis solicitudes".
+- Necesita el backend de `js-logistics` con `db:migrar` aplicado (estado `aceptado`, `/solicitudes/mias`).
+
 ## Nuevo pedido desde el portal — 2026-11-11
 
 - En **Mis pedidos** hay un botón **Nuevo pedido** (arriba a la derecha; ancho completo en celular) que abre un `Dialogo` variante `pedido` con `portal/clasico/NuevoPedido.tsx`. Pide los mismos campos de `/register`, con nombre, teléfono, correo y dirección de recogida tomados de la ficha y la cuenta, editables solo para ese pedido (no cambian la ficha).

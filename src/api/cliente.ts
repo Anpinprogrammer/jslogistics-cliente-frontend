@@ -3,12 +3,12 @@
  *
  * Estado del backend (rama del backend, backend/README.md):
  * - Listo: GET /pedidos (el cliente solo ve los suyos), GET /pedidos/:guia, POST /pedidos/:guia/cambio-recibido, GET /clientes/:id.
- * - Listo: POST /solicitudes/portal (pedir un envío nuevo desde el portal; la oficina lo aprueba).
+ * - Listo: POST /solicitudes/portal (pedir un envío nuevo desde el portal; la oficina lo aprueba) y GET /solicitudes/mias ("Mis solicitudes").
  * - Listo también: GET /clientes/:id/cuenta (saldo e historial paginado) y GET /pedidos/:guia/archivos (fotos firmadas de Storage, vencen en 1 hora).
  *   Si el backend desplegado aún no los tiene, un 404 se toma como lista vacía.
  */
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { Archivo, Cliente, Movimiento, PaginaPedidos, Pedido } from '../types/dominio';
+import type { Archivo, Cliente, Movimiento, PaginaPedidos, PaginaSolicitudes, Pedido } from '../types/dominio';
 import { cambioPendiente, delDia } from '../lib/negocio';
 import { api, ApiError, DEMO } from './http';
 import { demo } from '../demo/datos';
@@ -41,13 +41,14 @@ export function usePedidosCliente() {
 }
 
 /** Filtros de la pestaña de pedidos. */
-export type FiltroPedidos = 'todos' | 'ruta' | 'ent' | 'dev' | 'cambio';
+export type FiltroPedidos = 'todos' | 'acep' | 'ruta' | 'ent' | 'dev' | 'cambio';
 export interface ConsultaPedidos { filtro: FiltroPedidos; buscar: string; dia: string; pagina: number; porPagina: number }
 
 /** Lo que el servidor entiende de cada filtro. El servidor filtra, cuenta y corta la página. */
 function parametros({ filtro, buscar, dia, pagina, porPagina }: ConsultaPedidos) {
   const q = new URLSearchParams({ pagina: String(pagina), porPagina: String(porPagina) });
-  if (filtro === 'ruta') q.set('estado', 'pendiente');
+  if (filtro === 'acep') q.set('estado', 'aceptado');
+  else if (filtro === 'ruta') q.set('estado', 'pendiente');
   else if (filtro === 'ent') q.set('estado', 'entregado');
   else if (filtro === 'dev') q.set('estado', 'devuelto');
   else if (filtro === 'cambio') q.set('cambioPendiente', 'true');
@@ -60,6 +61,7 @@ function parametros({ filtro, buscar, dia, pagina, porPagina }: ConsultaPedidos)
 function paginarAqui(todos: Pedido[], { filtro, buscar, dia, pagina, porPagina }: ConsultaPedidos): PaginaPedidos {
   let ps = [...todos].sort((a, b) => b.n - a.n);
   if (filtro === 'cambio') ps = ps.filter(cambioPendiente);
+  else if (filtro === 'acep') ps = ps.filter(p => p.estado === 'aceptado');
   else if (filtro === 'ruta') ps = ps.filter(p => p.estado === 'pendiente');
   else if (filtro === 'ent') ps = ps.filter(p => p.estado === 'entregado');
   else if (filtro === 'dev') ps = ps.filter(p => p.estado === 'devuelto');
@@ -201,8 +203,25 @@ export function useConfirmarCambio() {
 
 /** "Nuevo pedido" del portal: manda la solicitud a la oficina. No crea la guía: la crea la oficina al asignar el mensajero. */
 export function useNuevaSolicitud() {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: (datos: DatosSolicitudPortal) =>
-      api('/solicitudes/portal', { method: 'POST', json: datos }).then(() => undefined),
+      DEMO ? demo.nuevaSolicitud(datos) : api('/solicitudes/portal', { method: 'POST', json: datos }).then(() => undefined),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['cliente', 'solicitudes'] }); },
+  });
+}
+
+/** "Mis solicitudes": las solicitudes de envío del cliente con su estado y, si se rechazó, la razón.
+    El backend solo devuelve las de la ficha de la sesión. Un backend que aún no tenga la ruta responde 404: lista vacía. */
+export function useMisSolicitudes(pagina: number, porPagina: number) {
+  return useQuery({
+    queryKey: ['cliente', 'solicitudes', pagina, porPagina],
+    placeholderData: keepPreviousData,
+    refetchInterval: 60_000,
+    queryFn: (): Promise<PaginaSolicitudes> => {
+      if (DEMO) return demo.solicitudes(pagina, porPagina);
+      const q = new URLSearchParams({ pagina: String(pagina), porPagina: String(porPagina) });
+      return opcional(() => api<PaginaSolicitudes>(`/solicitudes/mias?${q}`), { solicitudes: [], pagina: 1, porPagina, total: 0, paginas: 1 });
+    },
   });
 }
