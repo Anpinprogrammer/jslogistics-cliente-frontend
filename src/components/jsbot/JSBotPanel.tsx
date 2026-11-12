@@ -172,7 +172,7 @@ export default function JSBotPanel({ pedido, setAbierto, burbuja, origenApertura
           aria-modal="true"
           aria-labelledby="jsbot-title"
           aria-hidden={!abierto}
-          className={`absolute inset-y-0 right-0 flex h-dvh w-full flex-col border-l border-slate-200 bg-slate-50 text-slate-900 shadow-2xl transition-transform duration-300 ease-out motion-reduce:transition-none dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 sm:w-[420px] lg:w-[20vw] ${abierto ? "translate-x-0" : "translate-x-full"}`}
+          className={`absolute inset-y-0 right-0 flex h-dvh w-full flex-col border-l border-slate-200 bg-slate-50 text-slate-900 shadow-2xl transition-transform duration-300 ease-out motion-reduce:transition-none dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 sm:w-[420px] lg:w-[450px] xl:w-[480px] ${abierto ? "translate-x-0" : "translate-x-full"}`}
           style={{
             paddingTop: "env(safe-area-inset-top)",
             paddingBottom: "env(safe-area-inset-bottom)",
