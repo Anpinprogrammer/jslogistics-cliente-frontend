@@ -174,12 +174,12 @@ export function escenaIntro(c: number, m: Medidas | null, refs: RefsIntro, titul
         <>
           {/* Cuerpo de vidrio: se llena desde arriba, como tinta */}
           {vidrioVisible && (
-            <div aria-hidden style={{
-              ...CAPA, borderRadius: '1.5rem', background: 'rgba(15,23,42,.6)',
-              boxShadow: `0 24px 80px -20px rgba(2,132,199,${0.45 * relleno}), 0 10px 30px rgba(0,0,0,${0.5 * relleno})`,
+            <div aria-hidden className="login-intro-vidrio" style={{
+              ...CAPA, borderRadius: '1.5rem',
+              '--login-sombra-oscura': `0 24px 80px -20px rgba(2,132,199,${0.45 * relleno}), 0 10px 30px rgba(0,0,0,${0.5 * relleno})`,
               backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
               clipPath: `circle(${relleno * 170}% at 50% 0%)`,
-            }} />
+            } as CSSProperties} />
           )}
           <Trazo c={c} m={m} />
         </>

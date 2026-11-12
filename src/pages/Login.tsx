@@ -4,12 +4,20 @@ import { portadaDe, useSesion } from '../auth/AuthProvider';
 import { DEMO } from '../api/http';
 import {
   MarcoAcceso, BotonAcceso,
-  ETIQUETA, ENTRADA, ICONO, ENLACE, IcCorreo, IcCandado, IcOjo, IcOjoTachado, IcCopiar, IcOk,
+  ETIQUETA as ETIQUETA_OSCURA, ENTRADA as ENTRADA_OSCURA, ICONO, IcCorreo, IcCandado, IcOjo, IcOjoTachado, IcCopiar, IcOk,
 } from '../components/acceso';
 import { useIntroLogin } from '../components/intro/useIntroLogin';
 import { escenaIntro } from '../components/intro/escena';
 import { medir, type Medidas } from '../components/intro/medidas';
 import { clientToast } from '../utils/clientToast';
+
+const ETIQUETA = ETIQUETA_OSCURA.replace('text-slate-400', 'text-slate-700 dark:text-slate-300').replace('font-medium', 'font-bold dark:font-medium');
+const ENTRADA = ENTRADA_OSCURA
+  .replace('border-slate-700/80 bg-slate-950/60', 'border-slate-300/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/80')
+  .replace('placeholder:text-slate-500', 'placeholder:text-slate-400 dark:placeholder:text-slate-500')
+  .replace('text-slate-100', 'text-slate-900 dark:text-white')
+  .replace('hover:border-slate-500', 'hover:border-slate-400 dark:hover:border-slate-500');
+const ENLACE = 'font-semibold text-sky-700 dark:text-sky-400 underline-offset-4 transition-colors hover:text-sky-800 dark:hover:text-sky-300 hover:underline';
 
 const DEMO_EMAIL = 'cliente@demo.co';
 const DEMO_CLAVE = 'demo1234';
@@ -26,12 +34,12 @@ const FilaDemo: React.FC<{ etiqueta: string; valor: string; mono?: boolean }> = 
   return (
     <div className="flex items-center justify-between gap-3">
       <p className="min-w-0 text-[13px] sm:text-sm">
-        <span className="text-slate-400">{etiqueta}: </span>
-        <span className={`break-all font-medium text-slate-100 ${mono ? 'font-mono' : ''}`}>{valor}</span>
+        <span className="text-slate-600 dark:text-slate-400">{etiqueta}: </span>
+        <span className={`break-all font-medium text-slate-900 dark:text-slate-100 ${mono ? 'font-mono' : ''}`}>{valor}</span>
       </p>
       <button type="button" onClick={copiar} aria-label={`Copiar ${etiqueta.toLowerCase()}`}
         className={`grid h-7 w-7 shrink-0 sm:h-8 sm:w-8 place-items-center rounded-lg border transition ${
-          copiado ? 'border-emerald-400/50 bg-emerald-400/10 text-emerald-300' : 'border-sky-500/30 text-sky-300 hover:border-sky-400 hover:bg-sky-500/15'}`}>
+          copiado ? 'border-emerald-400/50 bg-emerald-400/10 text-emerald-700 dark:text-emerald-300' : 'border-sky-500/30 text-sky-700 dark:text-sky-300 hover:border-sky-400 hover:bg-sky-500/15'}`}>
         {copiado ? <IcOk /> : <IcCopiar />}
       </button>
     </div>
@@ -96,30 +104,31 @@ const Login: React.FC = () => {
 
   return (
     <MarcoAcceso
+      seguirTema
       titulo={TITULO}
       intro={intro?.marco}
       sinEntrada={salio}
       pie={
-        <p className="mt-3 text-center text-[13px] text-slate-400 sm:mt-6 sm:text-sm">
+        <p className="mx-auto mt-3 w-fit rounded-full bg-white/90 px-3.5 py-1.5 text-center text-[13px] text-slate-600 backdrop-blur-sm dark:w-auto dark:rounded-none dark:bg-transparent dark:p-0 dark:text-slate-400 dark:backdrop-blur-none sm:mt-6 sm:text-sm">
           ¿Quieres enviar con nosotros?{' '}
-          <Link to="/register" className={ENLACE}>
+          <Link to="/register" className="font-bold text-sky-600 underline-offset-4 transition-colors hover:text-sky-800 hover:underline dark:font-semibold dark:text-sky-400 dark:hover:text-sky-300">
             Solicitar envío
           </Link>
         </p>
       }
     >
       <div style={intro?.encabezado}>
-        <h2 className="font-display text-base font-700 text-white sm:text-xl">Iniciar sesión</h2>
-        <p className="mb-3 mt-0.5 text-xs text-slate-400 sm:mb-6 sm:mt-1 sm:text-sm">Ingresa con las credenciales de tu empresa</p>
+        <h2 className="font-display text-base font-700 text-slate-900 dark:text-white sm:text-xl">Iniciar sesión</h2>
+        <p className="mb-3 mt-0.5 text-xs text-slate-600 dark:text-slate-400 sm:mb-6 sm:mt-1 sm:text-sm">Ingresa con las credenciales de tu empresa</p>
       </div>
 
       {DEMO && (
         <div className="mb-3 rounded-xl border border-sky-500/30 bg-sky-500/10 p-2.5 sm:mb-6 sm:p-3.5" style={intro?.demo}>
           <div className="mb-2 flex items-center gap-2 sm:mb-2.5">
             <span className="rounded-md bg-sky-400 px-1.5 py-0.5 font-mono text-[10px] font-bold tracking-wider text-slate-950">DEMO</span>
-            <span className="text-xs text-slate-300">Credenciales de prueba</span>
+            <span className="text-xs text-slate-700 dark:text-slate-300">Credenciales de prueba</span>
             <button type="button" onClick={() => setForm({ email: DEMO_EMAIL, password: DEMO_CLAVE })}
-              className="ml-auto text-xs font-medium text-sky-300 underline-offset-4 hover:text-sky-200 hover:underline">
+              className="ml-auto text-xs font-medium text-sky-700 dark:text-sky-300 underline-offset-4 hover:text-sky-800 dark:hover:text-sky-200 hover:underline">
               Rellenar
             </button>
           </div>
@@ -149,7 +158,7 @@ const Login: React.FC = () => {
             {intro?.campos[1].escaner}
             <span className={ICONO}><IcCandado /></span>
             <button type="button" onClick={() => setVer(v => !v)} aria-label={ver ? 'Ocultar contraseña' : 'Mostrar contraseña'} aria-pressed={ver}
-              className="absolute right-1.5 top-1/2 grid h-8 w-8 -translate-y-1/2 sm:right-2 sm:h-9 sm:w-9 place-items-center rounded-lg text-slate-500 transition hover:bg-slate-700/50 hover:text-sky-400">
+              className="absolute right-1.5 top-1/2 grid h-8 w-8 -translate-y-1/2 sm:right-2 sm:h-9 sm:w-9 place-items-center rounded-lg text-slate-500 transition hover:bg-slate-200/70 dark:hover:bg-slate-700/50 hover:text-sky-400">
               {ver ? <IcOjoTachado /> : <IcOjo />}
             </button>
           </div>

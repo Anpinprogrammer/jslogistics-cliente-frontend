@@ -14,11 +14,13 @@ import { useSesion } from '../../auth/AuthProvider';
 import { fechaLarga, hoy } from '../../lib/formato';
 import { cambioPendiente } from '../../lib/negocio';
 import { useDatosCliente } from '../useDatosCliente';
+import { useEventosSolicitudes } from '../../api/cliente';
 import { useTheme } from '../../hooks/useTheme';
 import { debeRestaurar, guardarPestana, pestanaGuardada, type PestanaCliente } from '../../hooks/usePersistedTab';
 import { JSBOT_ABRIR } from '../../components/jsbot/evento';
 import { Icono } from './iconos';
 import { CargandoVista, Dialogo, LOGO } from './piezas';
+import { InicioSkeleton } from './InicioSkeleton';
 import { CampanitaCliente } from './Notificaciones';
 import { clientToast } from '../../utils/clientToast';
 
@@ -44,6 +46,7 @@ function alQuedarLibre(fn: () => void, ms: number) {
 const pestanaDe = (path: string): PestanaCliente => (path.endsWith('/pedidos') ? 'pedidos' : path.endsWith('/cuenta') ? 'cuenta' : 'inicio');
 
 export default function PortalClasico() {
+  useEventosSolicitudes();
   const { usuario, salir } = useSesion();
   const { theme, toggleTheme } = useTheme();
   const nav = useNavigate(), loc = useLocation();
@@ -69,6 +72,7 @@ export default function PortalClasico() {
   // para los contadores del menú y de los filtros. Fuera del Inicio se refresca cada 5 minutos en vez de cada minuto.
   const [diferida, setDiferida] = useState(false);
   useEffect(() => (tab === 'inicio' || diferida ? undefined : alQuedarLibre(() => setDiferida(true), 4000)), [tab, diferida]);
+  useEffect(() => { precargar(tab); }, [tab]);
   const d = useDatosCliente(tab === 'inicio' || diferida, tab === 'inicio' ? 60_000 : 300_000);
   const enRuta = d.pedidos.filter(p => p.estado === 'pendiente' || p.estado === 'aceptado').length, cambios = d.pedidos.filter(cambioPendiente);
   const items: [string, string, number?][] = [['inicio', 'Inicio'], ['pedidos', 'Mis pedidos', enRuta + cambios.length], ['cuenta', 'Mi cuenta']];
@@ -102,10 +106,10 @@ export default function PortalClasico() {
   let vista;
   if (restaurarA && esRaiz) vista = <Navigate to={'/cliente/' + restaurarA} replace state={{ restaurarNav: true }} />;
   else if (d.error) vista = <><h1>Hola</h1><div className="vacio">{d.error.message}</div></>;
-  else if (d.cargando) vista = <><h1>Hola</h1><div className="vacio">Cargando…</div></>;
+  else if (d.cargando) vista = tab === 'inicio' ? <InicioSkeleton /> : <CargandoVista />;
   else if (!d.cliente) vista = <><h1>Hola</h1><div className="vacio">Tu cuenta todavía no está asociada a un cliente. Escríbele a JS Logistics.</div></>;
   else vista = (
-    <Suspense fallback={<CargandoVista />}>
+    <Suspense fallback={tab === 'inicio' ? <InicioSkeleton /> : <CargandoVista />}>
       <Routes>
         <Route index element={<Inicio d={d} ir={ir} abrir={abrir} />} />
         <Route path="pedidos" element={<Pedidos d={d} abrir={abrir} />} />

@@ -36,6 +36,7 @@ export function estadoSolicitud(s: Pick<SolicitudCliente, 'estado'>): { texto: s
     case 'pendiente': return { texto: 'Pendiente de aprobación JS', clase: 'pend' };
     case 'cotizada': return { texto: 'Pendiente de tu aprobación', clase: 'pend' };
     case 'rechazada': return { texto: 'Rechazada', clase: 'sin' };
+    case 'asignada': return { texto: 'Asignada a mensajero', clase: 'ent' };
     default: return { texto: 'Aprobada por JS', clase: 'ent' };
   }
 }

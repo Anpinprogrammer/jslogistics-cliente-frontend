@@ -45,6 +45,10 @@ export interface SolicitudCliente {
   /** Guía creada al asignar el mensajero, y su estado. */
   guia: string | null;
   pedidoEstado: EstadoPedido | null;
+  /** true si el cliente aceptó la propuesta desde el portal; false si la aprobó la oficina. */
+  confirmadaPorCliente: boolean;
+  /** Nombre del mensajero cuando la solicitud ya fue asignada. */
+  mensajeroNombre: string | null;
   creado: string;
   actualizado: string;
 }

@@ -292,3 +292,13 @@
 }
 
 /* Los ajustes de los avisos (react-toastify) están en components/avisos.css: se cargan con el contenedor. */
+
+/* El revelado usa la misma superficie blanca que el formulario final en modo claro. */
+.login-intro-vidrio {
+  background: #fff;
+  box-shadow: 0 20px 25px -5px rgb(15 23 42 / .08), 0 8px 10px -6px rgb(15 23 42 / .08);
+}
+.dark .login-intro-vidrio {
+  background: rgba(15, 23, 42, .6);
+  box-shadow: var(--login-sombra-oscura);
+}

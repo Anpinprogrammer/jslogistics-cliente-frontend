@@ -200,7 +200,7 @@ export default function Home() {
                     placeholder="Número de guía"
                     enterKeyHint="search"
                     autoComplete="off"
-                    className="w-full min-w-0 rounded-2xl border border-slate-700/80 bg-slate-900/90 py-3.5 pl-11 pr-14 text-sm font-medium text-white shadow-xl backdrop-blur-md transition-all placeholder:text-slate-400 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400 lg:rounded-xl lg:border-slate-800 lg:bg-slate-950 lg:py-3 lg:pl-10 lg:pr-4 lg:shadow-none lg:placeholder:text-slate-500"
+                    className="w-full min-w-0 rounded-2xl border border-slate-700/80 bg-slate-900/90 py-3.5 pl-11 pr-14 text-sm font-medium text-white shadow-xl backdrop-blur-md transition-all placeholder:text-slate-400 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400 lg:rounded-xl lg:border-slate-800 lg:bg-slate-950 lg:py-3 lg:pl-10 lg:pr-4 lg:shadow-none lg:placeholder:text-slate-500 max-md:border-white/70 max-md:bg-white/95 max-md:text-slate-900 max-md:shadow-lg max-md:shadow-slate-950/20 dark:max-md:border-slate-700/80 dark:max-md:bg-slate-900/90 dark:max-md:text-white dark:max-md:shadow-xl dark:max-md:shadow-black/10"
                   />
                   <button
                     type="submit"
@@ -255,7 +255,7 @@ export default function Home() {
         <div
           role="region"
           aria-label="JS Logistics en cifras"
-          className="relative z-20 w-full shrink-0 border-t border-slate-800/80 bg-slate-950/90 py-4 backdrop-blur-md lg:py-5"
+          className="relative z-20 w-full shrink-0 border-t border-slate-800/80 bg-slate-950/90 py-4 backdrop-blur-md lg:py-5 max-md:pb-[calc(7rem+env(safe-area-inset-bottom))] dark:max-md:pb-4"
         >
           <div className="landing-shell">
             <div className="grid grid-cols-2 items-stretch gap-x-4 md:grid-cols-4 lg:gap-x-8">

@@ -1,5 +1,34 @@
 # Estado del proyecto y memoria para agentes de IA
 
+## Skeleton del Inicio del cliente — 2026-11-12
+
+- `portal/clasico/InicioSkeleton.tsx` reproduce el saludo, cuatro KPIs, dona de efectividad, barras de 30 días y listas de pedidos/movimientos con las mismas clases/grid del Inicio. Usa únicamente variables del tema del portal (`--papel`, `--linea`); tarjetas blancas en claro, sin pulso sobre el contenedor, y movimiento reducido mediante los estilos `esq-*` existentes.
+- Se muestra dentro del marco con sidebar/header visibles al cargar ficha en Inicio, en su Suspense y hasta recibir pedidos/cuenta. No se muestra a pantalla completa antes de la navegación; los errores conservan sus mensajes. La pestaña activa se precarga en paralelo con sus datos.
+
+## Colores claros del rastreo de escritorio — 2026-11-12
+
+- En `landing.css`, las reglas de `html:not(.dark) .landing-tracking` desde 1024 px (el corte real del box) cambian únicamente colores de superficie, borde, sombra, textos e input. No se modifica estructura, medidas, tipografía ni desenfoque; tampoco móvil ni ninguna regla oscura. Se conserva el botón cian original.
+
+## Input de rastreo móvil claro, sin tarjeta — 2026-11-12
+
+- Solo bajo md y en Light Mode, la cápsula original del input usa blanco, borde claro y texto oscuro; no se añade contenedor, padding ni tarjeta al formulario. Botón cian y enlace flotante originales. Escritorio y Dark Mode conservan sus estilos y espaciado.
+- En móvil claro se reserva espacio bajo las métricas para JSBot; la separación superior original del Hero respecto al header se conserva.
+
+## Superficie clara durante la intro del login — 2026-11-12
+
+- La capa de revelado `login-intro-vidrio` usa blanco y sombra clara en Light Mode, igual que el formulario final, evitando el cambio brusco de gris a blanco. Sigue la clase `dark` que controla el Navbar, sin crear otra instancia del hook de tema.
+- En oscuro conserva el fondo rgba(15,23,42,.6) y la sombra animada original mediante `--login-sombra-oscura`. No se tocaron el mapa, sus coordenadas ni sus animaciones.
+
+## Contraste del login claro — 2026-11-12
+
+- Tarjeta blanca sólida, labels en negrita, bordes de inputs y cápsulas claras bajo el subtítulo, la sede y el pie. Estilos oscuros conservados.
+- La viñeta `loginVineta` está dentro del SVG: solo en el login claro se oculta su rectángulo, sin modificar gradiente, trazados, coordenadas, puntos ni animaciones del mapa. Esta excepción visual sustituye la exigencia anterior de conservar visible la viñeta interna en claro.
+
+## Login con modo claro — 2026-11-12
+
+- Por pedido explícito, el login ahora sigue el tema del Navbar: fondo blanco en claro, oscuro en dark, tarjeta de vidrio y textos/campos con contraste en ambos temas. `MarcoAcceso` lo activa con `seguirTema`; recuperar/restablecer conservan su diseño anterior.
+- No modificar el mapa para adaptar el tema: `MapaSede`, SVG, viñeta interna, rutas, puntos, pin de Cali y animaciones permanecen intactos. Esta decisión sustituye la regla anterior de login siempre oscuro solo para `/login`.
+
 
 ## Detalle del pedido que se actualiza solo — 2026-11-12
 
@@ -50,9 +79,11 @@
 
 ## Campanita y propuesta de domicilio — 2026-11-12
 
-- La barra del portal tiene una campanita (`CampanitaCliente`, en `portal/clasico/Notificaciones.tsx`) con contador de no leídas. El panel muestra un aviso por solicitud según su estado actual: recibida, propuesta de domicilio, propuesta aceptada, asignada con guía o rechazada. Se abre como panel fijo debajo de la barra; en móvil ocupa el ancho de la pantalla. El botón vive en `.barra-der` para que en celular quede junto a la burbuja de la cuenta.
-- Las notificaciones se derivan de `GET /solicitudes/mias` (consulta `useSolicitudesRecientes`, página 1 con 50 y refresco cada 30 s). No hay tabla de avisos: la clave es `id:estado:actualizado`, y las leídas viven en `localStorage` (`jsl_cliente_notif_leidas_v1`). La primera carga marca como leído el historial y deja sin leer solo las propuestas pendientes.
+- La barra del portal tiene una campanita (`CampanitaCliente`, en `portal/clasico/Notificaciones.tsx`) con contador de no leídas. El icono con novedades usa `color:inherit` (toma el color de la barra): no fijarlo en blanco porque en tema claro desaparece sobre el fondo blanco. El panel muestra un aviso por solicitud según su estado actual: recibida, propuesta de domicilio, propuesta aceptada, asignada con guía o rechazada. Se abre como panel fijo debajo de la barra; en móvil ocupa el ancho de la pantalla. El botón vive en `.barra-der` para que en celular quede junto a la burbuja de la cuenta.
+- Las notificaciones se derivan de `GET /solicitudes/mias` (consulta `useSolicitudesRecientes`, página 1 con 50). El sondeo de 30 s queda como respaldo: `useEventosSolicitudes` abre `GET /api/eventos` y refresca al instante cuando el backend avisa de una solicitud propia. No hay tabla de avisos: la clave es `id:estado:actualizado`, y las leídas viven en `localStorage` (`jsl_cliente_notif_leidas_v1`). La primera carga marca como leído el historial; deja sin leer las propuestas y las asignaciones/rechazos de los últimos 7 días, por si el cliente estaba desconectado.
 - Cuando aparece una propuesta nueva (`cotizada`) se abre solo un modal centrado con los datos de la solicitud y la misma tarjeta de respuesta. Dura 10 s con barra de progreso; si el cliente interactúa (puntero, foco, tecla, cambio o rueda) el tiempo se detiene y el aviso queda abierto. Se cierra con la X, Escape o al aceptar/rechazar. Si llegan varias, se encolan y se muestran de a una.
+- Al quedar `asignada`, el cliente recibe otro aviso de 10 s: “Tu pedido fue aprobado y asignado”, con el nombre del mensajero (`mensajeroNombre`), el domicilio y la guía; el botón “Entendido” lo cierra. Si queda `rechazada`, el aviso final muestra la razón. Los dos son informativos y también quedan en la campanita.
+- Solo las solicitudes `origen: "portal"` entran en estos avisos y en `RespuestaPropuesta`. Las de la landing que la oficina vincule a una ficha aparecen en “Mis solicitudes” como información, pero su confirmación sigue por WhatsApp.
 - El cliente responde con `POST /solicitudes/mias/:id/responder` (`useResponderSolicitud`): aceptar deja la solicitud `confirmada` para que la oficina asigne mensajero; rechazar la deja `rechazada` con la razón opcional. La misma tarjeta `RespuestaPropuesta` se usa en la campanita, el aviso automático y el detalle de “Mis solicitudes”, así el cliente ya no depende solo de responder por WhatsApp.
 - El panel y el aviso se montan con `createPortal` dentro de `.clasico` (el CSS del portal está prefijado; fuera de ese contenedor se pierden los estilos). Modo demo: `demo.responderSolicitud` aplica el cambio en memoria y las solicitudes de ejemplo usan una fecha fija por sesión para que la campanita no las vea “nuevas” en cada consulta.
 
@@ -311,6 +342,8 @@ Por petición explícita del dueño, `Home.tsx` sustituye la composición anteri
 - No hay pruebas automáticas; la revisión es con `npm run build`, `npm run build:demo` y `dev:demo` a 375 px y en escritorio.
 
 ## Registro de sesiones (lo más reciente arriba)
+
+- **2026-11-12:** cierre del flujo de solicitudes en el portal. El aviso automático ahora cubre `propuesta`, `asignada` y `rechazada` con la misma cola de 10 s; el de asignación muestra el mensajero, el domicilio y la guía, y el de rechazo la razón. `RespuestaPropuesta` solo aparece para solicitudes `origen: "portal"`; las de la landing quedan informativas y se confirman por WhatsApp. La campanita agrega `EventSource` a `/api/eventos` (con el sondeo de 30 s como respaldo) y el detalle muestra el mensajero. Probado en demo a 1440 y 390 px: asignada, rechazo, pausa real, “Entendido”, cierre automático y sin desbordes. Requiere el backend con `confirmadaPorCliente`, `mensajeroNombre` y el filtro SSE por cliente.
 
 - **2026-11-12:** campanita de notificaciones en el portal y respuesta del cliente a la propuesta de domicilio. El panel deriva un aviso por solicitud desde `GET /solicitudes/mias` (refresco cada 30 s), guarda las leídas en `localStorage` y muestra la misma tarjeta `RespuestaPropuesta` en la campanita, el aviso automático y el detalle de “Mis solicitudes”. El aviso automático dura 10 s, se pausa al interactuar y se encola si llegan varios. Aceptar llama a `POST /solicitudes/mias/:id/responder` y deja la solicitud lista para asignar; rechazar guarda la razón opcional. Probado en demo a 1440 y 390 px: cierre automático, pausa real, aceptar, rechazar y sin desbordes. Requiere el backend del mismo cambio.
 - **2026-11-11:** Pedidos y solicitudes: paginación sin `COUNT(*)` en `GET /pedidos` y `GET /solicitudes/mias` con `sinTotal=true`; la tabla pide **5 en celular y 10 en computador** y el `PaginadorSinTotal` muestra solo “Página X” con Anterior/Siguiente. El backend trae una fila extra y responde `hayMas`; el modo anterior con `total/paginas` se conserva para la oficina. Revisado en demo a 320, 390 y 1440 px y los modelos contra la base real.

@@ -9,9 +9,10 @@
  *   Si el backend desplegado aún no los tiene, un 404 se toma como lista vacía.
  */
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import type { Archivo, Cliente, Movimiento, PaginaPedidos, PaginaSolicitudes, Pedido, SolicitudCliente } from '../types/dominio';
 import { cambioPendiente, cerrado, delDia } from '../lib/negocio';
-import { api, ApiError, DEMO } from './http';
+import { api, ApiError, BASE, DEMO } from './http';
 import { demo } from '../demo/datos';
 import { useSesion } from '../auth/AuthProvider';
 import type { DatosSolicitudPortal } from './solicitudes';
@@ -320,4 +321,22 @@ export function useResponderSolicitud() {
         : api<{ solicitud: SolicitudCliente }>(`/solicitudes/mias/${id}/responder`, { method: 'POST', json: { aceptar, ...(motivo ? { motivo } : {}) } }).then(r => r.solicitud),
     onSuccess: () => invalidar(qc, 'solicitudes'),
   });
+}
+
+/** Avisos SSE del backend: cuando cambia una solicitud propia, refresca la campanita y el aviso automático al instante.
+    El sondeo de 30 s sigue como respaldo si el navegador o el proxy no mantienen la conexión. */
+export function useEventosSolicitudes() {
+  const qc = useQueryClient();
+  useEffect(() => {
+    if (DEMO || typeof EventSource === 'undefined') return;
+    const es = new EventSource(`${BASE}/eventos`, { withCredentials: true });
+    const alCambiar = (e: MessageEvent) => {
+      try {
+        const d = JSON.parse(e.data) as { cols?: string[] };
+        if (d?.cols?.includes('solicitudes')) invalidar(qc, 'solicitudes');
+      } catch { /* un evento incompleto no debe romper la pantalla */ }
+    };
+    es.addEventListener('cambio', alCambiar);
+    return () => { es.removeEventListener('cambio', alCambiar); es.close(); };
+  }, [qc]);
 }

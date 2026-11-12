@@ -53,7 +53,7 @@ export default function MisSolicitudes({ abrir }: { abrir: (g: string) => void }
   const filtradas = filtrando && todas ? filtrarSolicitudes(todas, busqueda, grupo, dia) : [];
   const ss = filtrando ? filtradas.slice((pagina - 1) * porPagina, pagina * porPagina) : pag?.solicitudes ?? [];
   const hayMas = filtrando ? filtradas.length > pagina * porPagina : !!pag?.hayMas;
-  const porResponder = (todas ?? ss).filter(s => s.estado === 'cotizada').length;
+  const porResponder = (todas ?? ss).filter(s => s.estado === 'cotizada' && s.origen === 'portal').length;
   const selected = ss.find(s => s.id === selectedId) ?? null;
   const grupos: [GrupoSolicitud, string, number | null][] = GRUPOS_SOLICITUD.map(([k, t]) => [k, t, completo ? todas!.filter(s => enGrupo(s, k)).length : null]);
   useEffect(() => { setPagina(1); }, [porPagina]);
@@ -145,12 +145,14 @@ function DetalleSolicitud({ sol, alCerrar, verGuia }: { sol: SolicitudCliente; a
         </div>
       </div>
       {sol.estado === 'rechazada' && <div className="sol-rechazo" role="note"><b>Razón del rechazo</b><p>{sol.motivoRechazo || 'La oficina no registró la razón. Escríbenos por WhatsApp.'}</p></div>}
-      {sol.estado === 'cotizada' && <RespuestaPropuesta solicitud={sol} />}
+      {sol.estado === 'cotizada' && sol.origen === 'portal' && <RespuestaPropuesta solicitud={sol} />}
+      {sol.estado === 'cotizada' && sol.origen !== 'portal' && <div className="sol-aviso">Esta solicitud se está atendiendo por WhatsApp. La oficina te contactará para confirmar el valor del domicilio.</div>}
       <dl className="sol-datos">
         <div><dt><MapPin size={14} aria-hidden="true" /> Recoger en</dt><dd>{sol.direccionRecogida}</dd></div>
         <div><dt><Truck size={14} aria-hidden="true" /> Entregar a</dt><dd>{sol.destinatarioNombre}{sol.destinatarioTelefono ? ' · ' + sol.destinatarioTelefono : ''}<br />{sol.direccionEntrega}</dd></div>
         <div><dt>Paquetes</dt><dd>{sol.paquetes}{sol.pesoKg ? ` · ${sol.pesoKg} kg` : ''}</dd></div>
         <div><dt>Domicilio</dt><dd>{sol.valor != null ? pesos(sol.valor) : 'Por definir'}</dd></div>
+        {sol.mensajeroNombre && <div><dt>Mensajero</dt><dd>{sol.mensajeroNombre}</dd></div>}
       </dl>
       {sol.guia ? <button type="button" className="btn sol-modal-accion" onClick={() => verGuia(sol.guia!)}>Ver guía {sol.guia}{sol.pedidoEstado ? ` · ${ESTADO_PEDIDO[sol.pedidoEstado].texto}` : ''}<ChevronRight size={17} aria-hidden="true" /></button>
         : <button type="button" className="btn sec sol-modal-accion" onClick={alCerrar}>Cerrar</button>}

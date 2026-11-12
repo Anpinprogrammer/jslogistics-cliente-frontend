@@ -85,17 +85,26 @@ const fechaDe = (iso: string) => {
 export function notificacionDe(s: SolicitudCliente): Notificacion {
   const valor = s.valor != null ? pesos(s.valor) : 'el valor propuesto';
   const base = { clave: claveNotificacion(s), solicitud: s, fecha: fechaDe(s.actualizado) };
-  if (s.estado === 'cotizada') return {
-    ...base, clase: 'propuesta', titulo: 'Propuesta de domicilio',
-    texto: `La oficina propone ${valor} por el domicilio. Acepta o rechaza desde aquí.`,
-  };
+  if (s.estado === 'cotizada') {
+    if (s.origen !== 'portal') return {
+      ...base, clase: 'propuesta', titulo: 'Solicitud en revisión',
+      texto: 'La oficina te contactará por WhatsApp para confirmar el valor del domicilio.',
+    };
+    return {
+      ...base, clase: 'propuesta', titulo: 'Propuesta de domicilio',
+      texto: `La oficina propone ${valor} por el domicilio. Acepta o rechaza desde aquí.`,
+    };
+  }
   if (s.estado === 'confirmada') return {
-    ...base, clase: 'aceptada', titulo: 'Aceptaste la propuesta',
-    texto: `Domicilio ${valor}. La oficina asignará un mensajero a tu envío.`,
+    ...base, clase: 'aceptada',
+    titulo: s.confirmadaPorCliente ? 'Aceptaste la propuesta' : 'Solicitud aprobada',
+    texto: s.confirmadaPorCliente
+      ? `Domicilio ${valor}. La oficina asignará un mensajero a tu envío.`
+      : `La oficina aprobó el domicilio de ${valor}. Está asignando el mensajero.`,
   };
   if (s.estado === 'asignada') return {
-    ...base, clase: 'asignada', titulo: 'Tu solicitud tiene mensajero',
-    texto: `Ya está aprobada${s.guia ? ` con la guía ${s.guia}` : ''}. Puedes seguirla en “Mis pedidos”.`,
+    ...base, clase: 'asignada', titulo: 'Tu pedido fue aprobado y asignado',
+    texto: `Lo llevará ${s.mensajeroNombre || 'un mensajero'}${s.guia ? ` · guía ${s.guia}` : ''}. Puedes seguirla en “Mis pedidos”.`,
   };
   if (s.estado === 'rechazada') return {
     ...base, clase: 'rechazada', titulo: 'Solicitud rechazada',
