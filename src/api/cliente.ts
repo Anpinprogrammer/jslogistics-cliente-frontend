@@ -44,9 +44,9 @@ export function usePedidosCliente() {
 export type FiltroPedidos = 'todos' | 'acep' | 'ruta' | 'ent' | 'dev' | 'cambio';
 export interface ConsultaPedidos { filtro: FiltroPedidos; buscar: string; dia: string; pagina: number; porPagina: number }
 
-/** Lo que el servidor entiende de cada filtro. El servidor filtra, cuenta y corta la página. */
+/** Lo que el servidor entiende de cada filtro. El servidor filtra y corta la página; no cuenta el total. */
 function parametros({ filtro, buscar, dia, pagina, porPagina }: ConsultaPedidos) {
-  const q = new URLSearchParams({ pagina: String(pagina), porPagina: String(porPagina) });
+  const q = new URLSearchParams({ pagina: String(pagina), porPagina: String(porPagina), sinTotal: 'true' });
   if (filtro === 'acep') q.set('estado', 'aceptado');
   else if (filtro === 'ruta') q.set('estado', 'pendiente');
   else if (filtro === 'ent') q.set('estado', 'entregado');
@@ -69,7 +69,9 @@ function paginarAqui(todos: Pedido[], { filtro, buscar, dia, pagina, porPagina }
   if (q) ps = ps.filter(p => (p.guia + ' ' + (p.destinatario || '')).toLowerCase().includes(q));
   if (dia) ps = ps.filter(p => delDia(p, dia));
   const paginas = Math.max(1, Math.ceil(ps.length / porPagina)), actual = Math.min(pagina, paginas);
-  return { pedidos: ps.slice((actual - 1) * porPagina, actual * porPagina), pagina: actual, porPagina, total: ps.length, paginas };
+  const desde = (actual - 1) * porPagina;
+  const pedidos = ps.slice(desde, desde + porPagina);
+  return { pedidos, pagina: actual, porPagina, hayMas: desde + pedidos.length < ps.length };
 }
 
 /** Una página de "Mis pedidos". Mientras llega la siguiente se sigue viendo la anterior. */
@@ -81,9 +83,12 @@ export function usePaginaPedidos(c: ConsultaPedidos) {
     queryFn: async () => {
       if (DEMO) return paginarAqui(await demo.pedidos(), c);
       const r = await api<Partial<PaginaPedidos> & { pedidos: Pedido[] }>(`/pedidos?${parametros(c)}`);
-      // Un backend sin paginador ignora `pagina` y no manda `total`: se pagina aquí con la lista completa.
-      if (typeof r.total !== 'number' || typeof r.paginas !== 'number') return paginarAqui(await todosLosPedidos(), c);
-      return r as PaginaPedidos;
+      // El paginador nuevo responde `hayMas` y no consulta el total.
+      if (typeof r.hayMas === 'boolean') return { ...r, pedidos: r.pedidos ?? [] } as PaginaPedidos;
+      // Compatibilidad con un backend anterior que todavía devuelve páginas y total.
+      if (typeof r.total === 'number' && typeof r.paginas === 'number') return { ...r, hayMas: (r.pagina ?? 1) < r.paginas } as PaginaPedidos;
+      // Backend muy anterior, sin paginador: se pagina aquí con la lista completa.
+      return paginarAqui(await todosLosPedidos(), c);
     },
   });
 }
@@ -223,7 +228,8 @@ export function useNuevaSolicitud() {
 }
 
 /** "Mis solicitudes": las solicitudes de envío del cliente con su estado y, si se rechazó, la razón.
-    El backend solo devuelve las de la ficha de la sesión. Un backend que aún no tenga la ruta responde 404: lista vacía. */
+    El backend solo devuelve las de la ficha de la sesión. Con `sinTotal` no cuenta el total: usa `hayMas`.
+    Un backend que aún no tenga la ruta responde 404: lista vacía. */
 export function useMisSolicitudes(pagina: number, porPagina: number) {
   return useQuery({
     queryKey: ['cliente', 'solicitudes', pagina, porPagina],
@@ -231,8 +237,14 @@ export function useMisSolicitudes(pagina: number, porPagina: number) {
     refetchInterval: 60_000,
     queryFn: (): Promise<PaginaSolicitudes> => {
       if (DEMO) return demo.solicitudes(pagina, porPagina);
-      const q = new URLSearchParams({ pagina: String(pagina), porPagina: String(porPagina) });
-      return opcional(() => api<PaginaSolicitudes>(`/solicitudes/mias?${q}`), { solicitudes: [], pagina: 1, porPagina, total: 0, paginas: 1 });
+      const q = new URLSearchParams({ pagina: String(pagina), porPagina: String(porPagina), sinTotal: 'true' });
+      return opcional(
+        () => api<PaginaSolicitudes>(`/solicitudes/mias?${q}`).then(r => ({
+          ...r, solicitudes: r.solicitudes ?? [],
+          hayMas: r.hayMas ?? (typeof r.total === 'number' && typeof r.paginas === 'number' ? (r.pagina ?? 1) < r.paginas : false),
+        })),
+        { solicitudes: [], pagina: 1, porPagina, hayMas: false }
+      );
     },
   });
 }

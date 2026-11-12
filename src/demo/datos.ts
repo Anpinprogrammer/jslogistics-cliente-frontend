@@ -161,7 +161,9 @@ export const demo = {
   solicitudes: (pagina: number, porPagina: number): Promise<PaginaSolicitudes> => {
     const todas = [...solicitudesNuevas, ...solicitudesDemo()], total = todas.length, paginas = Math.max(1, Math.ceil(total / porPagina));
     const actual = Math.min(Math.max(1, pagina), paginas);
-    return espera({ solicitudes: todas.slice((actual - 1) * porPagina, actual * porPagina), pagina: actual, porPagina, total, paginas });
+    const desde = (actual - 1) * porPagina;
+    const page = todas.slice(desde, desde + porPagina);
+    return espera({ solicitudes: page, pagina: actual, porPagina, hayMas: desde + page.length < total });
   },
   cliente: () => espera(clienteDemo),
   movimientos: () => espera(generarMovs()),

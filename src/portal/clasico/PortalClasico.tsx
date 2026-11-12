@@ -20,7 +20,7 @@ import { useDatosCliente, type DatosCliente } from '../useDatosCliente';
 import { useTheme } from '../../hooks/useTheme';
 import { JSBOT_ABRIR } from '../../components/jsbot/JSBot';
 import { Icono } from './iconos';
-import { Cabecera, Columnas, Dialogo, Dona, EtqCambio, EtqDash, Foto, Paginador } from './piezas';
+import { Cabecera, Columnas, Dialogo, Dona, EtqCambio, EtqDash, Foto, Paginador, PaginadorSinTotal } from './piezas';
 import NuevoPedido from './NuevoPedido';
 import type { SolicitudCliente } from '../../types/dominio';
 
@@ -193,8 +193,9 @@ function Pedidos({ d, abrir }: { d: DatosCliente; abrir: (g: string) => void }) 
   const verVista = (v: 'pedidos' | 'solicitudes') => setSp(prev => { const n = new URLSearchParams(prev); if (v === 'solicitudes') n.set('v', v); else n.delete('v'); return n; }, { replace: true });
   const f = (sp.get('f') || 'todos') as FiltroPedidos;
   const [buscar, setBuscarT] = useState(''), [dia, setDiaT] = useState(''), [pagina, setPagina] = useState(1), porPagina = usePorPagina();
-  // Cambiar un filtro vuelve a la primera página.
+  // Cambiar un filtro o el tamaño de la pantalla vuelve a la primera página.
   const setBuscar = (v: string) => { setBuscarT(v); setPagina(1); }, setDia = (v: string) => { setDiaT(v); setPagina(1); };
+  useEffect(() => { setPagina(1); }, [porPagina]);
   const cambios = d.pedidos.filter(cambioPendiente);
   const tabs: [FiltroPedidos, string, number][] = [
     ['todos', 'Todos', d.pedidos.length],
@@ -251,35 +252,36 @@ function Pedidos({ d, abrir }: { d: DatosCliente; abrir: (g: string) => void }) 
         ))}
       </div>
 
-      {dia && pag && <p className="sub">{pag.total} envío{pag.total === 1 ? '' : 's'} de ese día</p>}
+      {dia && pag && <p className="sub">Mostrando envíos de ese día · Página {pag.pagina}.</p>}
       {consulta.isError ? <div className="vacio">No se pudieron traer tus envíos. Revisa tu conexión e intenta de nuevo.</div>
       : !pag ? <div className="vacio">Cargando envíos…</div>
-      : ps.length ? <><div className="lista" style={consulta.isPlaceholderData ? { opacity: .6 } : undefined}>{ps.map((p, i) => {
-        const Icono = p.estado === 'entregado' ? PackageCheck : p.estado === 'devuelto' ? Undo2 : p.estado === 'aceptado' ? ClipboardCheck : Truck;
-        const { clase, texto } = ESTADO_PEDIDO[p.estado];
-        const valor = p.estado === 'entregado' ? p.valorCobrado : p.aCobrar;
-        return (
-          <button key={p.guia} type="button" className={`pedido-card pedido-entra es-${p.estado}`} style={{ animationDelay: `${i * 40}ms` }}
-            onClick={() => abrir(p.guia)} aria-label={`Ver pedido ${p.guia}: ${texto}`}>
-            <span className="pedido-icono"><Icono aria-hidden="true" /></span>
-            <span className="pedido-info">
-              <span className="pedido-linea">
-                <span className="guia">{p.guia}</span>
-                <span className={`etq ${clase}`}>{texto}</span>
-                {p.intentos.length > 0 && <span className="etq gris">{p.intentos.length} intento{p.intentos.length === 1 ? '' : 's'}</span>}
-                <EtqCambio p={p} />
+      : <>
+        {ps.length ? <div className="lista" style={consulta.isPlaceholderData ? { opacity: .6 } : undefined}>{ps.map((p, i) => {
+          const Icono = p.estado === 'entregado' ? PackageCheck : p.estado === 'devuelto' ? Undo2 : p.estado === 'aceptado' ? ClipboardCheck : Truck;
+          const { clase, texto } = ESTADO_PEDIDO[p.estado];
+          const valor = p.estado === 'entregado' ? p.valorCobrado : p.aCobrar;
+          return (
+            <button key={p.guia} type="button" className={`pedido-card pedido-entra es-${p.estado}`} style={{ animationDelay: `${i * 40}ms` }}
+              onClick={() => abrir(p.guia)} aria-label={`Ver pedido ${p.guia}: ${texto}`}>
+              <span className="pedido-icono"><Icono aria-hidden="true" /></span>
+              <span className="pedido-info">
+                <span className="pedido-linea">
+                  <span className="guia">{p.guia}</span>
+                  <span className={`etq ${clase}`}>{texto}</span>
+                  {p.intentos.length > 0 && <span className="etq gris">{p.intentos.length} intento{p.intentos.length === 1 ? '' : 's'}</span>}
+                  <EtqCambio p={p} />
+                </span>
+                <span className="pedido-desc">{lineaPedido(p)}</span>
               </span>
-              <span className="pedido-desc">{lineaPedido(p)}</span>
-            </span>
-            <span className="pedido-cobro">
-              <span className="pedido-valor"><b>{valor > 0 ? pesos(valor) : '—'}</b><small>Cobro al cliente</small></span>
-              <span className="pedido-flecha"><ChevronRight aria-hidden="true" /></span>
-            </span>
-          </button>
-        );
-      })}</div>
-      <Paginador pagina={pag.pagina} paginas={pag.paginas} total={pag.total} porPagina={pag.porPagina} ir={ir} cargando={consulta.isPlaceholderData} /></>
-      : <div className="vacio">No hay envíos aquí.</div>}
+              <span className="pedido-cobro">
+                <span className="pedido-valor"><b>{valor > 0 ? pesos(valor) : '—'}</b><small>Cobro al cliente</small></span>
+                <span className="pedido-flecha"><ChevronRight aria-hidden="true" /></span>
+              </span>
+            </button>
+          );
+        })}</div> : <div className="vacio">{pagina > 1 ? 'No hay envíos en esta página.' : 'No hay envíos aquí.'}</div>}
+        <PaginadorSinTotal pagina={pag.pagina ?? pagina} hayMas={!!pag.hayMas} ir={ir} cargando={consulta.isPlaceholderData} etiqueta="Páginas de envíos" />
+      </>}
       </>}
       </div>
     </>
@@ -294,36 +296,38 @@ function MisSolicitudes({ abrir }: { abrir: (g: string) => void }) {
   const consulta = useMisSolicitudes(pagina, porPagina);
   const pag = consulta.data, ss = pag?.solicitudes ?? [];
   const selected = ss.find(s => s.id === selectedId) ?? null;
+  useEffect(() => { setPagina(1); }, [porPagina]);
   const ir = (n: number) => { setSelectedId(null); setPagina(n); window.scrollTo({ top: 0, behavior: 'smooth' }); };
   const verGuia = (guia: string) => { setSelectedId(null); requestAnimationFrame(() => abrir(guia)); };
   if (consulta.isError) return <div className="vacio">No se pudieron traer tus solicitudes. Revisa tu conexión e intenta de nuevo.</div>;
   if (!pag) return <div className="vacio">Cargando solicitudes…</div>;
-  if (!ss.length) return <div className="vacio">Todavía no tienes solicitudes. Pide un envío con “Nuevo pedido” y aquí verás si la oficina lo aprueba.</div>;
   return <>
-    <p className="sub sol-intro">Cuando la oficina aprueba una solicitud y le asigna mensajero, aparece en “Mis pedidos” con su número de guía.</p>
-    <div className="sol-rows-desktop" style={consulta.isPlaceholderData ? { opacity: .6 } : undefined}>
-      {ss.map(s => {
-        const estado = estadoSolicitud(s);
-        const EstadoIcono = s.estado === 'rechazada' ? XCircle : s.estado === 'confirmada' || s.estado === 'asignada' ? CheckCircle2 : Clock;
-        return <button key={s.id} type="button" className={`sol-row es-${s.estado}`} onClick={() => setSelectedId(s.id)} aria-label={`Ver seguimiento de solicitud para ${s.destinatarioNombre}: ${estado.texto}`}>
-          <span className="sol-row-estado"><span className="sol-row-icono"><EstadoIcono aria-hidden="true" /></span><span className="sol-row-identidad"><span className={`etq ${estado.clase}`}>{estado.texto}</span>{s.guia && <b>{s.guia}</b>}<small>Pedida {hora(s.creado)}</small></span></span>
-          <span className="sol-row-ruta"><span className="sol-row-ruta-linea"><span>{s.direccionRecogida}</span><ArrowRight aria-hidden="true" /><strong>{s.destinatarioNombre} · {s.direccionEntrega}</strong></span><small>{s.paquetes} paquete{s.paquetes === 1 ? '' : 's'}{s.pesoKg ? ` · ${s.pesoKg} kg` : ''}</small></span>
-          <span className="sol-row-valor"><b>{s.valor != null ? pesos(s.valor) : 'Por definir'}</b><small>Domicilio</small></span>
-          <span className="sol-row-accion">Ver seguimiento <ChevronRight aria-hidden="true" /></span>
-        </button>;
-      })}
-    </div>
-    <div className="sol-rows-mobile" style={consulta.isPlaceholderData ? { opacity: .6 } : undefined}>
-      {ss.map(s => {
-        const estado = estadoSolicitud(s);
-        return <button key={s.id} type="button" className={`sol-row-movil es-${s.estado}`} onClick={() => setSelectedId(s.id)} aria-label={`Ver seguimiento de solicitud para ${s.destinatarioNombre}: ${estado.texto}`}>
-          <span className="sol-movil-info"><span className="sol-movil-nombre"><i aria-hidden="true" /> <b>{s.destinatarioNombre}</b></span><span className="sol-movil-meta"><span>{estado.texto}</span><span aria-hidden="true">·</span><span>{new Date(s.creado).toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}</span>{s.guia && <span className="sol-movil-guia">{s.guia}</span>}</span></span>
-          <span className="sol-movil-final"><b>{s.valor != null ? pesos(s.valor) : 'Por definir'}</b><small>{s.paquetes} paquete{s.paquetes === 1 ? '' : 's'}</small></span>
-          <span className="sol-movil-flecha"><Info aria-hidden="true" /></span>
-        </button>;
-      })}
-    </div>
-    <Paginador pagina={pag.pagina} paginas={pag.paginas} total={pag.total} porPagina={pag.porPagina} ir={ir} cargando={consulta.isPlaceholderData} />
+    {ss.length > 0 && <p className="sub sol-intro">Cuando la oficina aprueba una solicitud y le asigna mensajero, aparece en “Mis pedidos” con su número de guía.</p>}
+    {ss.length ? <>
+      <div className="sol-rows-desktop" style={consulta.isPlaceholderData ? { opacity: .6 } : undefined}>
+        {ss.map(s => {
+          const estado = estadoSolicitud(s);
+          const EstadoIcono = s.estado === 'rechazada' ? XCircle : s.estado === 'confirmada' || s.estado === 'asignada' ? CheckCircle2 : Clock;
+          return <button key={s.id} type="button" className={`sol-row es-${s.estado}`} onClick={() => setSelectedId(s.id)} aria-label={`Ver seguimiento de solicitud para ${s.destinatarioNombre}: ${estado.texto}`}>
+            <span className="sol-row-estado"><span className="sol-row-icono"><EstadoIcono aria-hidden="true" /></span><span className="sol-row-identidad"><span className={`etq ${estado.clase}`}>{estado.texto}</span>{s.guia && <b>{s.guia}</b>}<small>Pedida {hora(s.creado)}</small></span></span>
+            <span className="sol-row-ruta"><span className="sol-row-ruta-linea"><span>{s.direccionRecogida}</span><ArrowRight aria-hidden="true" /><strong>{s.destinatarioNombre} · {s.direccionEntrega}</strong></span><small>{s.paquetes} paquete{s.paquetes === 1 ? '' : 's'}{s.pesoKg ? ` · ${s.pesoKg} kg` : ''}</small></span>
+            <span className="sol-row-valor"><b>{s.valor != null ? pesos(s.valor) : 'Por definir'}</b><small>Domicilio</small></span>
+            <span className="sol-row-accion">Ver seguimiento <ChevronRight aria-hidden="true" /></span>
+          </button>;
+        })}
+      </div>
+      <div className="sol-rows-mobile" style={consulta.isPlaceholderData ? { opacity: .6 } : undefined}>
+        {ss.map(s => {
+          const estado = estadoSolicitud(s);
+          return <button key={s.id} type="button" className={`sol-row-movil es-${s.estado}`} onClick={() => setSelectedId(s.id)} aria-label={`Ver seguimiento de solicitud para ${s.destinatarioNombre}: ${estado.texto}`}>
+            <span className="sol-movil-info"><span className="sol-movil-nombre"><i aria-hidden="true" /> <b>{s.destinatarioNombre}</b></span><span className="sol-movil-meta"><span>{estado.texto}</span><span aria-hidden="true">·</span><span>{new Date(s.creado).toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}</span>{s.guia && <span className="sol-movil-guia">{s.guia}</span>}</span></span>
+            <span className="sol-movil-final"><b>{s.valor != null ? pesos(s.valor) : 'Por definir'}</b><small>{s.paquetes} paquete{s.paquetes === 1 ? '' : 's'}</small></span>
+            <span className="sol-movil-flecha"><Info aria-hidden="true" /></span>
+          </button>;
+        })}
+      </div>
+    </> : <div className="vacio">{pagina > 1 ? 'No hay más solicitudes en esta página.' : 'Todavía no tienes solicitudes. Pide un envío con “Nuevo pedido” y aquí verás si la oficina lo aprueba.'}</div>}
+    <PaginadorSinTotal pagina={pag.pagina ?? pagina} hayMas={!!pag.hayMas} ir={ir} cargando={consulta.isPlaceholderData} etiqueta="Páginas de solicitudes" />
     <Dialogo abierto={!!selected} alCerrar={() => setSelectedId(null)} variante="solicitud">
       {selected && <DetalleSolicitud sol={selected} alCerrar={() => setSelectedId(null)} verGuia={verGuia} />}
     </Dialogo>

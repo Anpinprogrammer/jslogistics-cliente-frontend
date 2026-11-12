@@ -52,8 +52,11 @@ export interface PaginaSolicitudes {
   solicitudes: SolicitudCliente[];
   pagina: number;
   porPagina: number;
-  total: number;
-  paginas: number;
+  /** Con sinTotal no se envía. */
+  total?: number;
+  paginas?: number;
+  /** Paginación sin COUNT(*): hay otra página después de esta. */
+  hayMas?: boolean;
 }
 export type MetodoPago = '' | 'efectivo' | 'transf_js' | 'transf_cliente' | 'devuelto';
 export type Motivo = 'no_contesta' | 'direccion' | 'rechazo' | 'reprogramar' | 'otro';
@@ -104,8 +107,11 @@ export interface PaginaPedidos {
   pedidos: Pedido[];
   pagina: number;
   porPagina: number;
-  total: number;
-  paginas: number;
+  /** Con sinTotal no se envía. */
+  total?: number;
+  paginas?: number;
+  /** Paginación sin COUNT(*): hay otra página después de esta. */
+  hayMas?: boolean;
 }
 
 export type TipoArchivo = 'salida' | 'entrega' | 'firma';
