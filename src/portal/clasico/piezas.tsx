@@ -66,7 +66,7 @@ export function FiltroDia({ dia, poner }: { dia: string; poner: (d: string) => v
 }
 
 /** El <dialog> de la app (#dlg): hoja de abajo en el celular y ventana en el computador. */
-export function Dialogo({ abierto, alCerrar, children, variante }: { abierto: boolean; alCerrar: () => void; children: ReactNode; variante?: 'pedido' | 'solicitud' }) {
+export function Dialogo({ abierto, alCerrar, children, variante }: { abierto: boolean; alCerrar: () => void; children: ReactNode; variante?: 'pedido' | 'solicitud' | 'filtros' }) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     const d = ref.current; if (!d) return;
