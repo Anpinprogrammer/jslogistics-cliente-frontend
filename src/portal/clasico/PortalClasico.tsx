@@ -8,7 +8,7 @@ import { Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-
 import { AlertTriangle, ArrowRight, Bot, LogOut, Calendar, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, ClipboardCheck, ClipboardList, Clock, XCircle, Eye, EyeOff, FileText, Image as ImageIcon, Info, KeyRound, Lock, Mail, MapPin, Maximize2, Moon, PackageCheck, Phone, Plus, Receipt, RotateCcw, Save, Search, Settings, ShieldCheck, SlidersHorizontal, Store, Sun, Truck, Undo2, X } from 'lucide-react';
 import './clasico.css';
 import { useSesion } from '../../auth/AuthProvider';
-import { useActualizarPerfilCliente, useConfirmarCambio, usePedirReintento, useCuentaCliente, useMisSolicitudes, useMovimientosCliente, usePaginaPedidos, usePruebas, type FiltroPedidos } from '../../api/cliente';
+import { useActualizarPerfilCliente, useConfirmarCambio, usePedirReintento, useCuentaCliente, useMisSolicitudes, useSolicitudesRecientes, useMovimientosCliente, usePaginaPedidos, usePruebas, type FiltroPedidos } from '../../api/cliente';
 import { authApi } from '../../api/auth';
 import { POR_PAGINA, usePorPagina, usePorPaginaCuenta } from '../../lib/pantalla';
 import { diaCorto, diaDe, fechaLarga, hoy, hora, moverDia, pct, pesos, pesosConSigno } from '../../lib/formato';
@@ -288,7 +288,7 @@ function Pedidos({ d, abrir }: { d: DatosCliente; abrir: (g: string) => void }) 
       </div>
 
       <Dialogo abierto={hojaFiltros} alCerrar={() => setHojaFiltros(false)} variante="filtros">
-        <HojaFiltros estados={tabs} filtro={f} dia={dia} alCerrar={() => setHojaFiltros(false)}
+        <HojaFiltros estados={tabs} filtro={f} sinFiltro="todos" dia={dia} alCerrar={() => setHojaFiltros(false)}
           alAplicar={(k, d2) => { if (k !== f) verFiltro(k); if (d2 !== dia) setDia(d2); setHojaFiltros(false); }} />
       </Dialogo>
 
@@ -328,62 +328,135 @@ function Pedidos({ d, abrir }: { d: DatosCliente; abrir: (g: string) => void }) 
   );
 }
 
+interface TextosHoja { titulo: string; estado: string; fecha: string; solo: string }
+const TEXTOS_PEDIDOS: TextosHoja = { titulo: 'Filtrar mis pedidos', estado: 'Estado del envío', fecha: 'Fecha', solo: 'Solo los envíos de ' };
+const TEXTOS_SOLICITUDES: TextosHoja = { titulo: 'Filtrar mis solicitudes', estado: 'Estado de la solicitud', fecha: 'Fecha de solicitud', solo: 'Solo las solicitudes de ' };
+
 /** Hoja inferior del celular con el estado y la fecha de "Mis pedidos". Los cambios se guardan en un borrador y
     solo se aplican con "Aplicar filtros", así la lista de atrás no se vuelve a pedir con cada flecha. */
-function HojaFiltros({ estados, filtro, dia, alCerrar, alAplicar }: {
-  estados: [FiltroPedidos, string, number][]; filtro: FiltroPedidos; dia: string; alCerrar: () => void; alAplicar: (f: FiltroPedidos, dia: string) => void;
+function HojaFiltros<T extends string>({ estados, filtro, sinFiltro, dia, alCerrar, alAplicar, textos = TEXTOS_PEDIDOS }: {
+  estados: [T, string, number | null][]; filtro: T; sinFiltro: T; dia: string; alCerrar: () => void; alAplicar: (f: T, dia: string) => void; textos?: TextosHoja;
 }) {
   const [f, setF] = useState(filtro), [d, setD] = useState(dia), h = hoy();
   const base = d || h;
   return <>
     <header className="hoja-cab">
-      <h2><SlidersHorizontal aria-hidden="true" />Filtrar mis pedidos</h2>
+      <h2><SlidersHorizontal aria-hidden="true" />{textos.titulo}</h2>
       <button type="button" className="hoja-cerrar" onClick={alCerrar} aria-label="Cerrar filtros"><X aria-hidden="true" /></button>
     </header>
     <div className="hoja-campo">
-      <label htmlFor="hoja-estado">Estado del envío</label>
+      <label htmlFor="hoja-estado">{textos.estado}</label>
       <div className="hoja-select">
-        <select id="hoja-estado" value={f} onChange={e => setF(e.target.value as FiltroPedidos)}>
-          {estados.map(([k, t, n]) => <option key={k} value={k}>{t} ({n})</option>)}
+        <select id="hoja-estado" value={f} onChange={e => setF(e.target.value as T)}>
+          {estados.map(([k, t, n]) => <option key={k} value={k}>{n == null ? t : `${t} (${n})`}</option>)}
         </select>
         <ChevronDown aria-hidden="true" />
       </div>
     </div>
     <div className="hoja-campo">
-      <label htmlFor="hoja-dia">Fecha</label>
+      <label htmlFor="hoja-dia">{textos.fecha}</label>
       <div className="hoja-fecha">
         <button type="button" className="hoja-flecha" onClick={() => setD(moverDia(base, -1))} aria-label="Día anterior"><ChevronLeft aria-hidden="true" /></button>
-        <span className="hoja-dia"><SingleDatePicker id="hoja-dia" value={d} onChange={setD} max={h} placeholder="Todos los días" compacto /></span>
+        <span className="hoja-dia"><SingleDatePicker id="hoja-dia" value={d} onChange={setD} max={h} placeholder="Sin fecha" compacto /></span>
         <button type="button" className="hoja-flecha" onClick={() => setD(moverDia(d, 1))} disabled={!d || d >= h} aria-label="Día siguiente"><ChevronRight aria-hidden="true" /></button>
         <button type="button" className="hoja-hoy" aria-pressed={d === h} onClick={() => setD(h)}>Hoy</button>
       </div>
-      <small>{d ? 'Solo los envíos de ' + diaCorto(d) + '.' : 'Sin fecha: se ven todos los días.'}</small>
+      <small>{d ? textos.solo + diaCorto(d) + '.' : 'Sin fecha: se ven todos los días.'}</small>
     </div>
     <div className="hoja-pie">
-      <button type="button" className="btn sec" onClick={() => alAplicar('todos', '')}>Limpiar filtros</button>
+      <button type="button" className="btn sec" onClick={() => alAplicar(sinFiltro, '')}>Limpiar filtros</button>
       <button type="button" className="btn" onClick={() => alAplicar(f, d)}>Aplicar filtros</button>
     </div>
   </>;
 }
 
 /* ---------------------------- Mis solicitudes ---------------------------- */
+/** Los grupos de estado de "Mis solicitudes". "Aprobadas" junta las confirmadas y las ya asignadas a un mensajero. */
+type GrupoSolicitud = 'todas' | 'pendientes' | 'por-confirmar' | 'aprobadas' | 'rechazadas';
+const GRUPOS_SOLICITUD: [GrupoSolicitud, string][] = [['todas', 'Todas'], ['pendientes', 'Pendientes'], ['por-confirmar', 'Por confirmar'], ['aprobadas', 'Aprobadas por JS'], ['rechazadas', 'Rechazadas']];
+const LIMITE_RECIENTES = 50;
+const enGrupo = (s: SolicitudCliente, g: GrupoSolicitud) =>
+  g === 'todas' || (g === 'pendientes' ? s.estado === 'pendiente' : g === 'por-confirmar' ? s.estado === 'cotizada' : g === 'rechazadas' ? s.estado === 'rechazada' : s.estado === 'confirmada' || s.estado === 'asignada');
+const sinTildes = (t: string) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+/** Filtra por destinatario, teléfono, direcciones o guía, por estado y por el día (hora de Colombia) en que se pidió. */
+function filtrarSolicitudes(xs: SolicitudCliente[], texto: string, g: GrupoSolicitud, dia: string) {
+  const q = sinTildes(texto.trim());
+  return xs.filter(s => enGrupo(s, g) && (!dia || diaDe(s.creado) === dia)
+    && (!q || sinTildes([s.destinatarioNombre, s.destinatarioTelefono, s.direccionRecogida, s.direccionEntrega, s.guia ?? ''].join(' ')).includes(q)));
+}
+/** El valor, pero solo después de `ms` sin cambios: así la búsqueda no se recalcula con cada letra. */
+function useRetraso<T>(valor: T, ms: number) {
+  const [v, setV] = useState(valor);
+  useEffect(() => { const t = setTimeout(() => setV(valor), ms); return () => clearTimeout(t); }, [valor, ms]);
+  return v;
+}
+
 /** Lista compacta: el seguimiento y las direcciones completas viven en el detalle. */
 function MisSolicitudes({ abrir }: { abrir: (g: string) => void }) {
   const [pagina, setPagina] = useState(1), porPagina = usePorPagina();
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const consulta = useMisSolicitudes(pagina, porPagina);
-  const pag = consulta.data, ss = pag?.solicitudes ?? [];
-  const porResponder = ss.filter(s => s.estado === 'cotizada').length;
+  // Filtros: el backend todavía no filtra /solicitudes/mias, así que con un filtro puesto se filtran en el navegador
+  // las últimas 50 (la misma consulta de la campanita). Sin filtros se sigue paginando en el servidor.
+  const [buscar, setBuscarT] = useState(''), [grupo, setGrupoT] = useState<GrupoSolicitud>('todas'), [dia, setDiaT] = useState(''), [hoja, setHoja] = useState(false);
+  const busqueda = useRetraso(buscar, 400);
+  const setBuscar = (v: string) => setBuscarT(v);
+  const setGrupo = (v: GrupoSolicitud) => { setGrupoT(v); setPagina(1); }, setDia = (v: string) => { setDiaT(v); setPagina(1); };
+  useEffect(() => { setPagina(1); }, [busqueda]);
+  const filtrando = !!busqueda.trim() || grupo !== 'todas' || !!dia;
+  const activos = (grupo !== 'todas' ? 1 : 0) + (dia ? 1 : 0);
+  const limpiar = () => { setBuscarT(''); setGrupoT('todas'); setDiaT(''); setPagina(1); };
+  const consulta = useMisSolicitudes(pagina, porPagina), recientes = useSolicitudesRecientes();
+  const pag = consulta.data, todas = recientes.data?.solicitudes;
+  const cargando = filtrando ? !todas : !pag;
+  const completo = !!todas && todas.length < LIMITE_RECIENTES;
+  const filtradas = filtrando && todas ? filtrarSolicitudes(todas, busqueda, grupo, dia) : [];
+  const ss = filtrando ? filtradas.slice((pagina - 1) * porPagina, pagina * porPagina) : pag?.solicitudes ?? [];
+  const hayMas = filtrando ? filtradas.length > pagina * porPagina : !!pag?.hayMas;
+  const porResponder = (todas ?? ss).filter(s => s.estado === 'cotizada').length;
   const selected = ss.find(s => s.id === selectedId) ?? null;
+  const grupos: [GrupoSolicitud, string, number | null][] = GRUPOS_SOLICITUD.map(([k, t]) => [k, t, completo ? todas!.filter(s => enGrupo(s, k)).length : null]);
   useEffect(() => { setPagina(1); }, [porPagina]);
   const ir = (n: number) => { setSelectedId(null); setPagina(n); window.scrollTo({ top: 0, behavior: 'smooth' }); };
   const verGuia = (guia: string) => { setSelectedId(null); requestAnimationFrame(() => abrir(guia)); };
-  if (consulta.isError) return <div className="vacio">No se pudieron traer tus solicitudes. Revisa tu conexión e intenta de nuevo.</div>;
-  if (!pag) return <div className="vacio">Cargando solicitudes…</div>;
+  if (consulta.isError && !filtrando) return <div className="vacio">No se pudieron traer tus solicitudes. Revisa tu conexión e intenta de nuevo.</div>;
+  if (cargando && !filtrando) return <div className="vacio">Cargando solicitudes…</div>;
+  const hayAlguna = filtrando || ss.length > 0;
   return <>
-    {ss.length > 0 && <p className="sub sol-intro">Cuando la oficina aprueba una solicitud y le asigna mensajero, aparece en “Mis pedidos” con su número de guía. Si te propone un domicilio, puedes aceptarlo o rechazarlo aquí mismo.</p>}
+    {hayAlguna && <p className="sub sol-intro">Cuando la oficina aprueba una solicitud y le asigna mensajero, aparece en “Mis pedidos” con su número de guía. Si te propone un domicilio, puedes aceptarlo o rechazarlo aquí mismo.</p>}
+    {hayAlguna && <>
+      <div className="pedidos-toolbar">
+        <div className="buscador">
+          <Search aria-hidden="true" />
+          <input type="search" placeholder={porPagina === POR_PAGINA.celular ? 'Buscar destinatario…' : 'Buscar destinatario, dirección o guía…'} value={buscar}
+            onChange={e => setBuscar(e.target.value)} aria-label="Buscar solicitudes" />
+          {buscar && <button type="button" className="buscador-limpiar" onClick={() => setBuscar('')} aria-label="Borrar búsqueda"><X aria-hidden="true" /></button>}
+        </div>
+        <button type="button" className={'filtros-boton' + (activos ? ' activo' : '')} onClick={() => setHoja(true)}
+          aria-haspopup="dialog" aria-label={activos ? `Filtros (${activos} activo${activos === 1 ? '' : 's'})` : 'Filtros'}>
+          <SlidersHorizontal aria-hidden="true" /><span>Filtros</span>{activos > 0 && <span className="num" aria-hidden="true">{activos}</span>}
+        </button>
+        <div className="fechas">
+          <div className="fecha-sdp"><SingleDatePicker value={dia} onChange={setDia} max={hoy()} placeholder="Sin fecha" etiqueta="Filtrar por día" /></div>
+          <button type="button" className="btn sec chico" aria-pressed={dia === hoy()} onClick={() => setDia(hoy())}>Hoy</button>
+          {dia && <button type="button" className="btn sec chico" onClick={() => setDia('')}>Ver todas</button>}
+        </div>
+      </div>
+      <div className="filtros" aria-label="Filtrar solicitudes por estado">
+        {grupos.map(([k, t, n]) => (
+          <button key={k} type="button" aria-pressed={grupo === k} onClick={() => setGrupo(k)}>
+            <span>{t}</span>{n != null && <span className="num">{n}</span>}
+          </button>
+        ))}
+      </div>
+      <Dialogo abierto={hoja} alCerrar={() => setHoja(false)} variante="filtros">
+        <HojaFiltros estados={grupos} filtro={grupo} sinFiltro="todas" dia={dia} textos={TEXTOS_SOLICITUDES} alCerrar={() => setHoja(false)}
+          alAplicar={(k, d2) => { if (k !== grupo) setGrupo(k); if (d2 !== dia) setDia(d2); setHoja(false); }} />
+      </Dialogo>
+      {filtrando && todas && !completo && <p className="sub">Buscando entre tus últimas {LIMITE_RECIENTES} solicitudes.</p>}
+    </>}
     {porResponder > 0 && <div className="sol-aviso sol-aviso-accion" role="status"><b>{porResponder === 1 ? 'Tienes una propuesta por responder.' : `Tienes ${porResponder} propuestas por responder.`}</b> Abre la solicitud para aceptar o rechazar el domicilio.</div>}
-    {ss.length ? <>
+    {cargando ? <div className="vacio">Buscando solicitudes…</div> : null}
+    {cargando ? null : ss.length ? <>
       <div className="sol-rows-desktop" style={consulta.isPlaceholderData ? { opacity: .6 } : undefined}>
         {ss.map(s => {
           const estado = estadoSolicitud(s);
@@ -406,8 +479,8 @@ function MisSolicitudes({ abrir }: { abrir: (g: string) => void }) {
           </button>;
         })}
       </div>
-    </> : <div className="vacio">{pagina > 1 ? 'No hay más solicitudes en esta página.' : 'Todavía no tienes solicitudes. Pide un envío con “Nuevo pedido” y aquí verás si la oficina lo aprueba.'}</div>}
-    <PaginadorSinTotal pagina={pag.pagina ?? pagina} hayMas={!!pag.hayMas} ir={ir} cargando={consulta.isPlaceholderData} etiqueta="Páginas de solicitudes" />
+    </> : <div className="vacio">{filtrando ? <>No encontramos solicitudes con esos filtros. <button type="button" className="btn sec chico" onClick={limpiar}>Limpiar filtros</button></> : pagina > 1 ? 'No hay más solicitudes en esta página.' : 'Todavía no tienes solicitudes. Pide un envío con “Nuevo pedido” y aquí verás si la oficina lo aprueba.'}</div>}
+    {!cargando && <PaginadorSinTotal pagina={pagina} hayMas={hayMas} ir={ir} cargando={!filtrando && consulta.isPlaceholderData} etiqueta="Páginas de solicitudes" />}
     <Dialogo abierto={!!selected} alCerrar={() => setSelectedId(null)} variante="solicitud">
       {selected && <DetalleSolicitud sol={selected} alCerrar={() => setSelectedId(null)} verGuia={verGuia} />}
     </Dialogo>

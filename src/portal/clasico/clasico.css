@@ -1107,3 +1107,7 @@ dialog.dialogo-filtros::backdrop{background:rgba(2,6,23,.75);backdrop-filter:blu
 /* Recibo de cuadre: la tarjeta y su formulario nunca se salen de la pantalla. */
 .cuenta-bloque,.cuenta-recibo-form,.cuenta-recibo-form .campo{min-width:0}
 .cuenta-recibo-form .sdp-boton{border-width:1.5px;border-radius:12px;min-height:43px}
+
+/* ---- Mis solicitudes: el mismo buscador, fecha y píldoras de Mis pedidos ---- */
+.pedidos-toolbar .fecha-sdp{width:224px;min-width:0}
+.pedidos-toolbar .fecha-sdp .sdp-boton{min-height:40px;border-width:1.5px;border-radius:12px;background:var(--papel);font-size:.8rem}
