@@ -53,7 +53,7 @@ const SEDE = { left: `${CALI[0] / 10}%`, top: `${(CALI[1] - VISTA_Y) / 5}%` };
  * en celular el mundo queda detrás de la cabecera, con Cali a la izquierda del logo (la tarjeta tapa el resto de la pantalla);
  * desde `md` ocupa toda la pantalla, con Cali a la izquierda de la tarjeta.
  */
-function MapaSede({ sedeRef }: { sedeRef?: Ref<HTMLDivElement> }) {
+function MapaSede({ sedeRef, seguirTema = false }: { sedeRef?: Ref<HTMLDivElement>; seguirTema?: boolean }) {
   return (
     <div aria-hidden="true"
       className="pointer-events-none absolute -z-10 aspect-[2/1] w-[120vw] max-w-none left-[calc(50%-62.49vw)] top-[calc(40px-33.05vw)] sm:top-[calc(60px-33.05vw)] md:left-1/2 md:top-1/2 md:w-[max(1500px,100vw)] md:-translate-x-1/2 md:-translate-y-1/2">
@@ -76,7 +76,7 @@ function MapaSede({ sedeRef }: { sedeRef?: Ref<HTMLDivElement> }) {
             <circle className="login-pulso" cx={x} cy={y} r="2.2" stroke="#7dd3fc" strokeWidth=".8" style={{ animationDelay: `${i * 0.6}s` }} />
           </g>
         ))}
-        <rect y={VISTA_Y} width="1000" height="500" fill="url(#loginVineta)" />
+        <rect className={seguirTema ? 'hidden dark:block' : undefined} y={VISTA_Y} width="1000" height="500" fill="url(#loginVineta)" />
       </svg>
 
       {/* Pin de la sede: la punta queda justo sobre Cali */}
@@ -88,8 +88,8 @@ function MapaSede({ sedeRef }: { sedeRef?: Ref<HTMLDivElement> }) {
           <path d="M14 35C14 35 3 21.5 3 13a11 11 0 0 1 22 0c0 8.5-11 22-11 22z" fill="url(#loginPin)" stroke="#fff" strokeWidth="1.6" strokeLinejoin="round" />
           <circle cx="14" cy="13" r="4.2" fill="#fff" />
         </svg>
-        <p className="absolute left-0 top-2.5 -translate-x-1/2 whitespace-nowrap text-center text-[10px] font-semibold leading-tight text-white [text-shadow:0_1px_6px_#070B19,0_0_2px_#070B19] md:top-3.5 md:text-xs">
-          <span className="block text-[9px] font-medium uppercase tracking-wider text-[#7dd3fc] md:text-[10px]">Sede principal</span>
+        <p className={`absolute left-0 top-2.5 -translate-x-1/2 whitespace-nowrap text-center text-[10px] font-semibold leading-tight md:top-3.5 md:text-xs ${seguirTema ? 'rounded-lg border border-slate-200/80 bg-white/95 px-2.5 py-1 text-slate-800 shadow-sm dark:rounded-none dark:border-0 dark:bg-transparent dark:p-0 dark:text-white dark:shadow-none dark:[text-shadow:0_1px_6px_#070B19,0_0_2px_#070B19]' : 'text-white [text-shadow:0_1px_6px_#070B19,0_0_2px_#070B19]'}`}>
+          <span className={`block text-[9px] font-medium uppercase tracking-wider md:text-[10px] ${seguirTema ? 'text-sky-700 dark:text-[#7dd3fc]' : 'text-[#7dd3fc]'}`}>Sede principal</span>
           Cali, Colombia
         </p>
       </div>
@@ -133,6 +133,7 @@ export function MarcoAcceso({
   subtitulo = 'JS Logistics – Acceso de clientes',
   intro,
   sinEntrada = false,
+  seguirTema = false,
 }: {
   children: ReactNode;
   pie?: ReactNode;
@@ -142,21 +143,25 @@ export function MarcoAcceso({
   intro?: IntroMarco;
   /** Quita la entrada suave de siempre (`animate-fade-up`): el login la cambia por su animación. */
   sinEntrada?: boolean;
+  /** Solo el login sigue el tema; las otras pantallas conservan su diseño. */
+  seguirTema?: boolean;
 }) {
+  const tema = (oscuro: string, adaptable: string) => seguirTema ? adaptable : oscuro;
   return (
-    <div ref={intro?.raiz} className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-[#070B19] px-5 pb-10 pt-24 sm:px-4 sm:pb-16 sm:pt-28">
+    <div ref={intro?.raiz} className={tema("relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-[#070B19] px-5 pb-10 pt-24 sm:px-4 sm:pb-16 sm:pt-28", "relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 dark:bg-[#060d18] transition-colors duration-300 px-5 pb-10 pt-24 sm:px-4 sm:pb-16 sm:pt-28")}>
       {/* Fondo: malla y luces ambientales (el mapa va en MapaSede, anclado a la columna) */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
+        {seguirTema && <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_#fff_0%,_rgb(248_250_252_/_0.9)_60%,_rgb(241_245_249_/_0.8)_100%)] dark:hidden" />}
         <div className="absolute inset-0 opacity-[0.05]"
           style={{ backgroundImage: 'linear-gradient(rgba(148,176,207,1) 1px, transparent 1px), linear-gradient(90deg, rgba(148,176,207,1) 1px, transparent 1px)', backgroundSize: '56px 56px' }} />
-        <div className="absolute -left-32 -top-32 h-[28rem] w-[28rem] rounded-full bg-[#0284c7]/30 blur-[120px]" />
-        <div className="absolute -bottom-40 -right-28 h-[32rem] w-[32rem] rounded-full bg-[#38bdf8]/20 blur-[130px]" />
+        <div className={tema("absolute -left-32 -top-32 h-[28rem] w-[28rem] rounded-full bg-[#0284c7]/30 blur-[120px]", "absolute -left-32 -top-32 h-[28rem] w-[28rem] rounded-full bg-sky-100/30 dark:bg-[#0284c7]/30 blur-[120px] transition-colors duration-300")} />
+        <div className={tema("absolute -bottom-40 -right-28 h-[32rem] w-[32rem] rounded-full bg-[#38bdf8]/20 blur-[130px]", "absolute -bottom-40 -right-28 h-[32rem] w-[32rem] rounded-full bg-sky-100/20 dark:bg-[#38bdf8]/20 blur-[130px] transition-colors duration-300")} />
       </div>
       {intro && <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">{intro.detras}</div>}
 
       {/* En el celular la columna llega a 320 px y deja al menos 20 px a cada lado: a todo el ancho la tarjeta se veía enorme y pegada a los bordes. */}
       <div className="relative w-full max-w-[20rem] sm:max-w-md">
-        <MapaSede sedeRef={intro?.sede} />
+        <MapaSede sedeRef={intro?.sede} seguirTema={seguirTema} />
         {/* Con la animación del login no va `animate-fade-up`, pero se deja `will-change: opacity`: la animación de siempre
             deja este bloque como "raíz" del desenfoque de la tarjeta (el mapa se ve a través del vidrio), y sin eso
             el vidrio se vería más opaco que hoy. */}
@@ -172,16 +177,16 @@ export function MarcoAcceso({
               </span>
             </span>
           </div>
-          <h1 ref={intro?.titulo.ref} style={intro?.titulo.style} className="font-display text-xl font-700 text-white sm:text-3xl">{titulo}{intro?.letras}</h1>
-          <p className="mt-0.5 text-xs text-[#94a3b8] sm:mt-1 sm:text-sm" style={intro?.subtitulo}>{subtitulo}</p>
+          <h1 ref={intro?.titulo.ref} style={intro?.titulo.style} className={tema("font-display text-xl font-700 text-white sm:text-3xl", "font-display text-xl font-700 text-slate-900 dark:text-white transition-colors duration-300 sm:text-3xl")}>{titulo}{intro?.letras}</h1>
+          <p className={tema("mt-0.5 text-xs text-[#94a3b8] sm:mt-1 sm:text-sm", "mx-auto mt-0.5 w-fit rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-slate-600 backdrop-blur-sm transition-colors duration-300 dark:w-auto dark:rounded-none dark:bg-transparent dark:p-0 dark:font-normal dark:text-slate-400 dark:backdrop-blur-none sm:mt-1 sm:text-sm")} style={intro?.subtitulo}>{subtitulo}</p>
         </div>
 
         {/* Tarjeta de cristal con borde brillante */}
         <div ref={intro?.tarjeta.ref} style={intro?.tarjeta.style} className="relative">
-          <div aria-hidden="true" className="absolute -inset-px rounded-[1.4rem] bg-gradient-to-br from-sky-400/70 via-blue-600/30 to-cyan-300/50 opacity-70" style={intro?.borde} />
-          <div aria-hidden="true" className="absolute -inset-6 -z-10 rounded-[2.5rem] bg-blue-600/20 blur-3xl" style={intro?.haloTarjeta} />
+          <div aria-hidden="true" className={tema("absolute -inset-px rounded-[1.4rem] bg-gradient-to-br from-sky-400/70 via-blue-600/30 to-cyan-300/50 opacity-70", "absolute -inset-px rounded-[1.4rem] bg-gradient-to-br from-slate-200/40 via-sky-100/20 to-slate-200/30 dark:from-sky-400/70 dark:via-blue-600/30 dark:to-cyan-300/50 opacity-70")} style={intro?.borde} />
+          <div aria-hidden="true" className={tema("absolute -inset-6 -z-10 rounded-[2.5rem] bg-blue-600/20 blur-3xl", "absolute -inset-6 -z-10 rounded-[2.5rem] bg-sky-100/20 dark:bg-blue-600/20 blur-3xl")} style={intro?.haloTarjeta} />
           {intro?.vidrio}
-          <div className="relative rounded-3xl bg-slate-900/60 p-4 shadow-[0_24px_80px_-20px_rgba(2,132,199,0.45),0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-xl sm:p-8" style={intro?.cuerpo}>
+          <div className={tema("relative rounded-3xl bg-slate-900/60 p-4 shadow-[0_24px_80px_-20px_rgba(2,132,199,0.45),0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-xl sm:p-8", "relative rounded-3xl border border-slate-200 dark:border-sky-500/20 bg-white dark:bg-slate-900/75 p-4 shadow-xl shadow-slate-900/[0.08] dark:shadow-2xl dark:shadow-black/50 backdrop-blur-xl dark:backdrop-blur-md transition-colors duration-300 sm:p-8")} style={intro?.cuerpo}>
             {children}
           </div>
         </div>

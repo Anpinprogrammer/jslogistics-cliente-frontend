@@ -141,8 +141,8 @@ export default function NuevoPedido({ cliente, email, alCerrar }: { cliente: Cli
           <p className="nuevo-listo-titulo">¡Recibimos tu solicitud!</p>
           <p>
             La oficina la revisa en un momento. {tarifa > 0
-              ? <>Si el domicilio es tu valor de siempre (<span className="nuevo-valor">{pesos(tarifa)}</span>), asignamos al mensajero de una vez. Si para este pedido es otro valor, te escribimos por WhatsApp al <b>{f.telefono.trim()}</b> para que lo confirmes.</>
-              : <>Te escribimos por WhatsApp al <b>{f.telefono.trim()}</b> con el valor del domicilio y, cuando nos confirmes, asignamos al mensajero.</>}
+              ? <>Si el domicilio es tu valor de siempre (<span className="nuevo-valor">{pesos(tarifa)}</span>), asignamos al mensajero de una vez. Si para este pedido es otro valor, te lo propondremos aquí en el portal para que lo aceptes o rechaces.</>
+              : <>La oficina revisa el domicilio y te lo propone aquí en el portal para que lo aceptes o rechaces.</>}
           </p>
           <p className="nuevo-nota">El pedido aparece en tu lista cuando la oficina le asigna un mensajero.</p>
         </div>
@@ -211,8 +211,8 @@ export default function NuevoPedido({ cliente, email, alCerrar }: { cliente: Cli
             </div>
             <p className="nuevo-domicilio">
               {tarifa > 0
-                ? <>Tu domicilio de siempre es <b className="nuevo-valor">{pesos(tarifa)}</b>. Si para este pedido es otro valor, la oficina te escribe por WhatsApp antes de enviarlo.</>
-                : <>La oficina te escribe por WhatsApp con el valor del domicilio antes de enviarlo.</>}
+                ? <>Tu domicilio de siempre es <b className="nuevo-valor">{pesos(tarifa)}</b>. Si para este pedido es otro valor, la oficina te lo propone en el portal antes de enviarlo.</>
+                : <>La oficina revisa el domicilio y te lo propone en el portal antes de enviarlo.</>}
             </p>
           </section>}
         </div>

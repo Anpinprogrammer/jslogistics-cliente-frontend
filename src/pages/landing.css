@@ -343,3 +343,24 @@ button.boton-menu:focus-visible {
     border-radius: 12px;
   }
 }
+
+/* Rastreo de escritorio: solo colores claros; conserva geometría y estilos oscuros originales. */
+@media (min-width: 1024px) {
+  html:not(.dark) .landing-tracking {
+    background-color: rgb(255 255 255 / .95);
+    border-color: rgb(255 255 255 / .8);
+    box-shadow: 0 25px 50px -12px rgb(2 6 23 / .25);
+  }
+  html:not(.dark) .landing-tracking h2 { color: #0f172a; }
+  html:not(.dark) .landing-tracking h2 + p,
+  html:not(.dark) .landing-tracking > p { color: #64748b; }
+  html:not(.dark) .landing-tracking > p { border-color: #e2e8f0; }
+  html:not(.dark) .landing-tracking > p a { color: #0284c7; }
+  html:not(.dark) .landing-tracking #guiaHero {
+    background-color: rgb(241 245 249 / .9);
+    border-color: #e2e8f0;
+    color: #0f172a;
+  }
+  html:not(.dark) .landing-tracking #guiaHero::placeholder { color: #94a3b8; }
+  html:not(.dark) .landing-tracking #guiaHero:focus { border-color: #0ea5e9; }
+}

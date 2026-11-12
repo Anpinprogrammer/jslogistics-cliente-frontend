@@ -5,7 +5,8 @@ import { hora, hoy, moverDia, pct, pesos } from '../../lib/formato';
 import { cambioPendiente, entregasPorDia, resumenCliente, ultimaActividad } from '../../lib/negocio';
 import type { DatosCliente } from '../useDatosCliente';
 import { Icono } from './iconos';
-import { CargandoVista, Columnas, Dona, EtqDash, Foto, lineaPedido } from './piezas';
+import { InicioSkeleton } from './InicioSkeleton';
+import { Columnas, Dona, EtqDash, Foto, lineaPedido } from './piezas';
 
 const VERDE = 'var(--verde)', ROJO = 'var(--rojo)';
 
@@ -21,7 +22,7 @@ export default function Inicio({ d, ir, abrir }: { d: DatosCliente; ir: (k: stri
   const cuenta = useCuentaCliente(1, 6);
   const movs = cuenta.data?.filas ?? [], s = cuenta.data?.saldo ?? 0;
   if (d.errorPedidos && !d.pedidosListos) return <><h1>Hola, {d.cliente!.nombre}</h1><div className="vacio">No se pudieron traer tus envíos. Revisa tu conexión e intenta de nuevo.</div></>;
-  if (!d.pedidosListos) return <CargandoVista />;
+  if (!d.pedidosListos || cuenta.isPending) return <InicioSkeleton />;
   return (
     <>
       <div className="dash-cab"><div><h1>Hola, {d.cliente!.nombre}</h1><p className="sub">Así van tus envíos con JS Logistics</p></div></div>

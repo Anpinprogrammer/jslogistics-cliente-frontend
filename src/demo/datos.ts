@@ -78,12 +78,12 @@ function solicitudesDemo(): SolicitudCliente[] {
   // Fecha fija de la sesión: si cambiara en cada consulta, la campanita vería "nueva" la misma solicitud.
   const ahora = AHORA_SOLICITUDES, f = (h: number) => new Date(ahora - h * HORA).toISOString();
   const aceptado = pedidosActuales().find(p => p.estado === 'aceptado');
-  const base = { origen: 'portal' as const, direccionRecogida: 'Cra 24 # 9-30, San Fernando', paquetes: 1, pesoKg: null, destinatarioTelefono: '311 000 0000', motivoRechazo: '', guia: null, pedidoEstado: null };
+  const base = { origen: 'portal' as const, direccionRecogida: 'Cra 24 # 9-30, San Fernando', paquetes: 1, pesoKg: null, destinatarioTelefono: '311 000 0000', motivoRechazo: '', guia: null, pedidoEstado: null, confirmadaPorCliente: false, mensajeroNombre: null };
   return [
     { ...base, id: 'sd1', estado: 'pendiente', destinatarioNombre: 'Carolina Ríos', direccionEntrega: 'Calle 5 # 66-20, El Ingenio', valor: null, creado: f(0.5), actualizado: f(0.5) },
     { ...base, id: 'sd2', estado: 'cotizada', destinatarioNombre: 'Andrés Muñoz', direccionEntrega: 'Jamundí, Cra 10 # 12-04', paquetes: 2, valor: 14000, creado: f(3), actualizado: f(2) },
     { ...base, id: 'sd3', estado: 'asignada', destinatarioNombre: 'Valentina Ortiz', direccionEntrega: 'Av 3N # 44-15, La Flora', valor: CLIENTE.tarifa,
-      guia: aceptado?.guia ?? null, pedidoEstado: aceptado ? 'aceptado' : null, creado: f(6), actualizado: f(5) },
+      guia: aceptado?.guia ?? null, pedidoEstado: aceptado ? 'aceptado' : null, mensajeroNombre: 'Andrés Mora', creado: f(6), actualizado: f(5) },
     { ...base, id: 'sd4', estado: 'rechazada', destinatarioNombre: 'Julián Castro', direccionEntrega: 'Buenaventura, centro', valor: null,
       motivoRechazo: 'No tenemos cobertura en Buenaventura. Te recomendamos una transportadora nacional.', creado: f(30), actualizado: f(28) },
   ];
@@ -160,7 +160,7 @@ export const demo = {
     solicitudesNuevas.unshift({ id: 'demo-' + Date.now(), estado: 'pendiente', origen: 'portal', direccionRecogida: datos.direccionRecogida.trim(),
       paquetes: Number(datos.paquetes) || 1, pesoKg: datos.pesoKg ? Number(datos.pesoKg) : null, destinatarioNombre: datos.destinatarioNombre.trim(),
       destinatarioTelefono: datos.destinatarioTelefono?.trim() || '', direccionEntrega: datos.direccionEntrega.trim(), valor: null, motivoRechazo: '',
-      guia: null, pedidoEstado: null, creado: ahora, actualizado: ahora });
+      guia: null, pedidoEstado: null, confirmadaPorCliente: false, mensajeroNombre: null, creado: ahora, actualizado: ahora });
   },
   pedidos: () => espera(pedidosActuales()),
   solicitudes: (pagina: number, porPagina: number): Promise<PaginaSolicitudes> => {
@@ -180,7 +180,7 @@ export const demo = {
     solicitudesCambios[id] = {
       ...(solicitudesCambios[id] || {}),
       estado: aceptar ? 'confirmada' : 'rechazada',
-      ...(aceptar ? {} : { motivoRechazo: motivo?.trim() || 'El cliente no aceptó la propuesta de domicilio.' }),
+      ...(aceptar ? { confirmadaPorCliente: true } : { motivoRechazo: motivo?.trim() || 'El cliente no aceptó la propuesta de domicilio.' }),
       actualizado: new Date().toISOString(),
     };
     return { ...base, ...solicitudesCambios[id] };

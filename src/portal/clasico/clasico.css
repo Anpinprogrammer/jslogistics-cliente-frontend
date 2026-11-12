@@ -850,7 +850,7 @@ dialog.dialogo-pedido::backdrop{background:rgba(2,6,23,.72);backdrop-filter:blur
 .campana-cliente:hover{background:rgba(255,255,255,.14);color:#fff}
 .campana-cliente:active{transform:scale(.95)}
 .campana-cliente svg{width:19px;height:19px}
-.campana-cliente.con-nuevas{color:#fff}
+.campana-cliente.con-nuevas{color:inherit}
 .campana-cliente .num{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--rojo);color:#fff;font-size:.66rem;font-weight:700;line-height:18px;text-align:center;box-shadow:0 1px 4px rgba(2,6,23,.35)}
 @media (min-width:960px){
   .campana-cliente{background:var(--shell-fondo);border-color:var(--shell-linea);color:var(--shell-suave);box-shadow:0 1px 2px rgba(15,23,42,.05)}
@@ -906,6 +906,10 @@ dialog.dialogo-pedido::backdrop{background:rgba(2,6,23,.72);backdrop-filter:blur
 .sol-aviso-accion b{color:var(--amarillo)}
 
 .aviso-prop-fondo{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:16px;background:rgba(2,6,23,.62);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px)}
+/* El aviso usa un <dialog> nativo para quedar por encima de cualquier otro diálogo abierto (Mis solicitudes). */
+.aviso-prop-dialogo{position:fixed;inset:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;padding:16px;border:0;background:transparent;color:var(--tinta);overflow:auto}
+.aviso-prop-dialogo[open]{display:grid;place-items:center}
+.aviso-prop-dialogo::backdrop{background:rgba(2,6,23,.62);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px)}
 .aviso-prop{position:relative;width:min(520px,100%);max-height:calc(100dvh - 32px);display:flex;flex-direction:column;overflow:hidden;background:var(--papel);color:var(--tinta);border:1px solid var(--linea);border-radius:20px;box-shadow:0 30px 80px rgba(2,6,23,.42)}
 .aviso-prop-cerrar{position:absolute;top:10px;right:10px;z-index:2;display:grid;place-items:center;width:34px;height:34px;padding:0;border:1px solid var(--linea);border-radius:50%;background:var(--papel);color:var(--suave);font-size:1.15rem;line-height:1;cursor:pointer}
 .aviso-prop-cerrar:hover{background:var(--hueco);color:var(--tinta)}
@@ -927,6 +931,7 @@ dialog.dialogo-pedido::backdrop{background:rgba(2,6,23,.72);backdrop-filter:blur
 .aviso-prop-progreso.detenido small{color:var(--amarillo);font-weight:700}
 @media (max-width:480px){
   .aviso-prop-fondo{padding:10px}
+  .aviso-prop-dialogo{padding:10px}
   .aviso-prop-cab{padding:16px 40px 0 16px}
   .aviso-prop-cab h2{font-size:1.08rem}
   .aviso-prop-cuerpo{padding:12px 16px}
@@ -1166,3 +1171,28 @@ dialog.dialogo-nuevo[open]{animation:np-entra .2s ease-out}
 .esqueleto-modal .esq-bloque{height:90px}
 @keyframes esq-latido{50%{opacity:.45}}
 @media (prefers-reduced-motion:reduce){.esq-linea,.esq-bloque{animation:none}}
+
+/* Cierre del flujo: pedido asignado o solicitud rechazada. */
+.aviso-prop-eyebrow.ok{background:var(--verde-claro);color:var(--verde)}
+.aviso-prop-eyebrow.mal{background:var(--rojo-claro);color:var(--rojo)}
+.aviso-prop-cuerpo > .btn{width:100%;min-height:44px}
+
+/* Skeleton estructural del Inicio: superficies del tema, pulso solo en las formas. */
+.inicio-esqueleto{min-width:0}
+.inicio-esqueleto .esq-linea{background:var(--linea)}
+.ini-esq-linea{width:70%;max-width:100%;height:14px;border-radius:6px;flex:none}
+.ini-esq-cab{width:min(100%,320px);display:grid;gap:8px}
+.ini-esq-titulo{height:30px;width:90%}
+.ini-esq-kpi{gap:10px}
+.ini-esq-valor{height:30px;width:55%}
+.ini-esq-corta{width:45%}
+.ini-esq-encabezado{margin-bottom:14px;height:24px;display:flex;align-items:center}
+.ini-esq-dona{border:18px solid var(--linea);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.ini-esq-leyenda{width:100px;display:grid;gap:20px}
+.ini-esq-leyenda .ini-esq-linea{width:100%}
+.ini-esq-barra{width:100%;border-radius:4px 4px 0 0}
+.ini-esq-eje{display:flex;justify-content:space-between;margin-top:6px}
+.ini-esq-eje .ini-esq-linea{width:20%;height:10px}
+.ini-esq-foto{width:42px;height:42px;flex:none;border-radius:10px}
+.ini-esq-info{display:grid;gap:8px}
+.ini-esq-importe{width:20%;max-width:80px}
