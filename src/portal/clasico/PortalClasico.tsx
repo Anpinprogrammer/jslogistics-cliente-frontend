@@ -5,15 +5,15 @@
  */
 import { useEffect, useState, type FormEvent } from 'react';
 import { Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { AlertTriangle, Bot, Calendar, CheckCircle2, ChevronRight, Eye, EyeOff, FileText, Image as ImageIcon, Info, KeyRound, Lock, Mail, MapPin, Maximize2, Moon, PackageCheck, Phone, Plus, Receipt, RotateCcw, Save, Search, Settings, ShieldCheck, Store, Sun, Truck, Undo2, X } from 'lucide-react';
+import { AlertTriangle, Bot, Calendar, CheckCircle2, ChevronRight, ClipboardCheck, ClipboardList, XCircle, Eye, EyeOff, FileText, Image as ImageIcon, Info, KeyRound, Lock, Mail, MapPin, Maximize2, Moon, PackageCheck, Phone, Plus, Receipt, RotateCcw, Save, Search, Settings, ShieldCheck, Store, Sun, Truck, Undo2, X } from 'lucide-react';
 import './clasico.css';
 import { useSesion } from '../../auth/AuthProvider';
-import { useActualizarPerfilCliente, useConfirmarCambio, useCuentaCliente, useMovimientosCliente, usePaginaPedidos, usePruebas, type FiltroPedidos } from '../../api/cliente';
+import { useActualizarPerfilCliente, useConfirmarCambio, useCuentaCliente, useMisSolicitudes, useMovimientosCliente, usePaginaPedidos, usePruebas, type FiltroPedidos } from '../../api/cliente';
 import { authApi } from '../../api/auth';
 import { usePorPagina, usePorPaginaCuenta } from '../../lib/pantalla';
 import { diaCorto, diaDe, fechaLarga, hoy, hora, moverDia, pct, pesos, pesosConSigno } from '../../lib/formato';
 import {
-  cambioPendiente, cerrado, EMPRESA, entregasPorDia, gastoDe, metodoTxt, MOTIVOS, pagoDomi,
+  cambioPendiente, cerrado, EMPRESA, entregasPorDia, ESTADO_PEDIDO, estadoSolicitud, gastoDe, metodoTxt, MOTIVOS, pagoDomi, pasosSolicitud,
   reciboDelDia, resumenCliente, saldoPedido, servicio, textoDomi, textoSaldo, ultimaActividad, type Recibo,
 } from '../../lib/negocio';
 import { useDatosCliente, type DatosCliente } from '../useDatosCliente';
@@ -45,7 +45,7 @@ export default function PortalClasico() {
   const cerrar = () => setSp(prev => { const n = new URLSearchParams(prev); n.delete('ver'); return n; }, { replace: true });
 
   const tab = loc.pathname.endsWith('/pedidos') ? 'pedidos' : loc.pathname.endsWith('/cuenta') ? 'cuenta' : 'inicio';
-  const enRuta = d.pedidos.filter(p => p.estado === 'pendiente').length, cambios = d.pedidos.filter(cambioPendiente);
+  const enRuta = d.pedidos.filter(p => p.estado === 'pendiente' || p.estado === 'aceptado').length, cambios = d.pedidos.filter(cambioPendiente);
   const items: [string, string, number?][] = [['inicio', 'Inicio'], ['pedidos', 'Mis pedidos', enRuta + cambios.length], ['cuenta', 'Mi cuenta']];
   // En el escritorio el menú va agrupado por sección, como el de la oficina; en el celular se muestran las pestañas de siempre.
   const SECCIONES: [string, string[]][] = [['Principal', ['inicio', 'pedidos']], ['Mi cuenta', ['cuenta']]];
@@ -179,13 +179,17 @@ function Inicio({ d, ir, abrir }: { d: DatosCliente; ir: (k: string, f?: string)
 
 const lineaPedido = (p: DatosCliente['pedidos'][number]) =>
   p.estado === 'entregado' ? 'Recibió ' + (p.destinatario || '') + ' · ' + hora(p.entregado!)
-  : p.estado === 'devuelto' ? (MOTIVOS[p.motivoDev] || 'Devuelto') + ' · ' + hora(p.entregado!) : 'Salió ' + hora(p.creado);
+  : p.estado === 'devuelto' ? (MOTIVOS[p.motivoDev] || 'Devuelto') + ' · ' + hora(p.entregado!)
+  : p.estado === 'aceptado' ? 'Aceptado · el mensajero pasa a recogerlo' : 'Salió ' + hora(p.creado);
 
 /* ---------------------------- Mis pedidos ---------------------------- */
 function Pedidos({ d, abrir }: { d: DatosCliente; abrir: (g: string) => void }) {
   const [sp, setSp] = useSearchParams();
   const { usuario } = useSesion();
   const [nuevo, setNuevo] = useState(false);
+  // Sub-pestañas: los pedidos (guías) y las solicitudes que todavía revisa la oficina. Va en la URL (?v=solicitudes).
+  const vista = sp.get('v') === 'solicitudes' ? 'solicitudes' : 'pedidos';
+  const verVista = (v: 'pedidos' | 'solicitudes') => setSp(prev => { const n = new URLSearchParams(prev); if (v === 'solicitudes') n.set('v', v); else n.delete('v'); return n; }, { replace: true });
   const f = (sp.get('f') || 'todos') as FiltroPedidos;
   const [buscar, setBuscarT] = useState(''), [dia, setDiaT] = useState(''), [pagina, setPagina] = useState(1), porPagina = usePorPagina();
   // Cambiar un filtro vuelve a la primera página.
@@ -193,6 +197,7 @@ function Pedidos({ d, abrir }: { d: DatosCliente; abrir: (g: string) => void }) 
   const cambios = d.pedidos.filter(cambioPendiente);
   const tabs: [FiltroPedidos, string, number][] = [
     ['todos', 'Todos', d.pedidos.length],
+    ['acep', 'Aceptados', d.pedidos.filter(p => p.estado === 'aceptado').length],
     ['ruta', 'En ruta', d.pedidos.filter(p => p.estado === 'pendiente').length],
     ['ent', 'Entregados', d.pedidos.filter(p => p.estado === 'entregado').length],
     ['dev', 'Devueltos', d.pedidos.filter(p => p.estado === 'devuelto').length],
@@ -210,6 +215,14 @@ function Pedidos({ d, abrir }: { d: DatosCliente; abrir: (g: string) => void }) 
       <Dialogo abierto={nuevo} alCerrar={() => setNuevo(false)} variante="pedido">
         <NuevoPedido cliente={d.cliente} email={usuario?.email ?? ''} alCerrar={() => setNuevo(false)} />
       </Dialogo>
+      <div className="cuenta-tabs pedidos-tabs" role="tablist" aria-label="Pedidos y solicitudes">
+        <button type="button" role="tab" id="ped-tab-pedidos" aria-controls="ped-panel" aria-selected={vista === 'pedidos'} tabIndex={vista === 'pedidos' ? 0 : -1}
+          onClick={() => verVista('pedidos')} onKeyDown={e => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { verVista('solicitudes'); (e.currentTarget.nextElementSibling as HTMLElement | null)?.focus(); } }}><Truck size={18} aria-hidden="true" /><span>Mis pedidos</span></button>
+        <button type="button" role="tab" id="ped-tab-solicitudes" aria-controls="ped-panel" aria-selected={vista === 'solicitudes'} tabIndex={vista === 'solicitudes' ? 0 : -1}
+          onClick={() => verVista('solicitudes')} onKeyDown={e => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { verVista('pedidos'); (e.currentTarget.previousElementSibling as HTMLElement | null)?.focus(); } }}><ClipboardList size={18} aria-hidden="true" /><span>Mis solicitudes</span></button>
+      </div>
+      <div id="ped-panel" role="tabpanel" aria-labelledby={vista === 'pedidos' ? 'ped-tab-pedidos' : 'ped-tab-solicitudes'}>
+      {vista === 'solicitudes' ? <MisSolicitudes abrir={abrir} /> : <>
       {cambios.length > 0 && <div className="aviso alerta">Tienes {cambios.length === 1 ? '1 prenda de cambio' : cambios.length + ' prendas de cambio'} por recibir ({cambios.map(p => p.guia).join(', ')}). Cuando te la entreguen, ábrela y confirma que la recibiste.</div>}
 
       <div className="pedidos-toolbar">
@@ -241,8 +254,8 @@ function Pedidos({ d, abrir }: { d: DatosCliente; abrir: (g: string) => void }) 
       {consulta.isError ? <div className="vacio">No se pudieron traer tus envíos. Revisa tu conexión e intenta de nuevo.</div>
       : !pag ? <div className="vacio">Cargando envíos…</div>
       : ps.length ? <><div className="lista" style={consulta.isPlaceholderData ? { opacity: .6 } : undefined}>{ps.map((p, i) => {
-        const Icono = p.estado === 'entregado' ? PackageCheck : p.estado === 'devuelto' ? Undo2 : Truck;
-        const [clase, texto] = p.estado === 'entregado' ? ['ent', 'Entregado'] : p.estado === 'devuelto' ? ['dev', 'Devuelto'] : ['ruta', 'En ruta'];
+        const Icono = p.estado === 'entregado' ? PackageCheck : p.estado === 'devuelto' ? Undo2 : p.estado === 'aceptado' ? ClipboardCheck : Truck;
+        const { clase, texto } = ESTADO_PEDIDO[p.estado];
         const valor = p.estado === 'entregado' ? p.valorCobrado : p.aCobrar;
         return (
           <button key={p.guia} type="button" className={`pedido-card pedido-entra es-${p.estado}`} style={{ animationDelay: `${i * 40}ms` }}
@@ -266,8 +279,64 @@ function Pedidos({ d, abrir }: { d: DatosCliente; abrir: (g: string) => void }) 
       })}</div>
       <Paginador pagina={pag.pagina} paginas={pag.paginas} total={pag.total} porPagina={pag.porPagina} ir={ir} cargando={consulta.isPlaceholderData} /></>
       : <div className="vacio">No hay envíos aquí.</div>}
+      </>}
+      </div>
     </>
   );
+}
+
+/* ---------------------------- Mis solicitudes ---------------------------- */
+/** Las solicitudes de envío del cliente, cada una con su tracker: Solicitado → Pendiente de aprobación → Aprobada / Rechazada. */
+function MisSolicitudes({ abrir }: { abrir: (g: string) => void }) {
+  const [pagina, setPagina] = useState(1), porPagina = usePorPagina();
+  const consulta = useMisSolicitudes(pagina, porPagina);
+  const pag = consulta.data, ss = pag?.solicitudes ?? [];
+  const ir = (n: number) => { setPagina(n); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+  if (consulta.isError) return <div className="vacio">No se pudieron traer tus solicitudes. Revisa tu conexión e intenta de nuevo.</div>;
+  if (!pag) return <div className="vacio">Cargando solicitudes…</div>;
+  if (!ss.length) return <div className="vacio">Todavía no tienes solicitudes. Pide un envío con “Nuevo pedido” y aquí verás si la oficina lo aprueba.</div>;
+  return <>
+    <p className="sub sol-intro">Cuando la oficina aprueba una solicitud y le asigna mensajero, aparece en “Mis pedidos” con su número de guía.</p>
+    <div className="sol-lista" style={consulta.isPlaceholderData ? { opacity: .6 } : undefined}>{ss.map(s => {
+      const e = estadoSolicitud(s), pasos = pasosSolicitud(s);
+      const progreso = s.estado === 'pendiente' || s.estado === 'cotizada' ? '33.333%' : '66.666%';
+      return (
+        <article key={s.id} className={`sol-card es-${s.estado}`} aria-label={`Solicitud del ${hora(s.creado)}: ${e.texto}`}>
+          <header className="sol-cab">
+            <span className={`etq ${e.clase}`}>{e.texto}</span>
+            <small className="sub">Pedida {hora(s.creado)}</small>
+          </header>
+          <div className="pod-stepper sol-stepper">
+            <div className="pod-stepper-track">
+              <span className="pod-stepper-linea" />
+              <span className="pod-stepper-progreso" style={{ width: progreso }} />
+              {pasos.map((p, i) => {
+                const Ic = i === 0 ? FileText : i === 1 ? ClipboardCheck : p.rechazado ? XCircle : CheckCircle2;
+                return (
+                  <div key={i} className={`pod-paso${p.completado ? ' completado' : ''}${p.actual ? ' actual' : ''}${p.rechazado ? ' rechazado' : ''}`}>
+                    <span className="pod-dot"><Ic aria-hidden="true" /></span>
+                    <span className="pod-paso-label">{p.label}</span>
+                    <span className="pod-paso-fecha">{i === 2 && p.rechazado ? hora(s.actualizado) : p.detalle}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          {s.estado === 'rechazada' && <div className="sol-rechazo" role="note"><b>Razón del rechazo</b><p>{s.motivoRechazo || 'La oficina no registró la razón. Escríbenos por WhatsApp.'}</p></div>}
+          {s.estado === 'cotizada' && <div className="sol-aviso">Te escribimos por WhatsApp con el valor{s.valor ? ` (${pesos(s.valor)})` : ''}. Respóndenos para aprobarlo.</div>}
+          <dl className="sol-datos">
+            <div><dt><MapPin size={14} aria-hidden="true" /> Recoger en</dt><dd>{s.direccionRecogida}</dd></div>
+            <div><dt><Truck size={14} aria-hidden="true" /> Entregar a</dt><dd>{s.destinatarioNombre}{s.destinatarioTelefono ? ' · ' + s.destinatarioTelefono : ''}<br />{s.direccionEntrega}</dd></div>
+            <div><dt>Paquetes</dt><dd>{s.paquetes}{s.pesoKg ? ` · ${s.pesoKg} kg` : ''}</dd></div>
+            {s.valor ? <div><dt>Domicilio</dt><dd>{pesos(s.valor)}</dd></div> : null}
+          </dl>
+          {s.guia && <button type="button" className="btn sec chico sol-guia" onClick={() => abrir(s.guia!)}>
+            Ver guía {s.guia}{s.pedidoEstado ? ' · ' + ESTADO_PEDIDO[s.pedidoEstado].texto : ''}<ChevronRight size={16} aria-hidden="true" /></button>}
+        </article>
+      );
+    })}</div>
+    <Paginador pagina={pag.pagina} paginas={pag.paginas} total={pag.total} porPagina={pag.porPagina} ir={ir} cargando={consulta.isPlaceholderData} />
+  </>;
 }
 
 /* ---------------------------- Detalle (verPedidoCliente) ---------------------------- */
@@ -288,14 +357,13 @@ function VerPedido({ guia, d, alCerrar, toast }: { guia: string; d: DatosCliente
     </>
   );
 
-  const estadoTexto = p.estado === 'entregado' ? 'Entregado' : p.estado === 'devuelto' ? 'Devuelto' : 'En ruta';
-  const estadoClase = p.estado === 'entregado' ? 'ent' : p.estado === 'devuelto' ? 'dev' : 'ruta';
+  const { texto: estadoTexto, clase: estadoClase } = ESTADO_PEDIDO[p.estado];
   const valorCab = p.estado === 'entregado' ? p.valorCobrado : p.aCobrar;
   const cambioPend = p.cambio && !p.cambioRecibido;
   const cambioOk = p.cambio && !!p.cambioRecibido;
 
   const pasoFinal = cambioPend
-    ? { label: 'Cambio por recibir', fecha: 'Pendiente', Icono: RotateCcw, completado: false, actual: p.estado !== 'pendiente' }
+    ? { label: 'Cambio por recibir', fecha: 'Pendiente', Icono: RotateCcw, completado: false, actual: cerrado(p) }
     : cambioOk
     ? { label: 'Cambio recibido', fecha: hora(p.cambioRecibido!), Icono: RotateCcw, completado: true, actual: false }
     : p.estado === 'devuelto'
@@ -304,11 +372,12 @@ function VerPedido({ guia, d, alCerrar, toast }: { guia: string; d: DatosCliente
     ? { label: 'Entregado', fecha: p.entregado ? hora(p.entregado) : 'Pendiente', Icono: CheckCircle2, completado: true, actual: false }
     : { label: 'Entregado', fecha: 'Pendiente', Icono: CheckCircle2, completado: false, actual: false };
   const pasos = [
-    { label: 'Solicitado', fecha: diaCorto(diaDe(p.creado)), Icono: FileText, completado: true, actual: false },
-    { label: 'En ruta', fecha: hora(p.creado), Icono: Truck, completado: p.estado !== 'pendiente', actual: p.estado === 'pendiente' },
+    // Aceptado: la oficina aprobó y asignó mensajero. Pasa a "En ruta" cuando el mensajero lo recoge con la foto.
+    { label: 'Aceptado', fecha: p.estado === 'aceptado' ? 'Por recoger' : diaCorto(diaDe(p.creado)), Icono: ClipboardCheck, completado: true, actual: p.estado === 'aceptado' },
+    { label: 'En ruta', fecha: p.estado === 'aceptado' ? 'Pendiente' : hora(p.creado), Icono: Truck, completado: cerrado(p), actual: p.estado === 'pendiente' },
     pasoFinal,
   ];
-  const progreso = p.estado === 'pendiente' && !cambioOk ? '33.333%' : '66.666%';
+  const progreso = p.estado === 'aceptado' ? '0%' : p.estado === 'pendiente' && !cambioOk ? '33.333%' : '66.666%';
 
   const novedades = [
     ...p.intentos.map((i, k) => ({
@@ -408,7 +477,7 @@ function VerPedido({ guia, d, alCerrar, toast }: { guia: string; d: DatosCliente
         <section className="pod-detalles">
           <span className="pod-seccion-titulo">Detalles del envío</span>
           <dl className="pod-datos">
-            <dt>Salió</dt><dd>{hora(p.creado)}</dd>
+            {p.estado === 'aceptado' ? <><dt>Estado</dt><dd>Aceptado: el mensajero pasa a recogerlo</dd></> : <><dt>Salió</dt><dd>{hora(p.creado)}</dd></>}
             {p.aCobrar > 0 && <><dt>Valor a cobrar</dt><dd>{pesos(p.aCobrar)}</dd></>}
             {p.estado === 'entregado' && <><dt>Entregado</dt><dd>{hora(p.entregado!)}</dd><dt>Recibió</dt><dd>{p.destinatario}</dd><dt>Cobrado</dt><dd>{pesos(p.valorCobrado)}</dd><dt>Método</dt><dd>{metodoTxt(p)}</dd></>}
             {p.estado === 'devuelto' && <><dt>Devuelto</dt><dd>{hora(p.entregado!)}</dd><dt>Motivo</dt><dd>{MOTIVOS[p.motivoDev] || ''}</dd></>}

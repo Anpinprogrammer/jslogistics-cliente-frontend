@@ -3,8 +3,8 @@
  * muestre exactamente lo mismo que la app actual. Cuando el backend devuelva los saldos ya calculados
  * (pendiente en backend/README.md), estas funciones solo quedan para mostrar el detalle.
  */
-import type { Movimiento, Pedido, TipoMovimiento } from '../types/dominio';
-import { diaDe, ms, pesos } from './formato';
+import type { EstadoPedido, Movimiento, Pedido, SolicitudCliente, TipoMovimiento } from '../types/dominio';
+import { diaDe, hora, ms, pesos } from './formato';
 
 export const MOTIVOS: Record<string, string> = {
   no_contesta: 'No contestan', direccion: 'Dirección errada', rechazo: 'Lo rechazaron',
@@ -21,6 +21,43 @@ export const MOVS: Record<TipoMovimiento, { corto: string; s: 1 | -1; pago?: boo
   compra_cliente: { corto: 'Compra por encargo', s: -1 },
   ganancia: { corto: 'Servicio adicional', s: -1 },
 };
+/** Etiqueta de cada estado del pedido. "Aceptado" = la oficina lo aprobó y asignó mensajero; pasa a "En ruta"
+    cuando el mensajero lo recoge y le toma la foto. */
+export const ESTADO_PEDIDO: Record<EstadoPedido, { texto: string; clase: string }> = {
+  aceptado: { texto: 'Aceptado', clase: 'acep' },
+  pendiente: { texto: 'En ruta', clase: 'ruta' },
+  entregado: { texto: 'Entregado', clase: 'ent' },
+  devuelto: { texto: 'Devuelto', clase: 'dev' },
+};
+
+/** Etiqueta de una solicitud en "Mis solicitudes". */
+export function estadoSolicitud(s: Pick<SolicitudCliente, 'estado'>): { texto: string; clase: string } {
+  switch (s.estado) {
+    case 'pendiente': return { texto: 'Pendiente de aprobación JS', clase: 'pend' };
+    case 'cotizada': return { texto: 'Pendiente de tu aprobación', clase: 'pend' };
+    case 'rechazada': return { texto: 'Rechazada', clase: 'sin' };
+    default: return { texto: 'Aprobada por JS', clase: 'ent' };
+  }
+}
+
+export interface PasoSolicitud { label: string; detalle: string; completado: boolean; actual: boolean; rechazado?: boolean }
+/** Tracker de la solicitud: Solicitado → Pendiente de aprobación (de JS o tuya) → Aprobada por JS o Rechazada. */
+export function pasosSolicitud(s: SolicitudCliente): PasoSolicitud[] {
+  const solicitado: PasoSolicitud = { label: 'Solicitado', detalle: hora(s.creado), completado: true, actual: false };
+  const valor = s.valor ? pesos(s.valor) : '';
+  if (s.estado === 'pendiente') return [solicitado,
+    { label: 'Pendiente de aprobación JS', detalle: 'Estamos revisando tu solicitud', completado: false, actual: true },
+    { label: 'Aprobada por JS', detalle: 'Pendiente', completado: false, actual: false }];
+  if (s.estado === 'cotizada') return [solicitado,
+    { label: 'Pendiente de tu aprobación', detalle: valor ? `Te propusimos ${valor} de domicilio` : 'Te escribimos por WhatsApp', completado: false, actual: true },
+    { label: 'Aprobada por JS', detalle: 'Pendiente', completado: false, actual: false }];
+  const revisada: PasoSolicitud = { label: 'Revisada por JS', detalle: valor ? `Domicilio ${valor}` : hora(s.actualizado), completado: true, actual: false };
+  if (s.estado === 'rechazada') return [solicitado, { ...revisada, detalle: hora(s.actualizado) },
+    { label: 'Rechazada', detalle: s.motivoRechazo || 'Sin razón registrada', completado: true, actual: false, rechazado: true }];
+  return [solicitado, revisada,
+    { label: 'Aprobada por JS', detalle: s.guia ? `Guía ${s.guia}` : 'Asignando mensajero', completado: true, actual: false }];
+}
+
 export const EMPRESA = {
   nombre: 'JS LOGISTICS CALI', lema: '¡SERVIR ES NUESTRA LABOR!', tel: 'TEL: 316 493 3854', ig: 'IG: @JS.LOGISTICS.CALI',
 };

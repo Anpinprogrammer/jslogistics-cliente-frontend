@@ -7,6 +7,7 @@ import { diaCorto, hoy, moverDia } from '../../lib/formato';
 export const EtqEstado = ({ p }: { p: Pedido }) =>
   p.estado === 'entregado' ? <span className="etq ent">Entregado</span>
   : p.estado === 'devuelto' ? <span className="etq dev">Devuelto</span>
+  : p.estado === 'aceptado' ? <span className="etq acep">Aceptado</span>
   : <><span className="etq pend">Por entregar</span>{p.intentos.length > 0 && <> <span className="etq sin">{p.intentos.length} intento{p.intentos.length === 1 ? '' : 's'}</span></>}</>;
 
 export const EtqCambio = ({ p }: { p: Pedido }) =>

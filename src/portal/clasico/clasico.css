@@ -786,3 +786,33 @@ dialog.dialogo-pedido::backdrop{background:rgba(2,6,23,.72);backdrop-filter:blur
   .nuevo-pie{flex-direction:column-reverse}
   .nuevo-pie .btn{width:100%}
 }
+
+/* Estado "Aceptado" (aprobado y con mensajero, sin recoger) y "Mis solicitudes" — 2026-11-12. */
+.etq.acep{background:color-mix(in srgb,#7c3aed 12%,var(--papel));color:#6d28d9;border-color:rgba(109,40,217,.2)}
+:root[data-theme="dark"] .etq.acep{background:rgba(139,92,246,.16);color:#c4b5fd;border-color:rgba(167,139,250,.28)}
+.pedido-card.es-aceptado .pedido-icono{background:color-mix(in srgb,#7c3aed 10%,var(--papel));border-color:rgba(109,40,217,.2);color:#6d28d9}
+:root[data-theme="dark"] .pedido-card.es-aceptado .pedido-icono{background:rgba(139,92,246,.14);color:#c4b5fd}
+.pedidos-tabs{margin-bottom:16px}
+.pedidos-tabs button{flex:1 1 0;white-space:nowrap}
+.sol-intro{margin:0 0 12px}
+.sol-lista{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+@media (min-width:1100px){.sol-lista{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}}
+.sol-card{display:flex;flex-direction:column;gap:12px;min-width:0;padding:16px;border:1px solid var(--linea);border-radius:16px;background:var(--papel);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.sol-cab{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.sol-cab .etq{white-space:normal;text-align:left}
+.sol-stepper{padding:14px 10px 14px}
+.pod-paso.rechazado .pod-dot{background:var(--rojo);border-color:var(--rojo);color:#fff;box-shadow:0 4px 12px rgba(192,57,43,.22)}
+.pod-paso.rechazado .pod-paso-label{color:var(--rojo)}
+.sol-rechazo{padding:12px 14px;border-radius:12px;background:var(--rojo-claro);color:var(--tinta);border:1px solid rgba(192,57,43,.2)}
+.sol-rechazo b{display:block;font-size:.8rem;color:var(--rojo);margin-bottom:2px}
+.sol-rechazo p{margin:0;font-size:.9rem;overflow-wrap:anywhere}
+.sol-aviso{padding:10px 14px;border-radius:12px;background:var(--amarillo-claro);color:var(--tinta);font-size:.88rem}
+.sol-datos{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin:0}
+.sol-datos > div{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px}
+.sol-datos dt{display:flex;align-items:center;gap:5px;color:var(--suave);font-size:.82rem}
+.sol-datos dd{margin:0;font-weight:600;font-size:.9rem;overflow-wrap:anywhere;min-width:0}
+.sol-guia{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;min-height:40px}
+@media (max-width:600px){
+  .sol-datos > div{grid-template-columns:minmax(0,1fr);gap:2px}
+  .sol-guia{align-self:stretch;justify-content:center}
+}

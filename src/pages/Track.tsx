@@ -8,6 +8,7 @@ import type { Pedido } from '../types/dominio';
 import type { Order } from '../types';
 import { serviceLabel, statusLabel } from '../utils/format';
 import { hora } from '../lib/formato';
+import { ESTADO_PEDIDO } from '../lib/negocio';
 import Navbar from '../components/layout/Navbar';
 import LandingFooter from '../components/layout/LandingFooter';
 
@@ -30,14 +31,15 @@ interface Resultado {
 
 const dePedidoDemo = (pedido: Pedido): Resultado => ({
   guia: pedido.guia,
-  estado: pedido.estado === 'pendiente' ? 'En ruta' : pedido.estado === 'entregado' ? 'Entregado' : 'Devuelto',
+  estado: ESTADO_PEDIDO[pedido.estado].texto,
   origen: pedido.clienteNombre || undefined,
   destino: pedido.destinatario || undefined,
   creado: pedido.creado,
   entregado: pedido.entregado,
   pasos: [
-    { titulo: 'Guía creada', fecha: pedido.creado, completado: true },
-    { titulo: pedido.estado === 'pendiente' ? 'En ruta' : pedido.estado === 'entregado' ? 'Entregado' : 'Devuelto', fecha: pedido.entregado, completado: pedido.estado !== 'pendiente' },
+    { titulo: 'Aceptado', fecha: pedido.creado, completado: true },
+    { titulo: 'En ruta', fecha: pedido.estado === 'aceptado' ? null : pedido.creado, completado: pedido.estado !== 'aceptado' },
+    { titulo: pedido.estado === 'devuelto' ? 'Devuelto' : 'Entregado', fecha: pedido.entregado, completado: pedido.estado === 'entregado' || pedido.estado === 'devuelto' },
   ],
 });
 
