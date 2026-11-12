@@ -8,13 +8,16 @@ export default defineConfig(({ mode }) => {
     build: {
       rollupOptions: {
         output: {
-          // Las librerías van en archivos aparte: cambian poco, así el navegador las guarda en caché entre despliegues
-          // y solo vuelve a bajar el código de la página.
+          // Lo que usa toda página (React, el router y TanStack Query) va en archivos aparte: cambia poco, así el navegador
+          // lo guarda en caché entre despliegues y solo vuelve a bajar el código de la página. Las demás librerías
+          // (íconos de lucide, react-toastify, axios) van con la página o el componente que las usa, para que la
+          // portada no descargue los íconos del portal ni los avisos.
           manualChunks(id) {
             if (!id.includes('node_modules')) return undefined;
             if (/node_modules[\\/](react|react-dom|scheduler)[\\/]/.test(id)) return 'react';
-            if (id.includes('axios')) return undefined; // solo la usan Register y Track: va con ellas
-            return 'librerias';
+            if (id.includes('react-toastify')) return 'avisos'; // solo la cargan las páginas que avisan algo
+            if (/node_modules[\\/](react-router|react-router-dom|@remix-run|@tanstack)[\\/]/.test(id)) return 'librerias';
+            return undefined;
           },
         },
       },

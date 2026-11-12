@@ -85,7 +85,8 @@ const Login: React.FC = () => {
     try {
       const u = await ingresar(form.email, form.password);
       const portada = portadaDe(u);
-      navigate(from && from.startsWith(portada) ? from : portada, { replace: true });
+      // `restaurarNav`: el portal puede volver a la pestaña en la que estaba esta persona (hooks/usePersistedTab.ts).
+      navigate(from && from.startsWith(portada) ? from : portada, { replace: true, state: { restaurarNav: true } });
     } catch (err) {
       clientToast.error(err instanceof Error ? err.message : 'No se pudo ingresar. Intenta de nuevo.');
     } finally {

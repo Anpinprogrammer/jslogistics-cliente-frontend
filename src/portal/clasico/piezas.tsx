@@ -2,7 +2,25 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useRef, type ReactNode } from 'react';
 import type { Pedido } from '../../types/dominio';
-import { diaCorto, hoy, moverDia } from '../../lib/formato';
+import { diaCorto, hora, hoy, moverDia } from '../../lib/formato';
+import { MOTIVOS } from '../../lib/negocio';
+
+export const LOGO = '/img/clasico/logo.png';
+
+/** Una línea con lo último que pasó con el pedido (Inicio y Mis pedidos). */
+export const lineaPedido = (p: Pedido) =>
+  p.estado === 'entregado' ? 'Recibió ' + (p.destinatario || '') + ' · ' + hora(p.entregado!)
+  : p.estado === 'devuelto' ? (MOTIVOS[p.motivoDev] || 'Devuelto') + ' · ' + hora(p.entregado!)
+  : p.estado === 'aceptado' ? 'Aceptado · el mensajero pasa a recogerlo' : 'Salió ' + hora(p.creado);
+
+/** Lo que se ve mientras baja el código de una pestaña o de un modal: unas barras grises, sin texto que salte. */
+export const CargandoVista = ({ modal = false }: { modal?: boolean }) => (
+  <div className={'esqueleto' + (modal ? ' esqueleto-modal' : '')} role="status" aria-live="polite">
+    <span className="esq-linea esq-titulo" /><span className="esq-linea esq-sub" />
+    <span className="esq-bloque" /><span className="esq-bloque" />
+    <span className="mov-sr">Cargando…</span>
+  </div>
+);
 
 export const EtqEstado = ({ p }: { p: Pedido }) =>
   p.estado === 'entregado' ? <span className="etq ent">Entregado</span>

@@ -15,6 +15,7 @@ import { api, ApiError, DEMO } from './http';
 import { demo } from '../demo/datos';
 import { useSesion } from '../auth/AuthProvider';
 import type { DatosSolicitudPortal } from './solicitudes';
+import { EN_MEMORIA, FRESCO, invalidar } from '../utils/queryCache';
 
 const MAX_PAGINAS = 20; // 20 × 200 = 4.000 pedidos: suficiente mientras el backend no devuelva el saldo
 
@@ -37,8 +38,39 @@ async function opcional<T>(fn: () => Promise<T>, vacio: T): Promise<T> {
   try { return await fn(); } catch (e) { if (e instanceof ApiError && e.status === 404) return vacio; throw e; }
 }
 
-export function usePedidosCliente() {
-  return useQuery({ queryKey: ['cliente', 'pedidos'], queryFn: todosLosPedidos, refetchInterval: 60_000 });
+/** La lista completa (hasta 4.000) para el Inicio, los contadores y el recibo. Es la consulta más pesada del portal:
+    solo sale con `enabled` y no se repite antes de un minuto. */
+export function usePedidosCliente(enabled = true, refresco = 60_000) {
+  return useQuery({
+    queryKey: ['cliente', 'pedidos'], queryFn: todosLosPedidos, enabled,
+    staleTime: FRESCO.medio, gcTime: EN_MEMORIA, refetchInterval: enabled ? refresco : false,
+  });
+}
+
+/** Busca la guía en lo que ya se trajo (la lista completa o una página de "Mis pedidos") para no pedirla otra vez. */
+function enCache(qc: ReturnType<typeof useQueryClient>, guia: string): Pedido | undefined {
+  for (const [, datos] of qc.getQueriesData<Pedido[] | PaginaPedidos>({ queryKey: ['cliente', 'pedidos'] })) {
+    const lista = Array.isArray(datos) ? datos : datos?.pedidos;
+    const p = lista?.find(x => x.guia === guia);
+    if (p) return p;
+  }
+  return undefined;
+}
+
+/** Detalle de una guía para el modal. Si ya está en memoria se muestra de una vez y no se pide; si no (por ejemplo,
+    al abrir `?ver=` con un F5), se pide solo esa guía con GET /pedidos/:guia en vez de esperar la lista completa. */
+export function usePedidoDetalle(guia: string | null, enLista: Pedido | undefined) {
+  const qc = useQueryClient();
+  return useQuery({
+    queryKey: ['cliente', 'pedido', guia],
+    enabled: !!guia && !enLista,
+    staleTime: FRESCO.corto,
+    initialData: () => (guia ? enCache(qc, guia) : undefined),
+    queryFn: async () => {
+      if (DEMO) return (await demo.pedidos()).find(p => p.guia === guia) ?? null;
+      return opcional(() => api<{ pedido: Pedido }>(`/pedidos/${encodeURIComponent(guia!)}`).then(r => r.pedido), null);
+    },
+  });
 }
 
 /** Filtros de la pestaña de pedidos. */
@@ -76,10 +108,12 @@ function paginarAqui(todos: Pedido[], { filtro, buscar, dia, pagina, porPagina }
 }
 
 /** Una página de "Mis pedidos". Mientras llega la siguiente se sigue viendo la anterior. */
-export function usePaginaPedidos(c: ConsultaPedidos) {
+export function usePaginaPedidos(c: ConsultaPedidos, enabled = true) {
   return useQuery({
     queryKey: ['cliente', 'pedidos', 'pagina', c],
+    enabled,
     placeholderData: keepPreviousData,
+    staleTime: FRESCO.corto,
     refetchInterval: 60_000,
     queryFn: async () => {
       if (DEMO) return paginarAqui(await demo.pedidos(), c);
@@ -100,6 +134,7 @@ export function useFichaCliente() {
   return useQuery({
     queryKey: ['cliente', 'ficha', id],
     enabled: !!id,
+    staleTime: FRESCO.largo,
     queryFn: () => (DEMO ? demo.cliente() : api<{ cliente: Cliente }>(`/clientes/${id}`).then(r => r.cliente)),
   });
 }
@@ -145,13 +180,14 @@ export interface CuentaCliente {
 }
 
 /** Página del historial y saldo del cliente. El servidor corta las filas. */
-export function useCuentaCliente(pagina: number, porPagina: number) {
+export function useCuentaCliente(pagina: number, porPagina: number, enabled = true) {
   const { usuario } = useSesion();
   const id = usuario?.clienteId;
   return useQuery<CuentaCliente>({
     queryKey: ['cliente', 'cuenta', id, pagina, porPagina],
-    enabled: !!id,
+    enabled: !!id && enabled,
     placeholderData: keepPreviousData,
+    staleTime: FRESCO.medio,
     queryFn: () => {
       if (DEMO) return demo.cuenta(pagina, porPagina);
       return opcional(
@@ -179,6 +215,7 @@ export function useMovimientosCliente(enabled = true) {
   return useQuery({
     queryKey: ['cliente', 'movimientos', id],
     enabled: !!id && enabled,
+    staleTime: FRESCO.medio,
     queryFn: () =>
       DEMO ? demo.movimientos()
         : opcional(() => api<{ movimientos: Movimiento[] }>(`/clientes/${id}/movimientos?limite=1000`).then(r => r.movimientos), []),
@@ -200,10 +237,7 @@ export function useConfirmarCambio() {
   return useMutation({
     mutationFn: (guia: string) =>
       DEMO ? demo.confirmarCambio(guia) : api<{ pedido: Pedido }>(`/pedidos/${guia}/cambio-recibido`, { method: 'POST' }).then(() => undefined),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['cliente', 'pedidos'] });
-      qc.invalidateQueries({ queryKey: ['cliente', 'cuenta'] });
-    },
+    onSuccess: () => invalidar(qc, 'pedidos', 'cuenta'),
   });
 }
 
@@ -214,7 +248,7 @@ export function usePedirReintento() {
   return useMutation({
     mutationFn: (guia: string) =>
       DEMO ? demo.pedirReintento(guia) : api<{ pedido: Pedido }>(`/pedidos/${guia}/pedir-reintento`, { method: 'POST' }).then(() => undefined),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['cliente', 'pedidos'] }); },
+    onSuccess: () => invalidar(qc, 'pedidos'),
   });
 }
 
@@ -224,7 +258,7 @@ export function useNuevaSolicitud() {
   return useMutation({
     mutationFn: (datos: DatosSolicitudPortal) =>
       DEMO ? demo.nuevaSolicitud(datos) : api('/solicitudes/portal', { method: 'POST', json: datos }).then(() => undefined),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['cliente', 'solicitudes'] }); },
+    onSuccess: () => invalidar(qc, 'solicitudes'),
   });
 }
 
@@ -247,6 +281,7 @@ export function useMisSolicitudes(pagina: number, porPagina: number) {
   return useQuery({
     queryKey: ['cliente', 'solicitudes', pagina, porPagina],
     placeholderData: keepPreviousData,
+    staleTime: FRESCO.corto,
     refetchInterval: 60_000,
     queryFn: () => DEMO ? demo.solicitudes(pagina, porPagina) : pedirSolicitudes(pagina, porPagina),
   });
@@ -256,6 +291,7 @@ export function useMisSolicitudes(pagina: number, porPagina: number) {
 export function useSolicitudesRecientes() {
   return useQuery({
     queryKey: ['cliente', 'solicitudes', 'recientes'],
+    staleTime: FRESCO.corto,
     refetchInterval: 30_000,
     queryFn: () => DEMO ? demo.solicitudes(1, 50) : pedirSolicitudes(1, 50),
   });
@@ -269,6 +305,6 @@ export function useResponderSolicitud() {
       DEMO
         ? demo.responderSolicitud(id, aceptar, motivo)
         : api<{ solicitud: SolicitudCliente }>(`/solicitudes/mias/${id}/responder`, { method: 'POST', json: { aceptar, ...(motivo ? { motivo } : {}) } }).then(r => r.solicitud),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['cliente', 'solicitudes'] }); },
+    onSuccess: () => invalidar(qc, 'solicitudes'),
   });
 }
