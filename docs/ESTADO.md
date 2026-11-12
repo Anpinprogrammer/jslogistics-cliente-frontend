@@ -1,5 +1,10 @@
 # Estado del proyecto y memoria para agentes de IA
 
+## Formato y consultas rápidas de JSBot — 2026-11-12
+
+- `MensajeAsistente` renderiza párrafos, saltos, viñetas (-/•), negritas y cápsulas de guía sin HTML ni enlaces ejecutables; solo mensajes del bot. El historial enviado al servidor conserva el texto original.
+- Panel compartido: fondo blanco/oscuro, burbujas con contraste y tres consultas rápidas persistentes encima del input, deshabilitadas al cargar sesión/enviar.
+
 ## Solicitar envío abre arriba — 2026-11-12
 
 - `ScrollToHash` restablece arriba al entrar a `/register` o `/solicitar-envio`, igual que el login.
