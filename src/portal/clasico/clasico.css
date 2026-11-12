@@ -1111,3 +1111,47 @@ dialog.dialogo-filtros::backdrop{background:rgba(2,6,23,.75);backdrop-filter:blu
 /* ---- Mis solicitudes: el mismo buscador, fecha y píldoras de Mis pedidos ---- */
 .pedidos-toolbar .fecha-sdp{width:224px;min-width:0}
 .pedidos-toolbar .fecha-sdp .sdp-boton{min-height:40px;border-width:1.5px;border-radius:12px;background:var(--papel);font-size:.8rem}
+
+/* ---- Nuevo pedido en 3 pasos: modal centrado (también en el celular), encabezado y pie fijos, un paso a la vez ---- */
+dialog.dialogo-nuevo{width:min(512px,calc(100vw - 32px));max-width:none;max-height:86dvh;margin:auto;border:1px solid var(--linea);border-radius:24px;overflow:hidden}
+dialog.dialogo-nuevo::backdrop{background:rgba(2,6,23,.75);backdrop-filter:blur(4px)}
+dialog.dialogo-nuevo[open]{animation:np-entra .2s ease-out}
+@keyframes np-entra{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){dialog.dialogo-nuevo[open]{animation:none}}
+.dlg.dlg-nuevo{display:flex;flex-direction:column;max-height:86dvh;padding:0;overflow:hidden;background:var(--papel)}
+.dlg.dlg-nuevo::before{display:none}
+.dlg-nuevo .pedido-modal-cab{background:var(--papel);border-bottom:0;padding:18px 20px 12px}
+.dlg-nuevo .pedido-modal-cerrar{width:36px;height:36px;border-radius:999px;background:var(--hueco)}
+.np-pasos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;flex:none;margin:0;padding:0 20px 14px;list-style:none;border-bottom:1px solid var(--linea)}
+.np-paso>button,.np-paso>div{display:block;width:100%;padding:0;border:0;background:none;text-align:left;font:inherit}
+.np-paso>button{cursor:pointer}
+.np-paso i{display:block;height:6px;margin-bottom:6px;border-radius:999px;background:var(--linea);transition:background .3s}
+.np-paso span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.69rem;font-weight:700;color:var(--suave)}
+.np-paso.actual i{background:#0284c7}
+.np-paso.actual span{color:#0284c7}
+.np-paso.listo i{background:var(--verde)}
+.np-paso.listo span{color:var(--verde)}
+:root[data-theme="dark"] .np-paso.actual i{background:#0ea5e9}
+:root[data-theme="dark"] .np-paso.actual span{color:#38bdf8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .np-paso.actual i{background:#0ea5e9}:root:not([data-theme="light"]) .np-paso.actual span{color:#38bdf8}}
+.np-form{display:flex;flex-direction:column;flex:1;min-height:0;padding:0}
+.np-cuerpo{flex:1;min-height:0;padding:18px 20px;overflow-y:auto;overscroll-behavior:contain}
+.np-seccion{display:flex;flex-direction:column;gap:14px;min-width:0;animation:np-paso .2s ease-out}
+@keyframes np-paso{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.np-seccion{animation:none}}
+.np-seccion .nuevo-ayuda{margin:0;padding:12px;border:1px solid var(--linea);border-radius:16px;background:var(--hueco)}
+.np-pie{display:flex;align-items:center;justify-content:space-between;gap:10px;flex:none;padding:14px 20px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--linea);background:var(--papel)}
+.np-pie .btn{min-height:46px;padding:0 18px;border-radius:16px;font-size:.8rem;font-weight:800;cursor:pointer}
+.np-pie .btn svg{width:16px;height:16px}
+.np-pie .btn:last-child{flex:1}
+.np-pie .btn:disabled{opacity:.6;cursor:wait}
+@media (max-width:600px){
+  dialog.dialogo-nuevo{width:calc(100vw - 32px);margin:auto}
+  .np-form .cuenta-campos{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:359px){.np-cuerpo,.dlg-nuevo .pedido-modal-cab{padding-inline:14px}.np-pasos{padding-inline:14px}.np-pie{padding-inline:14px}.np-paso span{font-size:.63rem}}
+.np-pie .btn{white-space:nowrap}
+@media (max-width:379px){.np-pie{gap:8px}.np-pie .btn{padding:0 12px;font-size:.75rem}.np-pie .btn:last-child svg:last-child:not(:first-child){display:none}}
+.np-pie .btn{min-width:0;flex:0 1 auto}
+.np-pie .btn:last-child{flex:1 1 0}
+@media (max-width:379px){.np-pie .btn{padding:0 10px}}

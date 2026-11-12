@@ -1,5 +1,12 @@
 # Estado del proyecto y memoria para agentes de IA
 
+## Nuevo pedido en 3 pasos — 2026-11-12
+
+- `NuevoPedido.tsx` ya no es un formulario largo: son 3 pasos de a uno por pantalla (**Recogida** → **Entrega** → **Paquetes**) con indicador de progreso (barras y "1. Recogida"…; los pasos ya hechos se pueden tocar para volver). Pie fijo: Cancelar / "Siguiente: Entrega"; Atrás / "Siguiente: Paquetes"; Atrás / "Solicitar pedido" (con "Enviando…"). Enter en un campo avanza de paso; solo el último envía.
+- **Validación por paso** (`PASOS` + `errores()`): "Siguiente" solo valida los campos del paso (recogida: nombre, teléfono, correo y dirección; entrega: quien recibe y dirección; paquetes: cantidad y peso), avisa con `clientToast.warning` y deja el cursor en el primer campo malo. Al enviar se vuelve a validar todo y, si algo falló en un paso anterior (o el servidor devuelve `campos`), se regresa a ese paso.
+- **Modal centrado también en el celular**: `Dialogo` variante `nuevo` (`dialog.dialogo-nuevo`, máx. 512 px, 86 dvh, fondo `rgba(2,6,23,.75)` con desenfoque); es la única variante del portal que no sale como hoja desde abajo. Estilos `np-*` al final de `clasico.css`.
+- No se agregaron campos: el backend (`POST /solicitudes/portal`) no recibe "indicaciones/referencia" ni "valor a cobrar / notas". Si se quieren, primero va el campo en el backend. Los estados, el precargado desde la ficha, la nota "Cali, Valle del Cauca", la petición y el aviso de éxito siguen igual.
+
 ## Filtros en Mis solicitudes — 2026-11-12
 
 - "Mis solicitudes" tiene el mismo sistema de filtros que "Mis pedidos": buscador (con retraso de 400 ms), fecha con `SingleDatePicker` + "Hoy" y píldoras de estado en escritorio (Todas, Pendientes, Por confirmar, Aprobadas por JS, Rechazadas); en el celular, buscador + botón Filtros con contador y la misma hoja inferior (`HojaFiltros`, ahora genérica: recibe los textos y los estados). Los grupos salen de `estado`: pendientes = `pendiente`, por confirmar = `cotizada`, aprobadas = `confirmada` + `asignada`.
