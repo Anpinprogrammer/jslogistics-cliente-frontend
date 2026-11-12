@@ -10,7 +10,7 @@
  */
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Archivo, Cliente, Movimiento, PaginaPedidos, PaginaSolicitudes, Pedido, SolicitudCliente } from '../types/dominio';
-import { cambioPendiente, delDia } from '../lib/negocio';
+import { cambioPendiente, cerrado, delDia } from '../lib/negocio';
 import { api, ApiError, DEMO } from './http';
 import { demo } from '../demo/datos';
 import { useSesion } from '../auth/AuthProvider';
@@ -57,15 +57,26 @@ function enCache(qc: ReturnType<typeof useQueryClient>, guia: string): Pedido | 
   return undefined;
 }
 
-/** Detalle de una guía para el modal. Si ya está en memoria se muestra de una vez y no se pide; si no (por ejemplo,
-    al abrir `?ver=` con un F5), se pide solo esa guía con GET /pedidos/:guia en vez de esperar la lista completa. */
-export function usePedidoDetalle(guia: string | null, enLista: Pedido | undefined) {
+/** Cada cuánto se revisa un pedido abierto que todavía no termina (la pestaña oculta no consulta). */
+const REVISAR_PEDIDO = 15_000;
+
+/** Detalle de una guía para el modal. Siempre pide la guía sola (GET /pedidos/:guia), sin fiarse de la lista completa,
+    que se refresca cada 1 a 5 minutos y por eso podía mostrar la barra de rastreo vieja. Lo que ya está en memoria se
+    muestra de una vez, pero se da por viejo y se revisa de inmediato. Mientras el pedido no termine (entregado o
+    devuelto, y sin cambio por recibir) se vuelve a revisar solo; al volver a la pestaña también. */
+export function usePedidoDetalle(guia: string | null) {
   const qc = useQueryClient();
   return useQuery({
     queryKey: ['cliente', 'pedido', guia],
-    enabled: !!guia && !enLista,
-    staleTime: FRESCO.corto,
+    enabled: !!guia,
+    staleTime: 0,
     initialData: () => (guia ? enCache(qc, guia) : undefined),
+    initialDataUpdatedAt: 0,
+    refetchOnWindowFocus: 'always',
+    refetchInterval: q => {
+      const p = q.state.data;
+      return !p || !cerrado(p) || cambioPendiente(p) ? REVISAR_PEDIDO : false;
+    },
     queryFn: async () => {
       if (DEMO) return (await demo.pedidos()).find(p => p.guia === guia) ?? null;
       return opcional(() => api<{ pedido: Pedido }>(`/pedidos/${encodeURIComponent(guia!)}`).then(r => r.pedido), null);
@@ -222,10 +233,12 @@ export function useMovimientosCliente(enabled = true) {
   });
 }
 
-export function usePruebas(guia: string | null) {
+/** `estado` va en la clave: cuando el pedido cambia (sale, se entrega) se piden de nuevo las fotos. */
+export function usePruebas(guia: string | null, estado?: string) {
   return useQuery({
-    queryKey: ['pedido', guia, 'archivos'],
+    queryKey: ['pedido', guia, 'archivos', estado],
     enabled: !!guia,
+    staleTime: 0,
     queryFn: () =>
       DEMO ? demo.archivos(guia!)
         : opcional(() => api<{ archivos: Archivo[] }>(`/pedidos/${guia}/archivos`).then(r => r.archivos), []),
