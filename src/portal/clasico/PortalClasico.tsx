@@ -5,18 +5,19 @@
  */
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { AlertTriangle, ArrowRight, Bot, LogOut, Calendar, CheckCircle2, ChevronRight, ClipboardCheck, ClipboardList, Clock, XCircle, Eye, EyeOff, FileText, Image as ImageIcon, Info, KeyRound, Lock, Mail, MapPin, Maximize2, Moon, PackageCheck, Phone, Plus, Receipt, RotateCcw, Save, Search, Settings, ShieldCheck, Store, Sun, Truck, Undo2, X } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Bot, LogOut, Calendar, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, ClipboardCheck, ClipboardList, Clock, XCircle, Eye, EyeOff, FileText, Image as ImageIcon, Info, KeyRound, Lock, Mail, MapPin, Maximize2, Moon, PackageCheck, Phone, Plus, Receipt, RotateCcw, Save, Search, Settings, ShieldCheck, SlidersHorizontal, Store, Sun, Truck, Undo2, X } from 'lucide-react';
 import './clasico.css';
 import { useSesion } from '../../auth/AuthProvider';
 import { useActualizarPerfilCliente, useConfirmarCambio, usePedirReintento, useCuentaCliente, useMisSolicitudes, useMovimientosCliente, usePaginaPedidos, usePruebas, type FiltroPedidos } from '../../api/cliente';
 import { authApi } from '../../api/auth';
-import { usePorPagina, usePorPaginaCuenta } from '../../lib/pantalla';
+import { POR_PAGINA, usePorPagina, usePorPaginaCuenta } from '../../lib/pantalla';
 import { diaCorto, diaDe, fechaLarga, hoy, hora, moverDia, pct, pesos, pesosConSigno } from '../../lib/formato';
 import {
   cadenaGuias, cambioPendiente, cerrado, EMPRESA, entregasPorDia, ESTADO_PEDIDO, estadoSolicitud, gastoDe, metodoTxt, MOTIVOS, pagoDomi, pasosSolicitud,
   reciboDelDia, resumenCliente, saldoPedido, servicio, textoDomi, textoSaldo, ultimaActividad, type Recibo,
 } from '../../lib/negocio';
 import { useDatosCliente, type DatosCliente } from '../useDatosCliente';
+import { SingleDatePicker } from '../../components/ui/SingleDatePicker';
 import { useTheme } from '../../hooks/useTheme';
 import { JSBOT_ABRIR } from '../../components/jsbot/JSBot';
 import { Icono } from './iconos';
@@ -230,6 +231,9 @@ function Pedidos({ d, abrir }: { d: DatosCliente; abrir: (g: string) => void }) 
     ['dev', 'Devueltos', d.pedidos.filter(p => p.estado === 'devuelto').length],
     ['cambio', 'Cambios por recibir', cambios.length],
   ];
+  const verFiltro = (k: FiltroPedidos) => { setPagina(1); setSp(prev => { const n2 = new URLSearchParams(prev); n2.set('f', k); return n2; }, { replace: true }); };
+  const [hojaFiltros, setHojaFiltros] = useState(false);
+  const activos = (f !== 'todos' ? 1 : 0) + (dia ? 1 : 0);
   const consulta = usePaginaPedidos({ filtro: f, buscar, dia, pagina, porPagina });
   const pag = consulta.data, ps = pag?.pedidos ?? [];
   const ir = (n: number) => { setPagina(n); window.scrollTo({ top: 0, behavior: 'smooth' }); };
@@ -255,9 +259,15 @@ function Pedidos({ d, abrir }: { d: DatosCliente; abrir: (g: string) => void }) 
       <div className="pedidos-toolbar">
         <div className="buscador">
           <Search aria-hidden="true" />
-          <input type="search" placeholder="Buscar por guía, cliente o destinatario…" value={buscar}
+          <input type="search" placeholder={porPagina === POR_PAGINA.celular ? 'Buscar guía o nombre…' : 'Buscar por guía, cliente o destinatario…'} value={buscar}
             onChange={e => setBuscar(e.target.value)} aria-label="Buscar pedidos" />
+          {buscar && <button type="button" className="buscador-limpiar" onClick={() => setBuscar('')} aria-label="Borrar búsqueda"><X aria-hidden="true" /></button>}
         </div>
+        {/* En el celular el estado y la fecha van en una hoja inferior para dejar libre la pantalla. */}
+        <button type="button" className={'filtros-boton' + (activos ? ' activo' : '')} onClick={() => setHojaFiltros(true)}
+          aria-haspopup="dialog" aria-label={activos ? `Filtros (${activos} activo${activos === 1 ? '' : 's'})` : 'Filtros'}>
+          <SlidersHorizontal aria-hidden="true" /><span>Filtros</span>{activos > 0 && <span className="num" aria-hidden="true">{activos}</span>}
+        </button>
         <div className="fechas">
           <label className="fecha">
             <Calendar aria-hidden="true" />
@@ -271,11 +281,16 @@ function Pedidos({ d, abrir }: { d: DatosCliente; abrir: (g: string) => void }) 
       <div className="filtros" aria-label="Filtrar pedidos por estado">
         {tabs.map(([k, t, n]) => (
           <button key={k} type="button" aria-pressed={f === k}
-            onClick={() => { setPagina(1); setSp(prev => { const n2 = new URLSearchParams(prev); n2.set('f', k); return n2; }, { replace: true }); }}>
+            onClick={() => verFiltro(k)}>
             <span>{t}</span><span className="num">{n}</span>
           </button>
         ))}
       </div>
+
+      <Dialogo abierto={hojaFiltros} alCerrar={() => setHojaFiltros(false)} variante="filtros">
+        <HojaFiltros estados={tabs} filtro={f} dia={dia} alCerrar={() => setHojaFiltros(false)}
+          alAplicar={(k, d2) => { if (k !== f) verFiltro(k); if (d2 !== dia) setDia(d2); setHojaFiltros(false); }} />
+      </Dialogo>
 
       {dia && pag && <p className="sub">Mostrando envíos de ese día · Página {pag.pagina}.</p>}
       {consulta.isError ? <div className="vacio">No se pudieron traer tus envíos. Revisa tu conexión e intenta de nuevo.</div>
@@ -311,6 +326,44 @@ function Pedidos({ d, abrir }: { d: DatosCliente; abrir: (g: string) => void }) 
       </div>
     </>
   );
+}
+
+/** Hoja inferior del celular con el estado y la fecha de "Mis pedidos". Los cambios se guardan en un borrador y
+    solo se aplican con "Aplicar filtros", así la lista de atrás no se vuelve a pedir con cada flecha. */
+function HojaFiltros({ estados, filtro, dia, alCerrar, alAplicar }: {
+  estados: [FiltroPedidos, string, number][]; filtro: FiltroPedidos; dia: string; alCerrar: () => void; alAplicar: (f: FiltroPedidos, dia: string) => void;
+}) {
+  const [f, setF] = useState(filtro), [d, setD] = useState(dia), h = hoy();
+  const base = d || h;
+  return <>
+    <header className="hoja-cab">
+      <h2><SlidersHorizontal aria-hidden="true" />Filtrar mis pedidos</h2>
+      <button type="button" className="hoja-cerrar" onClick={alCerrar} aria-label="Cerrar filtros"><X aria-hidden="true" /></button>
+    </header>
+    <div className="hoja-campo">
+      <label htmlFor="hoja-estado">Estado del envío</label>
+      <div className="hoja-select">
+        <select id="hoja-estado" value={f} onChange={e => setF(e.target.value as FiltroPedidos)}>
+          {estados.map(([k, t, n]) => <option key={k} value={k}>{t} ({n})</option>)}
+        </select>
+        <ChevronDown aria-hidden="true" />
+      </div>
+    </div>
+    <div className="hoja-campo">
+      <label htmlFor="hoja-dia">Fecha</label>
+      <div className="hoja-fecha">
+        <button type="button" className="hoja-flecha" onClick={() => setD(moverDia(base, -1))} aria-label="Día anterior"><ChevronLeft aria-hidden="true" /></button>
+        <span className="hoja-dia"><SingleDatePicker id="hoja-dia" value={d} onChange={setD} max={h} placeholder="Todos los días" compacto /></span>
+        <button type="button" className="hoja-flecha" onClick={() => setD(moverDia(d, 1))} disabled={!d || d >= h} aria-label="Día siguiente"><ChevronRight aria-hidden="true" /></button>
+        <button type="button" className="hoja-hoy" aria-pressed={d === h} onClick={() => setD(h)}>Hoy</button>
+      </div>
+      <small>{d ? 'Solo los envíos de ' + diaCorto(d) + '.' : 'Sin fecha: se ven todos los días.'}</small>
+    </div>
+    <div className="hoja-pie">
+      <button type="button" className="btn sec" onClick={() => alAplicar('todos', '')}>Limpiar filtros</button>
+      <button type="button" className="btn" onClick={() => alAplicar(f, d)}>Aplicar filtros</button>
+    </div>
+  </>;
 }
 
 /* ---------------------------- Mis solicitudes ---------------------------- */
@@ -678,7 +731,7 @@ function Cuenta({ d, toast }: { d: DatosCliente; toast: (t: string) => void }) {
       {tab === 'movimientos' ? <div role="tabpanel" id="cuenta-panel-mov" aria-labelledby="cuenta-tab-mov" className="cuenta-panel cuenta-fin-grid">
         <div className="cuenta-fin-lado">
         <section className="cuenta-saldo" aria-label="Estado financiero actual"><div className="cuenta-saldo-contenido"><span className="cuenta-saldo-label">BALANCE ACTUAL</span><strong>{pesos(Math.abs(s))}</strong><span className="cuenta-saldo-estado">{s === 0 ? 'Cuenta al día' : s > 0 ? 'Saldo a tu favor' : 'Saldo pendiente'}</span><p>{textoSaldo(s)}</p></div><div className="cuenta-saldo-icono"><Receipt size={30} /></div></section>
-        <section className="cuenta-bloque"><div className="cuenta-bloque-cab"><div><h2>Recibo de cuadre</h2><p>Consulta el detalle de tus entregas y pagos por día.</p></div></div><div className="cuenta-recibo-form"><div className="campo"><label htmlFor="diaRC">Fecha del recibo</label><input type="date" id="diaRC" value={diaRec} onChange={e => setDiaRec(e.target.value || hoy())} /></div><button type="button" className="btn" onClick={verRecibo} disabled={pedirRecibo && movsRecibo.isFetching}><FileText size={17} /> {pedirRecibo && movsRecibo.isFetching ? 'Cargando…' : 'Ver recibo'}</button></div></section>
+        <section className="cuenta-bloque"><div className="cuenta-bloque-cab"><div><h2>Recibo de cuadre</h2><p>Consulta el detalle de tus entregas y pagos por día.</p></div></div><div className="cuenta-recibo-form"><div className="campo"><label htmlFor="diaRC">Fecha del recibo</label><SingleDatePicker id="diaRC" value={diaRec} onChange={v => setDiaRec(v || hoy())} max={hoy()} /></div><button type="button" className="btn" onClick={verRecibo} disabled={pedirRecibo && movsRecibo.isFetching}><FileText size={17} /> {pedirRecibo && movsRecibo.isFetching ? 'Cargando…' : 'Ver recibo'}</button></div></section>
         </div>
         <section className="cuenta-bloque" id="historial-movimientos"><div className="cuenta-bloque-cab"><div><h2>Historial de movimientos</h2><p>Registro de pedidos y pagos, ordenado del más reciente al más antiguo.</p></div><span className="cuenta-total">{totalMov} movimientos</span></div>{cuentaCliente.isLoading ? <div className="vacio">Cargando movimientos…</div> : rows.length ? <><div className="cuenta-tabla" style={cuentaCliente.isPlaceholderData ? { opacity: .6 } : undefined}><table><thead><tr><th scope="col">Fecha</th><th scope="col" className="mov-det">Detalle</th><th scope="col" className="n">Valor</th><th scope="col" className="mov-info"><span className="mov-sr">Ver detalle</span></th></tr></thead><tbody>{rows.map((r, i) => <tr key={`${r.fecha}-${i}`}><td>{hora(r.fecha)}</td><td className="mov-det">{r.det}</td><td className={'n ' + (r.v < 0 ? 'neg' : r.v > 0 ? 'pos' : '')}>{pesosConSigno(r.v)}</td><td className="mov-info"><button type="button" className="mov-info-btn" onClick={() => setMovVer(r)} aria-label={`Ver detalle del movimiento del ${hora(r.fecha)}`}><Info size={18} aria-hidden="true" /></button></td></tr>)}</tbody></table></div><Paginador pagina={cuentaCliente.data?.pagina ?? paginaMov} paginas={paginasMov} total={totalMov} porPagina={porPaginaMov} ir={irMov} cargando={cuentaCliente.isFetching} /></> : <div className="vacio">Aún no hay movimientos en tu cuenta.</div>}</section>
       </div> : <div role="tabpanel" id="cuenta-panel-config" aria-labelledby="cuenta-tab-config" className="cuenta-panel cuenta-config">
