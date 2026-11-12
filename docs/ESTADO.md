@@ -1,5 +1,11 @@
 # Estado del proyecto y memoria para agentes de IA
 
+## Reintento de pedidos devueltos — 2026-11-12
+- En el detalle de un pedido **devuelto** el cliente ve: "Estamos confirmando tu paquete" (el mensajero aún no dice dónde quedó), el botón **Reintentar entrega** (con el aviso de que el reintento se cobra como un domicilio y la devolución se sigue cobrando igual), "Pediste el reintento" o "Reintento en camino" con la guía nueva. Pedir el reintento no crea la guía: llama a `POST /pedidos/:guia/pedir-reintento` (`usePedirReintento`) y la oficina lo asigna a un mensajero.
+- La guía nueva está enlazada (`reintentoDe` / `reintentos`): el detalle muestra "Guías de esta entrega" (`cadenaGuias` en `lib/negocio.ts`) y se salta de una a otra con `?ver=`.
+- Modo demo: `pedirReintento` guarda el pedido en `localStorage` (`jsl_demo_reintentos`) y los devueltos más recientes quedan en cada caso (por confirmar, con el cliente, en la oficina, ya reintentado).
+- Necesita el backend con `destino-devolucion`, `reintento` y `pedir-reintento` (PR del mismo nombre en `js-logistics`); si no, el botón responde error y avisa.
+
 ## Estado "Aceptado" y Mis solicitudes — 2026-11-12
 
 - El pedido tiene un estado nuevo antes de "En ruta": `aceptado` (la oficina aprobó la solicitud y asignó mensajero, pero todavía no la recoge). Pasa a `pendiente` ("En ruta") cuando el mensajero le toma la foto al paquete. Textos y clases en `ESTADO_PEDIDO` de `lib/negocio.ts` (clase `etq acep`). El tracker del detalle es Aceptado → En ruta → Entregado/Devuelto, y "Mis pedidos" tiene el filtro "Aceptados".
