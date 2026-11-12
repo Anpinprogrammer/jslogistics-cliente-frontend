@@ -1,5 +1,15 @@
 # Estado del proyecto y memoria para agentes de IA
 
+## Solicitar envío abre arriba — 2026-11-12
+
+- `ScrollToHash` restablece arriba al entrar a `/register` o `/solicitar-envio`, igual que el login.
+- El desplazamiento al formulario compara `pasoAnterior` con `currentStep`: solo se ejecuta al cambiar realmente de paso, nunca al montar ni al repetir efectos bajo StrictMode. No usar una bandera que se consume en el primer efecto para omitir el montaje.
+
+## Solicitar envío en tres pasos en todas las pantallas — 2026-11-12
+
+- `/register` (también su alias `/solicitar-envio`) usa un único formulario de tres pasos para móvil, tablet y escritorio: Recogida → Paquetes → Destino y confirmación. Se eliminó el formulario completo duplicado de escritorio.
+- Se conservan validación por paso, avance con Enter, resumen final, regreso a pasos con errores del servidor y confirmación de envío. Cambiar el ancho ya no cambia el formulario ni oculta el progreso. Sustituye la decisión anterior de mantener el formulario largo en escritorio.
+
 ## Skeleton del Inicio del cliente — 2026-11-12
 
 - `portal/clasico/InicioSkeleton.tsx` reproduce el saludo, cuatro KPIs, dona de efectividad, barras de 30 días y listas de pedidos/movimientos con las mismas clases/grid del Inicio. Usa únicamente variables del tema del portal (`--papel`, `--linea`); tarjetas blancas en claro, sin pulso sobre el contenedor, y movimiento reducido mediante los estilos `esq-*` existentes.
