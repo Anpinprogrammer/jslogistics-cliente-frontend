@@ -3,12 +3,13 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { portadaDe, useSesion } from '../auth/AuthProvider';
 import { DEMO } from '../api/http';
 import {
-  MarcoAcceso, BotonAcceso, AvisoError,
+  MarcoAcceso, BotonAcceso,
   ETIQUETA, ENTRADA, ICONO, ENLACE, IcCorreo, IcCandado, IcOjo, IcOjoTachado, IcCopiar, IcOk,
 } from '../components/acceso';
 import { useIntroLogin } from '../components/intro/useIntroLogin';
 import { escenaIntro } from '../components/intro/escena';
 import { medir, type Medidas } from '../components/intro/medidas';
+import { clientToast } from '../utils/clientToast';
 
 const DEMO_EMAIL = 'cliente@demo.co';
 const DEMO_CLAVE = 'demo1234';
@@ -48,7 +49,6 @@ const Login: React.FC = () => {
   const [form, setForm] = useState({ email: '', password: '' });
   const [ver, setVer] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   // Animación de entrada: sale en cada carga del login y se salta con cualquier gesto; el fondo no se anima.
   // Mientras corre, `intro` trae el estilo del cuadro actual para cada pieza; al terminar es `undefined` y el login queda como siempre.
@@ -81,14 +81,13 @@ const Login: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     saltar();
-    setError('');
     setLoading(true);
     try {
       const u = await ingresar(form.email, form.password);
       const portada = portadaDe(u);
       navigate(from && from.startsWith(portada) ? from : portada, { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'No se pudo ingresar. Intenta de nuevo.');
+      clientToast.error(err instanceof Error ? err.message : 'No se pudo ingresar. Intenta de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -130,7 +129,6 @@ const Login: React.FC = () => {
         </div>
       )}
 
-      {error && <AvisoError>{error}</AvisoError>}
 
       <form onSubmit={handleSubmit} className="space-y-2.5 sm:space-y-4">
         <div style={intro?.campos[0].estilo}>

@@ -10,6 +10,8 @@ import { Spinner } from './components/ui';
 import Home from './pages/Home';
 import JSBot from './components/jsbot/JSBot';
 import { ApiError } from './api/http';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // La portada va en el archivo principal porque es lo que más se abre. El resto de páginas se descarga solo cuando se visita:
 // quien entra a la portada no baja el portal, y quien entra al portal no baja el registro ni el rastreo (ni axios, que solo usan ellos).
@@ -110,6 +112,8 @@ const App = () => (
       <BrowserRouter>
         <Rutas />
       </BrowserRouter>
+      {/* El tema de cada aviso se toma de la clase `dark` al mostrarlo (utils/clientToast.ts). */}
+      <ToastContainer position="top-right" autoClose={3500} pauseOnHover newestOnTop limit={3} />
     </AuthProvider>
   </QueryClientProvider>
 );

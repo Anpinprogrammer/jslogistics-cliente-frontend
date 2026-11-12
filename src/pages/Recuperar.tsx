@@ -1,8 +1,9 @@
 import { useId, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { authApi } from '../api/auth';
+import { clientToast } from '../utils/clientToast';
 import {
-  MarcoAcceso, BotonAcceso, AvisoError,
+  MarcoAcceso, BotonAcceso,
   ETIQUETA, ENTRADA, ICONO, ENLACE, IcCorreo, IcCheck, IcVolver,
 } from '../components/acceso';
 
@@ -11,18 +12,17 @@ export default function Recuperar() {
   const idCorreo = useId();
   const [email, setEmail] = useState('');
   const [enviado, setEnviado] = useState(false);
-  const [error, setError] = useState('');
   const [enviando, setEnviando] = useState(false);
 
   const enviar = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     setEnviando(true);
     try {
       await authApi.recuperar(email.trim());
       setEnviado(true);
+      clientToast.success('Si el correo está registrado, te enviamos el enlace.');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'No se pudo enviar el enlace. Intenta de nuevo.');
+      clientToast.error(err instanceof Error ? err.message : 'No se pudo enviar el enlace. Intenta de nuevo.');
     } finally {
       setEnviando(false);
     }
@@ -54,7 +54,7 @@ export default function Recuperar() {
           </p>
           <p className="mt-4 text-center text-sm text-slate-400">
             ¿Escribiste mal el correo?{' '}
-            <button type="button" onClick={() => { setEnviado(false); setError(''); }} className={ENLACE}>
+            <button type="button" onClick={() => setEnviado(false)} className={ENLACE}>
               Intentar de nuevo
             </button>
           </p>
@@ -65,8 +65,6 @@ export default function Recuperar() {
           <p className="mb-4 mt-1 text-sm text-slate-400 sm:mb-6">
             Escribe el correo de tu cuenta y te enviamos un enlace para crear una contraseña nueva.
           </p>
-
-          {error && <AvisoError>{error}</AvisoError>}
 
           <form onSubmit={enviar} className="space-y-3 sm:space-y-4">
             <div>

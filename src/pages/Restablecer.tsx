@@ -4,6 +4,7 @@ import { authApi } from '../api/auth';
 import { DEMO } from '../api/http';
 import type { EnlaceCorreo } from '../types/dominio';
 import { useSesion } from '../auth/AuthProvider';
+import { clientToast } from '../utils/clientToast';
 import {
   MarcoAcceso, BotonAcceso, AvisoError,
   ETIQUETA, ENTRADA, ICONO, ENLACE, IcCandado, IcOjo, IcOjoTachado, IcCheck, IcVolver,
@@ -61,8 +62,9 @@ export default function Restablecer() {
       // El servidor cierra las sesiones al cambiar la contraseña: se limpia la sesión local si había una.
       await salir().catch(() => {});
       setListo(true);
+      clientToast.success('Contraseña guardada. Ya puedes ingresar.');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'No se pudo guardar la contraseña. Intenta de nuevo.');
+      clientToast.error(err instanceof Error ? err.message : 'No se pudo guardar la contraseña. Intenta de nuevo.');
     } finally {
       setEnviando(false);
     }

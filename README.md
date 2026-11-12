@@ -1,6 +1,6 @@
 # JS Logistics: frontend
 
-Landing pública y portal de clientes de JS Logistics, en **React 18 + TypeScript + Tailwind**, con **Vite**.
+Landing pública y portal de clientes de JS Logistics, en **React 18 + TypeScript + Tailwind**, con **Vite**. Los avisos (guardado, envío, errores de conexión) salen con **react-toastify**.
 Habla con el backend de Express (repo `js-logistics`, carpeta `backend/`) por `/api`, con la sesión en una cookie httpOnly.
 
 ## Comandos
@@ -45,8 +45,9 @@ src/
   portal/       useDatosCliente.ts y clasico/ (la vista del cliente)
   demo/         datos de prueba para VITE_DEMO=true
   pages/        landing (Home), Login, Registro, Recuperar, Restablecer, Rastreo y la página provisional del equipo
-  components/   piezas de la landing (Navbar con menú móvil, Footer, ui, HeroCarrusel)
+  components/   piezas de la landing (Navbar con menú móvil, Footer, ui, HeroCarrusel) y jsbot/ (el asistente)
   hooks/        useTheme (modo claro/oscuro)
+  utils/        clientToast.ts: avisos con react-toastify (el contenedor está en App.tsx)
 ```
 
 ## Para quien cambie el código (personas o agentes de IA)

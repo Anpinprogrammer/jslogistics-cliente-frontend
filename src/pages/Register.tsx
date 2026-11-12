@@ -5,6 +5,7 @@ import Navbar from '../components/layout/Navbar';
 import LandingFooter from '../components/layout/LandingFooter';
 import { ApiError, DEMO } from '../api/http';
 import { solicitudesApi, type DatosSolicitud } from '../api/solicitudes';
+import { clientToast } from '../utils/clientToast';
 
 const ENTRADA = 'w-full rounded-2xl border border-slate-200 bg-slate-100 px-4 py-3 text-base text-slate-900 outline-none transition-all placeholder:text-slate-500 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 disabled:opacity-60 dark:border-slate-800 dark:bg-slate-950 dark:text-white sm:text-[15px]';
 const ETIQUETA = 'mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 sm:text-xs';
@@ -98,7 +99,6 @@ export default function Register() {
   const [sitio, setSitio] = useState(''); // trampa para robots
   const [enviando, setEnviando] = useState(false);
   const [enviada, setEnviada] = useState(false);
-  const [error, setError] = useState('');
   const [campos, setCampos] = useState<Record<string, string>>({});
   const [currentStep, setCurrentStep] = useState(1);
   const [direccion, setDireccion] = useState<1 | -1>(1);
@@ -108,7 +108,6 @@ export default function Register() {
   const poner: Poner = (k) => (e) => {
     const valor = e.target.value;
     setF(a => ({ ...a, [k]: valor }));
-    if (error) setError('');
     setCampos(a => {
       if (!a[k]) return a;
       const n = { ...a };
@@ -161,12 +160,10 @@ export default function Register() {
     const errs = erroresPaso(currentStep);
     setCampos(errs);
     if (Object.keys(errs).length) return;
-    setError('');
     irAPaso(Math.min(3, currentStep + 1), 1);
   };
 
   const atras = () => {
-    setError('');
     irAPaso(Math.max(1, currentStep - 1), -1);
   };
 
@@ -177,7 +174,6 @@ export default function Register() {
 
   const enviar = async (e: FormEvent) => {
     e.preventDefault();
-    setError('');
     if (!validarTodo()) return;
     const paquetes = Number(f.paquetes);
     const peso = f.pesoKg.trim() === '' ? null : Number(f.pesoKg.replace(',', '.'));
@@ -190,6 +186,7 @@ export default function Register() {
     try {
       await solicitudesApi.enviar(datos);
       setEnviada(true);
+      clientToast.success('Recibimos tu solicitud de envío. Te contactamos pronto.');
       setCurrentStep(1);
       setDireccion(1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -200,7 +197,7 @@ export default function Register() {
         const paso = PASO_DE_CAMPO[err.campos[0].campo] ?? currentStep;
         irAPaso(paso, paso < currentStep ? -1 : 1);
       }
-      setError(err instanceof Error ? err.message : 'No pudimos enviar la solicitud. Intenta de nuevo.');
+      clientToast.error(err instanceof Error ? err.message : 'No pudimos enviar la solicitud. Intenta de nuevo.');
     } finally { setEnviando(false); }
   };
 
@@ -231,7 +228,7 @@ export default function Register() {
                 Revisaremos las direcciones y te escribiremos al <b className="font-semibold text-slate-900 dark:text-white">{f.telefono.trim()}</b> por WhatsApp con el valor del domicilio. Cuando nos confirmes, asignamos al mensajero.
               </p>
               <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-                <button type="button" onClick={() => { setF(VACIO); setSitio(''); setEnviada(false); setCurrentStep(1); setDireccion(1); setError(''); setCampos({}); }} className="flex min-h-[44px] items-center justify-center gap-2 rounded-2xl bg-sky-400 px-6 py-3 text-sm font-extrabold text-slate-950 shadow-lg shadow-sky-500/20 transition-all hover:bg-sky-300 active:scale-95">
+                <button type="button" onClick={() => { setF(VACIO); setSitio(''); setEnviada(false); setCurrentStep(1); setDireccion(1); setCampos({}); }} className="flex min-h-[44px] items-center justify-center gap-2 rounded-2xl bg-sky-400 px-6 py-3 text-sm font-extrabold text-slate-950 shadow-lg shadow-sky-500/20 transition-all hover:bg-sky-300 active:scale-95">
                   Hacer otra solicitud
                 </button>
                 <Link to="/" className="flex min-h-[44px] items-center justify-center gap-2 rounded-2xl border border-slate-300 px-6 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
@@ -266,7 +263,6 @@ export default function Register() {
                   </div>
                 </div>
 
-                {error && <div role="alert" className="rounded-2xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-200">{error}</div>}
 
                 <div key={currentStep} className={`space-y-4 ${direccion === 1 ? 'registro-paso-der' : 'registro-paso-izq'}`}>
                   {currentStep === 1 && <CamposRecogida f={f} campos={campos} poner={poner} enviando={enviando} />}
@@ -310,7 +306,6 @@ export default function Register() {
 
               {/* Escritorio: el formulario completo, igual que antes */}
               <form onSubmit={enviar} noValidate={false} className={`hidden space-y-8 lg:block ${TARJETA_FORM}`}>
-                {error && <div role="alert" className="rounded-2xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-200">{error}</div>}
                 <CamposRecogida f={f} campos={campos} poner={poner} enviando={enviando} />
                 <CamposPaquetes f={f} campos={campos} poner={poner} enviando={enviando} />
                 <CamposDestino f={f} campos={campos} poner={poner} enviando={enviando} />

@@ -9,6 +9,7 @@ import { useNuevaSolicitud } from '../../api/cliente';
 import { ApiError } from '../../api/http';
 import type { Cliente } from '../../types/dominio';
 import { pesos } from '../../lib/formato';
+import { clientToast } from '../../utils/clientToast';
 
 const VACIO = { nombre: '', telefono: '', email: '', direccionRecogida: '', paquetes: '1', pesoKg: '', destinatarioNombre: '', destinatarioTelefono: '', direccionEntrega: '' };
 type Formulario = typeof VACIO;
@@ -48,7 +49,6 @@ function Campo({ id, etiqueta, nota, error, ancho, area, icono, children }: { id
 export default function NuevoPedido({ cliente, email, alCerrar }: { cliente: Cliente | undefined; email: string; alCerrar: () => void }) {
   const [f, setF] = useState<Formulario>(() => inicial(cliente, email));
   const [campos, setCampos] = useState<Record<string, string>>({});
-  const [error, setError] = useState('');
   const [enviada, setEnviada] = useState(false);
   const enviar = useNuevaSolicitud();
   const tarifa = cliente?.tarifa ?? 0;
@@ -57,7 +57,6 @@ export default function NuevoPedido({ cliente, email, alCerrar }: { cliente: Cli
   const poner = (k: keyof Formulario) => (e: { target: { value: string } }) => {
     const v = e.target.value;
     setF(a => ({ ...a, [k]: v }));
-    if (error) setError('');
     if (campos[k]) setCampos(a => { const n = { ...a }; delete n[k]; return n; });
   };
   const props = (k: keyof Formulario) => ({
@@ -66,7 +65,7 @@ export default function NuevoPedido({ cliente, email, alCerrar }: { cliente: Cli
   });
 
   const mandar = async (e: FormEvent) => {
-    e.preventDefault(); setError('');
+    e.preventDefault();
     const errs = errores(f);
     setCampos(errs);
     if (Object.keys(errs).length) {
@@ -80,9 +79,10 @@ export default function NuevoPedido({ cliente, email, alCerrar }: { cliente: Cli
         destinatarioNombre: f.destinatarioNombre.trim(), destinatarioTelefono: f.destinatarioTelefono.trim(), direccionEntrega: f.direccionEntrega.trim(),
       });
       setEnviada(true);
+      clientToast.success('Recibimos tu solicitud de envío. Te contactamos pronto.');
     } catch (err) {
       if (err instanceof ApiError && err.campos?.length) setCampos(Object.fromEntries(err.campos.map(c => [c.campo, c.mensaje])));
-      setError(err instanceof Error ? err.message : 'No pudimos enviar la solicitud. Intenta de nuevo.');
+      clientToast.error(err instanceof Error ? err.message : 'No pudimos enviar la solicitud. Intenta de nuevo.');
     }
   };
 
@@ -122,7 +122,6 @@ export default function NuevoPedido({ cliente, email, alCerrar }: { cliente: Cli
     <>
       {cab}
       <form className="pedido-modal-cuerpo cuenta-form nuevo-form" onSubmit={mandar} noValidate>
-        {error && <p className="cuenta-error" role="alert">{error}</p>}
 
         <section aria-labelledby="np-t1">
           <span className="pod-seccion-titulo" id="np-t1">Recogida</span>

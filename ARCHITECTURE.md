@@ -45,6 +45,7 @@ api/http.ts        fetch con cookie, X-JSL, ApiError y aviso de 401        demo/
 - **`lib/negocio.ts`** porta las reglas de `js-logistics/app/js/app.js` que ve el cliente: saldo por pedido y por cliente, textos de método y domicilio, prendas de cambio pendientes, recibo de cuadre del día, entregas por día y resumen.
   - Hoy el portal descarga todos los pedidos del cliente, paginados de a 200 con un máximo de 4.000, junto con sus movimientos, y calcula el saldo aquí. Así da exactamente lo mismo que la app actual.
   - Cuando el backend devuelva saldos ya calculados, el portal los usa y deja de descargar el historial.
+- **`utils/clientToast.ts`** (react-toastify) es el único camino para avisar el resultado de una acción: `clientToast.success/error/info/warning/auto`. `<ToastContainer>` está montado una vez en `App.tsx` y cada aviso toma el tema de la clase `dark` de `<html>` al mostrarse. `auto` decide por el texto (empieza con "No se pudo…": error) y existe para el `toast(texto)` del portal clásico. Los errores de campo no van aquí: se quedan junto al campo.
 - **`lib/formato.ts`** fija la zona `America/Bogota` para todo lo que agrupa por día o muestra horas. Así un pedido de las 11 p. m. no cae en otro día por la hora del celular.
 
 ## Sesión

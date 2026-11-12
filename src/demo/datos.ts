@@ -70,8 +70,13 @@ function generar(): Pedido[] {
 
 /* Solicitudes de ejemplo, una por estado. La aprobada apunta a la guía "aceptado" de hoy. */
 const solicitudesNuevas: SolicitudCliente[] = [];
+// Cambios hechos desde el portal en la demo (aceptar/rechazar una propuesta). Las solicitudes de ejemplo se
+// regeneran en cada llamada, así que el cambio se guarda aparte y se aplica al listar.
+const solicitudesCambios: Record<string, Partial<SolicitudCliente>> = {};
+const AHORA_SOLICITUDES = Date.now();
 function solicitudesDemo(): SolicitudCliente[] {
-  const ahora = Date.now(), f = (h: number) => new Date(ahora - h * HORA).toISOString();
+  // Fecha fija de la sesión: si cambiara en cada consulta, la campanita vería "nueva" la misma solicitud.
+  const ahora = AHORA_SOLICITUDES, f = (h: number) => new Date(ahora - h * HORA).toISOString();
   const aceptado = pedidosActuales().find(p => p.estado === 'aceptado');
   const base = { origen: 'portal' as const, direccionRecogida: 'Cra 24 # 9-30, San Fernando', paquetes: 1, pesoKg: null, destinatarioTelefono: '311 000 0000', motivoRechazo: '', guia: null, pedidoEstado: null };
   return [
@@ -159,11 +164,26 @@ export const demo = {
   },
   pedidos: () => espera(pedidosActuales()),
   solicitudes: (pagina: number, porPagina: number): Promise<PaginaSolicitudes> => {
-    const todas = [...solicitudesNuevas, ...solicitudesDemo()], total = todas.length, paginas = Math.max(1, Math.ceil(total / porPagina));
+    const todas = [...solicitudesNuevas, ...solicitudesDemo()].map(s => ({ ...s, ...(solicitudesCambios[s.id] || {}) })),
+      total = todas.length, paginas = Math.max(1, Math.ceil(total / porPagina));
     const actual = Math.min(Math.max(1, pagina), paginas);
     const desde = (actual - 1) * porPagina;
     const page = todas.slice(desde, desde + porPagina);
     return espera({ solicitudes: page, pagina: actual, porPagina, hayMas: desde + page.length < total });
+  },
+  /** Respuesta del cliente a la propuesta de domicilio; replica el endpoint del backend. */
+  async responderSolicitud(id: string, aceptar: boolean, motivo?: string): Promise<SolicitudCliente> {
+    await espera(null, 350);
+    const base = [...solicitudesNuevas, ...solicitudesDemo()].map(s => ({ ...s, ...(solicitudesCambios[s.id] || {}) })).find(s => s.id === id);
+    if (!base) throw new ApiError(404, 'NO_ENCONTRADA', 'La solicitud no existe');
+    if (base.estado !== 'cotizada') throw new ApiError(409, 'ESTADO_SOLICITUD', 'Esta solicitud ya no está esperando tu respuesta.');
+    solicitudesCambios[id] = {
+      ...(solicitudesCambios[id] || {}),
+      estado: aceptar ? 'confirmada' : 'rechazada',
+      ...(aceptar ? {} : { motivoRechazo: motivo?.trim() || 'El cliente no aceptó la propuesta de domicilio.' }),
+      actualizado: new Date().toISOString(),
+    };
+    return { ...base, ...solicitudesCambios[id] };
   },
   cliente: () => espera(clienteDemo),
   movimientos: () => espera(generarMovs()),

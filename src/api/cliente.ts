@@ -3,12 +3,13 @@
  *
  * Estado del backend (rama del backend, backend/README.md):
  * - Listo: GET /pedidos (el cliente solo ve los suyos), GET /pedidos/:guia, POST /pedidos/:guia/cambio-recibido, GET /clientes/:id.
- * - Listo: POST /solicitudes/portal (pedir un envío nuevo desde el portal; la oficina lo aprueba) y GET /solicitudes/mias ("Mis solicitudes").
+ * - Listo: POST /solicitudes/portal (pedir un envío nuevo desde el portal; la oficina lo aprueba), GET /solicitudes/mias ("Mis solicitudes")
+ *   y POST /solicitudes/mias/:id/responder (aceptar o rechazar la propuesta de domicilio).
  * - Listo también: GET /clientes/:id/cuenta (saldo e historial paginado) y GET /pedidos/:guia/archivos (fotos firmadas de Storage, vencen en 1 hora).
  *   Si el backend desplegado aún no los tiene, un 404 se toma como lista vacía.
  */
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { Archivo, Cliente, Movimiento, PaginaPedidos, PaginaSolicitudes, Pedido } from '../types/dominio';
+import type { Archivo, Cliente, Movimiento, PaginaPedidos, PaginaSolicitudes, Pedido, SolicitudCliente } from '../types/dominio';
 import { cambioPendiente, delDia } from '../lib/negocio';
 import { api, ApiError, DEMO } from './http';
 import { demo } from '../demo/datos';
@@ -227,6 +228,18 @@ export function useNuevaSolicitud() {
   });
 }
 
+/** Pide una página de "Mis solicitudes"; `opcional` deja lista vacía si el backend aún no tiene la ruta. */
+function pedirSolicitudes(pagina: number, porPagina: number): Promise<PaginaSolicitudes> {
+  const q = new URLSearchParams({ pagina: String(pagina), porPagina: String(porPagina), sinTotal: 'true' });
+  return opcional(
+    () => api<PaginaSolicitudes>(`/solicitudes/mias?${q}`).then(r => ({
+      ...r, solicitudes: r.solicitudes ?? [],
+      hayMas: r.hayMas ?? (typeof r.total === 'number' && typeof r.paginas === 'number' ? (r.pagina ?? 1) < r.paginas : false),
+    })),
+    { solicitudes: [], pagina: 1, porPagina, hayMas: false }
+  );
+}
+
 /** "Mis solicitudes": las solicitudes de envío del cliente con su estado y, si se rechazó, la razón.
     El backend solo devuelve las de la ficha de la sesión. Con `sinTotal` no cuenta el total: usa `hayMas`.
     Un backend que aún no tenga la ruta responde 404: lista vacía. */
@@ -235,16 +248,27 @@ export function useMisSolicitudes(pagina: number, porPagina: number) {
     queryKey: ['cliente', 'solicitudes', pagina, porPagina],
     placeholderData: keepPreviousData,
     refetchInterval: 60_000,
-    queryFn: (): Promise<PaginaSolicitudes> => {
-      if (DEMO) return demo.solicitudes(pagina, porPagina);
-      const q = new URLSearchParams({ pagina: String(pagina), porPagina: String(porPagina), sinTotal: 'true' });
-      return opcional(
-        () => api<PaginaSolicitudes>(`/solicitudes/mias?${q}`).then(r => ({
-          ...r, solicitudes: r.solicitudes ?? [],
-          hayMas: r.hayMas ?? (typeof r.total === 'number' && typeof r.paginas === 'number' ? (r.pagina ?? 1) < r.paginas : false),
-        })),
-        { solicitudes: [], pagina: 1, porPagina, hayMas: false }
-      );
-    },
+    queryFn: () => DEMO ? demo.solicitudes(pagina, porPagina) : pedirSolicitudes(pagina, porPagina),
+  });
+}
+
+/** Las últimas solicitudes, para la campanita y el aviso automático. Se refresca más seguido que la pantalla. */
+export function useSolicitudesRecientes() {
+  return useQuery({
+    queryKey: ['cliente', 'solicitudes', 'recientes'],
+    refetchInterval: 30_000,
+    queryFn: () => DEMO ? demo.solicitudes(1, 50) : pedirSolicitudes(1, 50),
+  });
+}
+
+/** El cliente acepta o rechaza desde su portal la propuesta de domicilio que hizo la oficina. */
+export function useResponderSolicitud() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, aceptar, motivo }: { id: string; aceptar: boolean; motivo?: string }): Promise<SolicitudCliente> =>
+      DEMO
+        ? demo.responderSolicitud(id, aceptar, motivo)
+        : api<{ solicitud: SolicitudCliente }>(`/solicitudes/mias/${id}/responder`, { method: 'POST', json: { aceptar, ...(motivo ? { motivo } : {}) } }).then(r => r.solicitud),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['cliente', 'solicitudes'] }); },
   });
 }

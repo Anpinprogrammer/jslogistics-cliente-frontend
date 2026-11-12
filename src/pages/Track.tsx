@@ -11,6 +11,7 @@ import { hora } from '../lib/formato';
 import { ESTADO_PEDIDO } from '../lib/negocio';
 import Navbar from '../components/layout/Navbar';
 import LandingFooter from '../components/layout/LandingFooter';
+import { clientToast } from '../utils/clientToast';
 
 interface Paso {
   titulo: string;
@@ -100,7 +101,7 @@ export default function Track() {
         setResultado(deOrden(await ordersAPI.track(limpia)));
       }
     } catch (fallo) {
-      setError(fallo instanceof Error ? fallo.message : 'No pudimos consultar esta guía. Intenta de nuevo.');
+      clientToast.error(fallo instanceof Error ? fallo.message : 'No pudimos consultar esta guía. Intenta de nuevo.');
     } finally { setCargando(false); }
   }
 

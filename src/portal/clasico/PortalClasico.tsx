@@ -3,9 +3,9 @@
  * js-logistics/app/js/app.js), pasada a React sin cambiar lo que se ve: mismo HTML, mismas clases y el mismo
  * estilos.css. Para el dueño que prefiere que sus clientes sigan viendo exactamente lo de siempre.
  */
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { AlertTriangle, ArrowRight, Bot, Calendar, CheckCircle2, ChevronRight, ClipboardCheck, ClipboardList, Clock, XCircle, Eye, EyeOff, FileText, Image as ImageIcon, Info, KeyRound, Lock, Mail, MapPin, Maximize2, Moon, PackageCheck, Phone, Plus, Receipt, RotateCcw, Save, Search, Settings, ShieldCheck, Store, Sun, Truck, Undo2, X } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Bot, LogOut, Calendar, CheckCircle2, ChevronRight, ClipboardCheck, ClipboardList, Clock, XCircle, Eye, EyeOff, FileText, Image as ImageIcon, Info, KeyRound, Lock, Mail, MapPin, Maximize2, Moon, PackageCheck, Phone, Plus, Receipt, RotateCcw, Save, Search, Settings, ShieldCheck, Store, Sun, Truck, Undo2, X } from 'lucide-react';
 import './clasico.css';
 import { useSesion } from '../../auth/AuthProvider';
 import { useActualizarPerfilCliente, useConfirmarCambio, usePedirReintento, useCuentaCliente, useMisSolicitudes, useMovimientosCliente, usePaginaPedidos, usePruebas, type FiltroPedidos } from '../../api/cliente';
@@ -21,17 +21,14 @@ import { useTheme } from '../../hooks/useTheme';
 import { JSBOT_ABRIR } from '../../components/jsbot/JSBot';
 import { Icono } from './iconos';
 import { Cabecera, Columnas, Dialogo, Dona, EtqCambio, EtqDash, Foto, Paginador, PaginadorSinTotal } from './piezas';
+import { CampanitaCliente, RespuestaPropuesta } from './Notificaciones';
 import NuevoPedido from './NuevoPedido';
 import type { SolicitudCliente } from '../../types/dominio';
+import { clientToast } from '../../utils/clientToast';
 
 const VERDE = 'var(--verde)', ROJO = 'var(--rojo)';
 const LOGO = '/img/clasico/logo.png';
 
-function useToast() {
-  const [txt, setTxt] = useState('');
-  useEffect(() => { if (!txt) return; const t = setTimeout(() => setTxt(''), 3200); return () => clearTimeout(t); }, [txt]);
-  return { toast: setTxt, nodo: txt ? <div className="toast" role="status">{txt}</div> : null };
-}
 
 export default function PortalClasico() {
   const d = useDatosCliente();
@@ -39,7 +36,7 @@ export default function PortalClasico() {
   const { theme, toggleTheme } = useTheme();
   const nav = useNavigate(), loc = useLocation();
   const [sp, setSp] = useSearchParams();
-  const { toast, nodo: toastNodo } = useToast();
+  const toast = clientToast.auto;
   const [menuColapsado, setMenuColapsado] = useState(false);
   const ver = sp.get('ver');
   const abrir = (guia: string) => setSp(prev => { const n = new URLSearchParams(prev); n.set('ver', guia); return n; });
@@ -112,6 +109,10 @@ export default function PortalClasico() {
           <Bot aria-hidden="true" /><span>JSBot</span>
           <span className="jsbot-estado" aria-hidden="true" />
         </button>
+        <div className="barra-der">
+          <CampanitaCliente />
+          <PerfilMovil nombre={nom} iniciales={iniciales} theme={theme} alCambiarTema={toggleTheme} alSalir={() => salir().then(() => nav('/'))} />
+        </div>
         <button type="button" className="tema" data-tema={theme} onClick={toggleTheme}
           aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
           title={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}>
@@ -125,9 +126,33 @@ export default function PortalClasico() {
       <Dialogo abierto={!!ver} alCerrar={cerrar} variante="pedido">
         {ver && <VerPedido guia={ver} d={d} alCerrar={cerrar} alVer={abrir} toast={toast} />}
       </Dialogo>
-      {toastNodo}
     </div>
   );
+}
+
+/** Cuenta del cliente en el celular: la burbuja con sus iniciales abre un menú con el tema y el cierre de sesión.
+    En escritorio estos botones van sueltos en la barra y este menú no se muestra (clasico.css). */
+function PerfilMovil({ nombre, iniciales, theme, alCambiarTema, alSalir }: { nombre: string; iniciales: string; theme: string; alCambiarTema: () => void; alSalir: () => void }) {
+  const [abierto, setAbierto] = useState(false);
+  const caja = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!abierto) return;
+    const fuera = (e: Event) => { if (caja.current && !caja.current.contains(e.target as Node)) setAbierto(false); };
+    const tecla = (e: KeyboardEvent) => { if (e.key === 'Escape') setAbierto(false); };
+    document.addEventListener('mousedown', fuera);
+    document.addEventListener('touchstart', fuera);
+    document.addEventListener('keydown', tecla);
+    return () => { document.removeEventListener('mousedown', fuera); document.removeEventListener('touchstart', fuera); document.removeEventListener('keydown', tecla); };
+  }, [abierto]);
+  const oscuro = theme === 'dark';
+  return <div className="perfil-movil" ref={caja}>
+    <button type="button" className={'avatar perfil-movil-btn' + (abierto ? ' abierto' : '')} onClick={() => setAbierto(v => !v)} aria-haspopup="menu" aria-expanded={abierto} aria-label="Menú de la cuenta">{iniciales || 'CP'}</button>
+    {abierto && <div className="perfil-menu" role="menu">
+      <div className="perfil-menu-cab"><b>{nombre.replace(/@.*/, '') || 'Mi cuenta'}</b><small>Portal de clientes</small></div>
+      <button type="button" role="menuitem" onClick={() => { alCambiarTema(); setAbierto(false); }}>{oscuro ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}<span>{oscuro ? 'Modo claro' : 'Modo oscuro'}</span></button>
+      <button type="button" role="menuitem" className="peligro" onClick={() => { setAbierto(false); alSalir(); }}><LogOut aria-hidden="true" /><span>Cerrar sesión</span></button>
+    </div>}
+  </div>;
 }
 
 /* ---------------------------- Inicio (pintarInicioCliente) ---------------------------- */
@@ -295,6 +320,7 @@ function MisSolicitudes({ abrir }: { abrir: (g: string) => void }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const consulta = useMisSolicitudes(pagina, porPagina);
   const pag = consulta.data, ss = pag?.solicitudes ?? [];
+  const porResponder = ss.filter(s => s.estado === 'cotizada').length;
   const selected = ss.find(s => s.id === selectedId) ?? null;
   useEffect(() => { setPagina(1); }, [porPagina]);
   const ir = (n: number) => { setSelectedId(null); setPagina(n); window.scrollTo({ top: 0, behavior: 'smooth' }); };
@@ -302,7 +328,8 @@ function MisSolicitudes({ abrir }: { abrir: (g: string) => void }) {
   if (consulta.isError) return <div className="vacio">No se pudieron traer tus solicitudes. Revisa tu conexión e intenta de nuevo.</div>;
   if (!pag) return <div className="vacio">Cargando solicitudes…</div>;
   return <>
-    {ss.length > 0 && <p className="sub sol-intro">Cuando la oficina aprueba una solicitud y le asigna mensajero, aparece en “Mis pedidos” con su número de guía.</p>}
+    {ss.length > 0 && <p className="sub sol-intro">Cuando la oficina aprueba una solicitud y le asigna mensajero, aparece en “Mis pedidos” con su número de guía. Si te propone un domicilio, puedes aceptarlo o rechazarlo aquí mismo.</p>}
+    {porResponder > 0 && <div className="sol-aviso sol-aviso-accion" role="status"><b>{porResponder === 1 ? 'Tienes una propuesta por responder.' : `Tienes ${porResponder} propuestas por responder.`}</b> Abre la solicitud para aceptar o rechazar el domicilio.</div>}
     {ss.length ? <>
       <div className="sol-rows-desktop" style={consulta.isPlaceholderData ? { opacity: .6 } : undefined}>
         {ss.map(s => {
@@ -351,7 +378,7 @@ function DetalleSolicitud({ sol, alCerrar, verGuia }: { sol: SolicitudCliente; a
         </div>
       </div>
       {sol.estado === 'rechazada' && <div className="sol-rechazo" role="note"><b>Razón del rechazo</b><p>{sol.motivoRechazo || 'La oficina no registró la razón. Escríbenos por WhatsApp.'}</p></div>}
-      {sol.estado === 'cotizada' && <div className="sol-aviso">Te escribimos por WhatsApp con el valor{sol.valor != null ? ` (${pesos(sol.valor)})` : ''}. Respóndenos para aprobarlo.</div>}
+      {sol.estado === 'cotizada' && <RespuestaPropuesta solicitud={sol} />}
       <dl className="sol-datos">
         <div><dt><MapPin size={14} aria-hidden="true" /> Recoger en</dt><dd>{sol.direccionRecogida}</dd></div>
         <div><dt><Truck size={14} aria-hidden="true" /> Entregar a</dt><dd>{sol.destinatarioNombre}{sol.destinatarioTelefono ? ' · ' + sol.destinatarioTelefono : ''}<br />{sol.direccionEntrega}</dd></div>

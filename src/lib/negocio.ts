@@ -49,7 +49,7 @@ export function pasosSolicitud(s: SolicitudCliente): PasoSolicitud[] {
     { label: 'Pendiente de aprobación JS', detalle: 'Estamos revisando tu solicitud', completado: false, actual: true },
     { label: 'Aprobada por JS', detalle: 'Pendiente', completado: false, actual: false }];
   if (s.estado === 'cotizada') return [solicitado,
-    { label: 'Pendiente de tu aprobación', detalle: valor ? `Te propusimos ${valor} de domicilio` : 'Te escribimos por WhatsApp', completado: false, actual: true },
+    { label: 'Pendiente de tu aprobación', detalle: valor ? `Te propusimos ${valor} de domicilio` : 'Revisa la propuesta en tu portal', completado: false, actual: true },
     { label: 'Aprobada por JS', detalle: 'Pendiente', completado: false, actual: false }];
   const revisada: PasoSolicitud = { label: 'Revisada por JS', detalle: valor ? `Domicilio ${valor}` : hora(s.actualizado), completado: true, actual: false };
   if (s.estado === 'rechazada') return [solicitado, { ...revisada, detalle: hora(s.actualizado) },
