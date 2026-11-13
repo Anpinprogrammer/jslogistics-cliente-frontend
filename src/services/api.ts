@@ -1,12 +1,11 @@
 import axios from 'axios';
+import { BASE } from '../api/http';
 import { AuthResponse, CreateOrderPayload, FinanceSummary, Order, Transaction, User } from '../types';
 
 /*
  * API anterior de este repo, que solo usan Registro y Rastreo (páginas de la landing).
  * El portal del cliente usa src/api/. La sesión ahora va en una cookie httpOnly: nada de tokens en localStorage.
  */
-const BASE = import.meta.env.VITE_API_URL || '/api';
-
 const api = axios.create({ baseURL: BASE, withCredentials: true, headers: { 'X-JSL': '1' } });
 
 // Bubble up error messages cleanly

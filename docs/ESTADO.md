@@ -1,5 +1,13 @@
 # Estado del proyecto y memoria para agentes de IA
 
+## La API se configura con VITE_API_URL, no con vercel.json — 2026-11-13
+
+- `vercel.json` ya no reescribe `/api`: el portal llama directo a `VITE_API_URL` (producción `https://api.jslogistics.pro`, demo `https://api.ingenieroandrespineda.dev`), que se define en cada proyecto de Vercel. `src/api/http.ts` (`direccionApi`) le agrega `/api` igual que la app de oficina, y `services/api.ts` usa el mismo `BASE`.
+- La API debe ser subdominio del mismo dominio del portal (mismo *sitio*) para que la cookie `SameSite=Lax` funcione en Safari de iPhone. Nunca una URL `onrender.com`.
+- En Vercel, el build de producción avisa `⚠️ Falta VITE_API_URL` si no está. Las vistas previas (modo demo) no la necesitan; `/register` en una vista previa da 403 porque `*.vercel.app` no está en `CORS_ORIGENES`.
+- Consecuencia aceptada: portal y oficina comparten la cookie del host de la API, así que en un mismo navegador entrar en uno cierra la sesión del otro.
+- El cambio par en el backend y la oficina está en `js-logistics` (misma fecha).
+
 ## Formato y consultas rápidas de JSBot — 2026-11-12
 
 - `MensajeAsistente` renderiza párrafos, saltos, viñetas (-/•), negritas y cápsulas de guía sin HTML ni enlaces ejecutables; solo mensajes del bot. El historial enviado al servidor conserva el texto original.

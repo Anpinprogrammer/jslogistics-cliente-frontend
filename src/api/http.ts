@@ -4,7 +4,17 @@
  * - X-JSL: 1 en todo lo que no sea GET (protección CSRF que exige el backend).
  * - Errores con la forma del backend: { error: { code, message, campos? } }.
  */
-export const BASE = (import.meta.env.VITE_API_URL as string | undefined) || '/api';
+/**
+ * Dirección de la API. En Vercel es VITE_API_URL (producción https://api.jslogistics.pro), una por proyecto; se le
+ * agrega /api si no lo trae. Sin ella se usa /api en el mismo dominio (el proxy de Vite en desarrollo).
+ */
+export function direccionApi(valor?: string): string {
+  const v = (valor ?? '').trim().replace(/\/+$/, '');
+  if (!v) return '/api';
+  return v.endsWith('/api') ? v : `${v}/api`;
+}
+
+export const BASE = direccionApi(import.meta.env.VITE_API_URL as string | undefined);
 export const DEMO = import.meta.env.VITE_DEMO === 'true';
 
 export class ApiError extends Error {
