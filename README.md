@@ -33,7 +33,11 @@ dentro de `.clasico`, así que no choca con Tailwind ni con la landing.
 
 `vercel.json` fija Vite, la carpeta `dist` y la regla de SPA (toda ruta va a `index.html`).
 Las vistas previas de cada PR (`VERCEL_ENV=preview`) se construyen en **modo demo**, con datos de prueba, así se le pueden
-mostrar al dueño sin backend. Producción usa el modo normal y llama a `/api`, que Vercel reenvía a `https://js-logistics.onrender.com`.
+mostrar al dueño sin backend. Producción usa el modo normal y llama directo a la API de la variable **`VITE_API_URL`**
+(obligatoria en Vercel, sin `/api` al final: producción `https://api.jslogistics.pro`, demo `https://api.ingenieroandrespineda.dev`).
+`vercel.json` ya no reenvía `/api`, así que es el mismo para todos los despliegues. La API tiene que ser un subdominio del
+mismo dominio del portal (mismo *sitio*): con una URL `onrender.com` Safari de iPhone no guarda la cookie de sesión.
+Las variables `VITE_*` se leen al construir: si cambias una en Vercel, vuelve a publicar.
 
 ## Estructura
 

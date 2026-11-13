@@ -8,8 +8,8 @@ La arquitectura general del sistema (backend, base de datos y migración desde F
 ```text
                     jslogistics.pro (Vercel)                 admin./app.jslogistics.pro (Vercel)
                     este repo: landing + portal clientes     js-logistics/frontend: oficina + mensajeros
-                              │  /api/*                                │  /api/*
-                              └──────────── reescritura ───────────────┘
+                              │  VITE_API_URL                          │  VITE_API_URL
+                              └──────── https://api.jslogistics.pro ───┘
                                                  ▼
                                 Backend Express 5 en Render (js-logistics/backend)
                                                  ▼
@@ -17,10 +17,10 @@ La arquitectura general del sistema (backend, base de datos y migración desde F
 ```
 
 - **Un solo backend.** Él decide quién puede ver qué y hace los cálculos. Los frontends solo muestran y piden.
-- **Cada frontend llama a `/api` en su propio dominio.** Vercel reenvía esa ruta a Render. Hay tres razones:
-  - La cookie de sesión es de *primera parte* y *host-only* (`SameSite=Lax`, sin `Domain`), así que funciona en Safari de iPhone, que bloquea las cookies de terceros.
-  - La sesión del cliente en `jslogistics.pro` y la de la oficina en su subdominio quedan separadas.
-  - El navegador no necesita CORS. El backend igual revisa el `Origin` contra `CORS_ORIGENES` como defensa CSRF, junto con la cabecera `X-JSL: 1`.
+- **Cada frontend llama directo a la API con `VITE_API_URL`** (decisión del 2026-11-13; antes era una reescritura de `vercel.json`). Así un mismo código y un mismo `vercel.json` sirven para producción y para la demo; cada proyecto de Vercel pone su URL.
+  - La API va en un subdominio del mismo dominio (`api.jslogistics.pro`): es del mismo *sitio* que `jslogistics.pro`, así que la cookie (`SameSite=Lax`, sin `Domain`) es de *primera parte* y funciona en Safari de iPhone, que bloquea las cookies de terceros.
+  - El backend permite los orígenes con CORS (`CORS_ORIGENES`, con credenciales) y además los revisa como defensa CSRF, junto con la cabecera `X-JSL: 1`.
+  - Como el portal y la oficina usan el mismo host de API, en **un mismo navegador** comparten la sesión: entrar en uno cierra la del otro.
 
 ## Capas del frontend
 
@@ -95,7 +95,7 @@ Las vistas previas de Vercel se construyen así, para mostrarle al dueño el por
   - Build con Vite y salida en `dist`.
   - Toda ruta que no sea `/api/`, `/assets/` ni `/img/` va a `index.html`, que es la regla de SPA.
   - En las vistas previas (`VERCEL_ENV=preview`) se corre `build:demo`. En producción, `build`.
-- **API:** `/api/:path*` se reescribe hacia `https://js-logistics.onrender.com/api/:path*`. Esa regla va antes de la de SPA. Las vistas previas también la tienen, pero en modo demo no llaman a la red.
+- **API:** la da `VITE_API_URL` de cada proyecto de Vercel; `vercel.json` ya no la reenvía. Las vistas previas se construyen en modo demo y casi no llaman a la red (salvo `/register`, ver `docs/demo-publica.md`).
 - **Variables**: ver `.env.example`. Todas las `VITE_*` son públicas porque quedan en el JavaScript, así que ninguna puede ser secreta.
 
 ## Lo que viene

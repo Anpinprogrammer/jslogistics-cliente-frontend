@@ -3,6 +3,9 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
+  if (process.env.VERCEL && !env.VITE_API_URL && mode !== 'demo' && env.VITE_DEMO !== 'true') {
+    console.warn('\n⚠️  Falta VITE_API_URL en este proyecto de Vercel: el portal llamará a /api en su propio dominio y no encontrará el backend.\n');
+  }
   return {
     plugins: [react()],
     build: {
@@ -24,7 +27,7 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       port: 3000,
-      // En desarrollo, /api va al backend local: mismo origen, igual que en producción con la reescritura de Render.
+      // En desarrollo, /api va al backend local (mismo origen). En producción se llama directo a VITE_API_URL.
       proxy: { '/api': { target: env.VITE_PROXY_API || 'http://localhost:4000', changeOrigin: true } },
     },
   };

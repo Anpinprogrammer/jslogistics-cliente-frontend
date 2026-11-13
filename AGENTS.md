@@ -55,22 +55,22 @@ No hay pruebas automáticas todavía. Si cambias pantallas, revísalas con `npm 
 
   No uses `fetch` ni `axios` directamente.
 - `src/services/api.ts` (axios) es herencia de la landing original. Solo lo usan `Register` y `Track`. No le agregues nada; si tocas esas páginas, pásalas a `api()`.
-- La API se llama en **el mismo sitio** (`/api`, con una reescritura de Vercel hacia Render). No pongas una URL absoluta del backend en el código. `VITE_API_URL` existe solo para casos especiales.
+- La API se llama con **`VITE_API_URL`** (producción `https://api.jslogistics.pro`), que cada proyecto de Vercel define; `src/api/http.ts` le agrega `/api`. Tiene que ser un subdominio del mismo dominio del portal (mismo *sitio*) para que la cookie funcione en Safari de iPhone. No pongas una URL absoluta del backend en el código. Sin la variable (desarrollo) se usa `/api` con el proxy de Vite.
 - Las variables `VITE_*` terminan en el navegador, así que **nunca** pongas secretos en ellas. La service role key de Supabase y el `JWT_SECRET` solo van en el backend.
 - El rol se revisa con `<RequireRole roles={[...]}>` en `src/App.tsx`. Es solo comodidad: quien de verdad autoriza es el backend.
 
 ## Dominios y despliegue
 
 - `jslogistics.pro` (y `www.`) es este repo, en Vercel. El subdominio de oficina y mensajeros (`admin.` o `app.`, por decidir) es `js-logistics/frontend`.
-- Cada frontend reescribe `/api/*` hacia el mismo servicio de Render. Así la cookie queda *host-only*: la sesión de clientes y la de oficina no se mezclan, no hace falta CORS en el navegador y funciona en Safari de iPhone.
+- Cada frontend llama directo a `https://api.jslogistics.pro` con `VITE_API_URL`. La cookie es *host-only* de la API y del mismo sitio, así que funciona en Safari de iPhone; en un mismo navegador la sesión del portal y la de oficina son la misma.
 - En el backend:
   - `COOKIE_DOMINIO` va vacío y `COOKIE_SAMESITE=lax`.
   - `CORS_ORIGENES` incluye `https://jslogistics.pro`, `https://www.jslogistics.pro` y el subdominio de oficina.
-  - `TRUST_PROXY=2`, porque Vercel y Render son dos proxies.
+  - `TRUST_PROXY=1`, porque el navegador llega directo a Render (2 solo si Cloudflare hace de proxy).
 - `vercel.json`:
   - Fija Vite, la carpeta `dist` y la regla de SPA.
   - Las vistas previas (`VERCEL_ENV=preview`) se construyen en modo demo.
-  - Reescribe `/api/:path*` → `https://js-logistics.onrender.com/api/:path*`. Esa regla va **antes** de la regla de SPA. Si el backend cambia de URL, se cambia aquí y en la app de oficina.
+  - Ya **no** reescribe `/api`: la URL de la API es la variable `VITE_API_URL` de cada proyecto de Vercel. Si el backend cambia de URL, se cambia la variable y se vuelve a publicar.
 
 ## Estructura y dónde va cada cosa
 

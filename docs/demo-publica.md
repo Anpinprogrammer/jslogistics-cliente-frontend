@@ -17,23 +17,23 @@ La guía completa (base de datos, backend en Render, oficina, reinicio nocturno 
 
 Para el portafolio se usa la columna de la derecha. El modo en memoria sigue siendo útil para revisar diseño en los PR.
 
-> Desde el 2026-11-11 el formulario de `/register` **ya no tiene rama de demostración** en `src/api/solicitudes.ts`: siempre llama a `POST /api/solicitudes/publico`. En una vista previa de Vercel (que se construye en modo demo en memoria) eso significa que el envío va a la API a la que apunte la reescritura de `vercel.json`, no a un dato simulado. Revisa a qué backend apunta antes de compartir una vista previa.
+> Desde el 2026-11-11 el formulario de `/register` **ya no tiene rama de demostración** en `src/api/solicitudes.ts`: siempre llama a `POST /api/solicitudes/publico`. En una vista previa de Vercel (que se construye en modo demo en memoria) el envío va a la API de `VITE_API_URL` del entorno Preview; como el dominio `*.vercel.app` de la vista previa no está en `CORS_ORIGENES`, responde 403. Es lo esperado: las vistas previas son para revisar diseño.
 
 ## Paso a paso
 
 1. **Backend y base de la demo:** sigue la guía de `js-logistics/docs/demo-publica.md` (Supabase nuevo, Render nuevo, `db:migrar` y `db:demo -- --si`). Necesitas la dirección del servicio de Render de la demo.
 2. **Proyecto de Vercel:** proyecto nuevo con este repo (raíz del repo, framework Vite).
-3. **`vercel.json`:** la reescritura `/api/:path*` apunta hoy a `https://js-logistics.onrender.com` (producción). Para la demo, tiene que apuntar al Render **de la demo**. Hazlo en una rama `demo` (o en la rama que despliega el proyecto de la demo) y **no en `main`**, que es la configuración de producción. Mantén la regla de la API **antes** de la de SPA.
+3. **Variable `VITE_API_URL`** (Settings → Environment Variables, entorno Production): `https://api.ingenieroandrespineda.dev`, sin `/api` y sin barra final. Es el dominio propio del Render de la demo (ver la guía del backend); no uses el `onrender.com`, porque Safari de iPhone no guardaría la cookie. `vercel.json` es el mismo de producción: no hace falta una rama aparte.
 4. **Modo de construcción:** el `buildCommand` construye en modo real (`npm run build`) en producción y en modo demo en memoria (`npm run build:demo`) solo cuando `VERCEL_ENV=preview`. El sitio del portafolio debe ser el **despliegue de producción** del proyecto de la demo (su rama de producción), no una vista previa. En las variables de entorno del proyecto no pongas `VITE_DEMO` (o ponla en `false`).
 5. **Dominio:** agrega `portal.ingenieroandrespineda.dev` al proyecto y crea el CNAME que Vercel te indique.
-6. **Backend:** en `CORS_ORIGENES` del Render de la demo incluye `https://portal.ingenieroandrespineda.dev` (con `https://`, sin barra final; varios orígenes se separan con coma). Sin eso, el envío de la solicitud da **403 "Origen no permitido"**. Con `TRUST_PROXY=2`.
+6. **Backend:** en `CORS_ORIGENES` del Render de la demo incluye `https://portal.ingenieroandrespineda.dev` (con `https://`, sin barra final; varios orígenes se separan con coma). Sin eso, el envío de la solicitud da **403 "Origen no permitido"**. Con `TRUST_PROXY=1`.
 
 ## Cómo comprobar que quedó bien
 
 1. Abre `https://portal.ingenieroandrespineda.dev/register`: arriba del título debe decir **"Sin crear cuenta"**. Si dice "Vista de demostración", el sitio está en modo demo en memoria.
 2. En DevTools → Network, envía una solicitud con datos ficticios: debe salir un `POST /api/solicitudes/publico` con **201**.
    - **403:** el dominio no está en `CORS_ORIGENES`.
-   - **404:** el Render de la demo no tiene el código con las solicitudes.
+   - **404:** si la petición fue a `portal.ingenieroandrespineda.dev/api/…`, falta `VITE_API_URL` (agrégala y vuelve a publicar); si fue a `api.…`, el Render de la demo no tiene el código con las solicitudes.
    - **429:** el límite por IP (en la demo se baja a propósito).
 3. En la oficina de la demo (`admin@demo.co`), la solicitud aparece en la campanita, como máximo 30 segundos después.
 
