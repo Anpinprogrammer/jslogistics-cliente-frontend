@@ -95,7 +95,7 @@ Las vistas previas de Vercel se construyen así, para mostrarle al dueño el por
   - Build con Vite y salida en `dist`.
   - Toda ruta que no sea `/api/`, `/assets/` ni `/img/` va a `index.html`, que es la regla de SPA.
   - En las vistas previas (`VERCEL_ENV=preview`) se corre `build:demo`. En producción, `build`.
-- **API:** `/api/:path*` se reescribe hacia `https://js-logistics.onrender.com/api/:path*`. Esa regla va antes de la de SPA. Las vistas previas también la tienen, pero en modo demo no llaman a la red.
+- **API:** `/api/:path*` se reescribe hacia `https://api.jslogistics.pro/api/:path*`. Esa regla va antes de la de SPA. Las vistas previas también la tienen, pero en modo demo no llaman a la red.
 - **Variables**: ver `.env.example`. Todas las `VITE_*` son públicas porque quedan en el JavaScript, así que ninguna puede ser secreta.
 
 ## Lo que viene

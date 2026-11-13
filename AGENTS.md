@@ -70,7 +70,7 @@ No hay pruebas automáticas todavía. Si cambias pantallas, revísalas con `npm 
 - `vercel.json`:
   - Fija Vite, la carpeta `dist` y la regla de SPA.
   - Las vistas previas (`VERCEL_ENV=preview`) se construyen en modo demo.
-  - Reescribe `/api/:path*` → `https://js-logistics.onrender.com/api/:path*`. Esa regla va **antes** de la regla de SPA. Si el backend cambia de URL, se cambia aquí y en la app de oficina.
+  - Reescribe `/api/:path*` → `https://api.jslogistics.pro/api/:path*`. Esa regla va **antes** de la regla de SPA. Si el backend cambia de URL, se cambia aquí y en la app de oficina.
 
 ## Estructura y dónde va cada cosa
 

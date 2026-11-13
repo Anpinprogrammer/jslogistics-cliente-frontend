@@ -1,5 +1,10 @@
 # Estado del proyecto y memoria para agentes de IA
 
+## `/api` de Vercel apunta a api.jslogistics.pro — 2026-11-13
+
+- `vercel.json` reescribe `/api/:path*` hacia `https://api.jslogistics.pro`, el dominio propio del servicio de Render (el de Render es `jslogisticscali-api.onrender.com`). Antes apuntaba a `js-logistics.onrender.com`, que no es el servicio de producción. La app de oficina tiene el mismo cambio.
+- En Vercel no va `VITE_API_URL` ni `REACT_APP_API_URL` (esta última no la lee Vite). En Render, `TRUST_PROXY=2`.
+
 ## Formato y consultas rápidas de JSBot — 2026-11-12
 
 - `MensajeAsistente` renderiza párrafos, saltos, viñetas (-/•), negritas y cápsulas de guía sin HTML ni enlaces ejecutables; solo mensajes del bot. El historial enviado al servidor conserva el texto original.

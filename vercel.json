@@ -7,7 +7,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://js-logistics.onrender.com/api/:path*"
+      "destination": "https://api.jslogistics.pro/api/:path*"
     },
     {
       "source": "/((?!api/|assets/|img/).*)",
