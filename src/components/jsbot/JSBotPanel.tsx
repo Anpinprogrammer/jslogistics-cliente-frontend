@@ -5,16 +5,19 @@ import { ArrowUpRight, Send, ShieldCheck, Sparkles, X } from "lucide-react";
 import { useSesion } from "../../auth/AuthProvider";
 import { ApiError, DEMO } from "../../api/http";
 import { WhatsAppIcon } from "../icons/WhatsAppIcon";
-import { derivacionDeError, enlaceWhatsApp, enviarChat, type DerivacionChat, type MensajeChat } from "../../api/chatbot";
+import { derivacionDeError, enlaceWhatsApp, enviarChat, type BorradorSolicitud, type DerivacionChat, type EvidenciasPedido, type MensajeChat } from "../../api/chatbot";
 
 import { MensajeAsistente } from "./MensajeAsistente";
+import { TarjetaBorrador, TarjetaEvidencias } from "./TarjetasChat";
 
-const PREGUNTAS_RAPIDAS = ["Estado de mis pedidos", "¿Cuál es mi saldo?", "¿Cómo solicito un envío?"];
+const PREGUNTAS_RAPIDAS = ["Estado de mis pedidos", "¿Cuál es mi saldo?", "Quiero solicitar un envío", "Ver fotos de mi última entrega"];
 
 interface Mensaje {
   id: number;
   autor: "bot" | "usuario";
   texto: string;
+  borrador?: BorradorSolicitud | null;
+  archivos?: EvidenciasPedido[] | null;
 }
 const SALUDO: Mensaje = {
   id: 0,
@@ -131,7 +134,7 @@ export default function JSBotPanel({ pedido, setAbierto, burbuja, origenApertura
     try {
       const respuesta = await enviarChat([...historial, { rol: "user", contenido: limpio }], esCliente, abortar.signal);
       if (abortar.signal.aborted) return;
-      setMensajes(actuales => [...actuales, { id: siguienteId.current++, autor: "bot", texto: respuesta.respuesta }]);
+      setMensajes(actuales => [...actuales, { id: siguienteId.current++, autor: "bot", texto: respuesta.respuesta, borrador: respuesta.borrador, archivos: respuesta.archivos }]);
       setDerivacion(respuesta.derivar);
     } catch (fallo) {
       if (controlador.current !== abortar) return;
@@ -158,6 +161,8 @@ export default function JSBotPanel({ pedido, setAbierto, burbuja, origenApertura
     void enviar(texto);
   };
   const whatsappUrl = enlaceWhatsApp(derivacion);
+  // Solo el último resumen se puede confirmar: el servidor deja un borrador vivo por cliente.
+  const ultimoBorradorId = [...mensajes].reverse().find(m => m.borrador)?.id;
 
   return createPortal(
     <>
@@ -293,6 +298,8 @@ export default function JSBotPanel({ pedido, setAbierto, burbuja, origenApertura
                       {mensaje.autor === "bot" ? "JSBot" : "Tú"}:{" "}
                     </span>
                     {mensaje.autor === "bot" ? <MensajeAsistente texto={mensaje.texto} /> : <span className="whitespace-pre-wrap">{mensaje.texto}</span>}
+                    {mensaje.borrador && <TarjetaBorrador borrador={mensaje.borrador} activa={mensaje.id === ultimoBorradorId} />}
+                    {mensaje.archivos?.map(e => <TarjetaEvidencias key={e.guia} evidencias={e} />)}
                   </div>
                 </div>
               ))}
