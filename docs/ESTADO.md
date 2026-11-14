@@ -1,3 +1,10 @@
+## Rastreo en blanco en celulares viejos — 2026-11-14
+
+- Causa: `Track.tsx` usaba `Array.prototype.findLast` y `findLastIndex` (ES2023), que no existen en Safari antes de iOS 15.4 ni en navegadores viejos de Android. Al llegar el resultado, el render lanzaba un error y React desmontaba toda la app: pantalla en blanco. En escritorio (Chrome reciente) no pasaba.
+- `tsconfig.json` ahora usa `lib` hasta **ES2022**, así `npm run typecheck` rechaza `findLast`, `toSorted`, `toReversed` y demás métodos ES2023. No lo subas a ES2023 sin agregar polyfills.
+- `components/FalloPantalla.tsx` es el error boundary de las rutas (en `App.tsx`, con `key` de la sección): si una página falla al dibujarse, se ve "No pudimos mostrar esta página" con "Volver a cargar" en lugar del blanco.
+- Si la guía no existe o falla la conexión, el rastreo deja el aviso en la página (no solo un toast).
+
 ## Inicio compacto en celular — 2026-11-14
 
 - Bajo 960 px (el ancho del shell móvil) el Inicio muestra el saldo como franja horizontal con "Ver cuenta >", los tres contadores (En ruta, Entregados, Devueltos) en una fila y "Últimos pedidos" justo debajo; después van Efectividad, Tus envíos entregados y Últimos movimientos. Es el mismo HTML de escritorio: solo CSS (`.inicio-flujo`, `display:contents` y `order` al final de `clasico.css`) y textos cortos (`solo-mov`/`solo-esc`) en `Inicio.tsx`. Desde 960 px nada cambia.
