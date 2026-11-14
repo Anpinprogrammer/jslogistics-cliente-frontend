@@ -4,6 +4,12 @@
 
 # Estado del proyecto y memoria para agentes de IA
 
+## Recuperar y restablecer: navbar y footer de la landing y modo claro — 2026-11-14
+
+- Por pedido del dueño, `/recuperar`, `/restablecer`, `/activar` y `/activar-cuenta` usan el mismo `Navbar hero` y `LandingFooter` del login (`esAcceso` en `App.tsx`); antes caían en el `Navbar` claro viejo y el `Footer` viejo, que ahora solo quedan para `/equipo` y el 404.
+- `components/acceso.tsx` sigue siempre el tema: se quitó `seguirTema`, y `ETIQUETA`, `ENTRADA`, `ENLACE` y el nuevo `BOTON_OJO` ya son las versiones claras/oscuras que antes armaba `Login.tsx` con `.replace()`. Para los textos de la tarjeta están `TITULO_TARJETA`, `TEXTO_TARJETA`, `RESALTADO` y `PIE` (la pastilla blanca del pie, igual a la del login). No vuelvas a poner clases solo oscuras (`text-white`, `text-slate-400`) en estas pantallas.
+- Revisado a 320, 390 y 1280 px en claro y oscuro con `npm run dev:demo`. La lógica del flujo de código no cambió.
+
 ## Recuperar contraseña con código de 6 dígitos (2026-11-14)
 
 - `pages/Recuperar.tsx` ya no pide un enlace: pide el correo, luego el código de 6 números con la contraseña nueva (`authApi.restablecerConCodigo` → `POST /auth/restablecer-con-codigo`). Todo fallo del código llega como `CODIGO_INVALIDO` con el mismo texto. `Restablecer.tsx` sigue para activar cuentas y para el enlace que manda administración. Necesita el cambio de `js-logistics` (mismo nombre de rama).
@@ -57,7 +63,7 @@
 
 ## Login con modo claro — 2026-11-12
 
-- Por pedido explícito, el login ahora sigue el tema del Navbar: fondo blanco en claro, oscuro en dark, tarjeta de vidrio y textos/campos con contraste en ambos temas. `MarcoAcceso` lo activa con `seguirTema`; recuperar/restablecer conservan su diseño anterior.
+- Por pedido explícito, el login ahora sigue el tema del Navbar: fondo blanco en claro, oscuro en dark, tarjeta de vidrio y textos/campos con contraste en ambos temas. Desde 2026-11-14, `/recuperar`, `/restablecer`, `/activar` y `/activar-cuenta` también siguen el tema (se quitó la prop `seguirTema`: `MarcoAcceso` siempre lo sigue).
 - No modificar el mapa para adaptar el tema: `MapaSede`, SVG, viñeta interna, rutas, puntos, pin de Cali y animaciones permanecen intactos. Esta decisión sustituye la regla anterior de login siempre oscuro solo para `/login`.
 
 

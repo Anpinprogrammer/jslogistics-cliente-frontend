@@ -4,11 +4,10 @@ import { authApi } from '../api/auth';
 import { clientToast } from '../utils/clientToast';
 import {
   MarcoAcceso, BotonAcceso, AvisoError,
-  ETIQUETA, ENTRADA, ICONO, ENLACE, IcCorreo, IcCandado, IcOjo, IcOjoTachado, IcCheck, IcVolver,
+  ETIQUETA, ENTRADA, ICONO, ENLACE, BOTON_OJO, TITULO_TARJETA, TEXTO_TARJETA, RESALTADO, PIE, IcCorreo, IcCandado, IcOjo, IcOjoTachado, IcCheck, IcVolver,
 } from '../components/acceso';
 
 const CLAVE_MINIMA = 10;
-const BOTON_OJO = 'absolute right-2 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-lg text-slate-500 transition hover:bg-slate-700/50 hover:text-sky-400 focus-visible:outline-2 focus-visible:outline-sky-400';
 
 type Paso = 'correo' | 'codigo' | 'listo';
 
@@ -75,7 +74,7 @@ export default function Recuperar() {
   };
 
   const pie = (
-    <p className="mt-4 text-center text-sm text-slate-400 sm:mt-6">
+    <p className={PIE}>
       <Link to="/login" className={`inline-flex items-center gap-1.5 ${ENLACE}`}>
         <IcVolver /> Volver al ingreso
       </Link>
@@ -96,12 +95,12 @@ export default function Recuperar() {
     <MarcoAcceso pie={pie}>
       {paso === 'listo' && (
         <>
-          <h2 className="font-display text-lg font-700 text-white sm:text-xl">Contraseña cambiada</h2>
-          <p className="mb-4 mt-1 text-sm text-slate-400 sm:mb-6">
+          <h2 className={TITULO_TARJETA}>Contraseña cambiada</h2>
+          <p className={`mb-4 mt-1 sm:mb-6 ${TEXTO_TARJETA}`}>
             Ya puedes entrar con tu contraseña nueva. Cerramos las sesiones que tenías abiertas.
           </p>
           <div className="flex justify-center py-1">
-            <span className="grid h-14 w-14 place-items-center rounded-full border border-sky-400/40 bg-sky-400/10 text-sky-400">
+            <span className="grid h-14 w-14 place-items-center rounded-full border border-sky-500/40 bg-sky-500/10 text-sky-600 dark:border-sky-400/40 dark:bg-sky-400/10 dark:text-sky-400">
               <IcCheck />
             </span>
           </div>
@@ -110,9 +109,9 @@ export default function Recuperar() {
 
       {paso === 'codigo' && (
         <>
-          <h2 className="font-display text-lg font-700 text-white sm:text-xl">Escribe el código</h2>
-          <p className="mb-4 mt-1 text-sm text-slate-400 sm:mb-6">
-            Si <b className="font-semibold text-slate-100">{email.trim()}</b> tiene una cuenta, te enviamos un código de 6 números. Vence en 10 minutos.
+          <h2 className={TITULO_TARJETA}>Escribe el código</h2>
+          <p className={`mb-4 mt-1 sm:mb-6 ${TEXTO_TARJETA}`}>
+            Si <b className={RESALTADO}>{email.trim()}</b> tiene una cuenta, te enviamos un código de 6 números. Vence en 10 minutos.
           </p>
 
           <form onSubmit={guardar} className="space-y-3 sm:space-y-4">
@@ -145,13 +144,13 @@ export default function Recuperar() {
                 <span className={ICONO}><IcCandado /></span>
               </div>
             </div>
-            <p className="text-xs leading-relaxed text-slate-400">Mínimo {CLAVE_MINIMA} caracteres. Si no llega, revisa la carpeta de spam.</p>
+            <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400">Mínimo {CLAVE_MINIMA} caracteres. Si no llega, revisa la carpeta de spam.</p>
 
             {error && <AvisoError>{error}</AvisoError>}
 
             <BotonAcceso cargando={enviando} cargandoTexto="Guardando…">Guardar contraseña</BotonAcceso>
 
-            <p className="text-center text-sm text-slate-400">
+            <p className={`text-center ${TEXTO_TARJETA}`}>
               ¿No te llegó?{' '}
               <button type="button" onClick={reenviar} disabled={enviando} className={ENLACE}>Pedir otro código</button>
               {' · '}
@@ -163,8 +162,8 @@ export default function Recuperar() {
 
       {paso === 'correo' && (
         <>
-          <h2 className="font-display text-lg font-700 text-white sm:text-xl">Recuperar contraseña</h2>
-          <p className="mb-4 mt-1 text-sm text-slate-400 sm:mb-6">
+          <h2 className={TITULO_TARJETA}>Recuperar contraseña</h2>
+          <p className={`mb-4 mt-1 sm:mb-6 ${TEXTO_TARJETA}`}>
             Escribe el correo de tu cuenta y te enviamos un código de 6 números para crear una contraseña nueva.
           </p>
 

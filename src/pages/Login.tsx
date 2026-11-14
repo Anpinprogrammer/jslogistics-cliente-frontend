@@ -4,20 +4,12 @@ import { portadaDe, useSesion } from '../auth/AuthProvider';
 import { DEMO } from '../api/http';
 import {
   MarcoAcceso, BotonAcceso,
-  ETIQUETA as ETIQUETA_OSCURA, ENTRADA as ENTRADA_OSCURA, ICONO, IcCorreo, IcCandado, IcOjo, IcOjoTachado, IcCopiar, IcOk,
+  ETIQUETA, ENTRADA, ICONO, ENLACE, BOTON_OJO, IcCorreo, IcCandado, IcOjo, IcOjoTachado, IcCopiar, IcOk,
 } from '../components/acceso';
 import { useIntroLogin } from '../components/intro/useIntroLogin';
 import { escenaIntro } from '../components/intro/escena';
 import { medir, type Medidas } from '../components/intro/medidas';
 import { clientToast } from '../utils/clientToast';
-
-const ETIQUETA = ETIQUETA_OSCURA.replace('text-slate-400', 'text-slate-700 dark:text-slate-300').replace('font-medium', 'font-bold dark:font-medium');
-const ENTRADA = ENTRADA_OSCURA
-  .replace('border-slate-700/80 bg-slate-950/60', 'border-slate-300/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/80')
-  .replace('placeholder:text-slate-500', 'placeholder:text-slate-400 dark:placeholder:text-slate-500')
-  .replace('text-slate-100', 'text-slate-900 dark:text-white')
-  .replace('hover:border-slate-500', 'hover:border-slate-400 dark:hover:border-slate-500');
-const ENLACE = 'font-semibold text-sky-700 dark:text-sky-400 underline-offset-4 transition-colors hover:text-sky-800 dark:hover:text-sky-300 hover:underline';
 
 const DEMO_EMAIL = 'cliente@demo.co';
 const DEMO_CLAVE = 'demo1234';
@@ -104,7 +96,6 @@ const Login: React.FC = () => {
 
   return (
     <MarcoAcceso
-      seguirTema
       titulo={TITULO}
       intro={intro?.marco}
       sinEntrada={salio}
@@ -158,7 +149,7 @@ const Login: React.FC = () => {
             {intro?.campos[1].escaner}
             <span className={ICONO}><IcCandado /></span>
             <button type="button" onClick={() => setVer(v => !v)} aria-label={ver ? 'Ocultar contraseña' : 'Mostrar contraseña'} aria-pressed={ver}
-              className="absolute right-1.5 top-1/2 grid h-8 w-8 -translate-y-1/2 sm:right-2 sm:h-9 sm:w-9 place-items-center rounded-lg text-slate-500 transition hover:bg-slate-200/70 dark:hover:bg-slate-700/50 hover:text-sky-400">
+              className={BOTON_OJO}>
               {ver ? <IcOjoTachado /> : <IcOjo />}
             </button>
           </div>

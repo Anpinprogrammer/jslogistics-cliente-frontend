@@ -48,7 +48,7 @@ const queryClient = new QueryClient({
 function ScrollToHash() {
   const location = useLocation();
   useLayoutEffect(() => {
-    if (['/login', '/register', '/solicitar-envio'].includes(location.pathname)) {
+    if (['/login', '/recuperar', '/restablecer', '/register', '/solicitar-envio'].includes(location.pathname)) {
       const root = document.documentElement;
       const anterior = root.style.scrollBehavior;
       root.style.scrollBehavior = 'auto';
@@ -79,11 +79,13 @@ function Rutas() {
   const esRastreo = pathname === '/track' || pathname === '/rastrear' || pathname === '/tracking';
   // Solicitar envío (/register) dibuja su propio navbar y footer de la landing, igual que el rastreo.
   const esSolicitud = pathname === '/register' || pathname === '/solicitar-envio';
+  // Ingreso, recuperar y restablecer comparten el navbar y el footer de la landing (los mismos de la portada).
+  const esAcceso = ['/login', '/recuperar', '/restablecer', '/activar', '/activar-cuenta'].includes(pathname);
   // En el ingreso se va bajando el portal, para que al entrar no haya que esperarlo.
   useEffect(() => { if (pathname === '/login') import('./portal/PortalCliente').catch(() => { /* se reintenta al abrirlo */ }); }, [pathname]);
   return (
     <div className="flex flex-col min-h-screen">
-      {!sinMarco && !esPortada && !esRastreo && !esSolicitud && <Navbar hero={pathname === '/login'} />}
+      {!sinMarco && !esPortada && !esRastreo && !esSolicitud && <Navbar hero={esAcceso} />}
       {(esPortada || pathname === '/login' || esRastreo || esSolicitud || sinMarco) && <JSBot enPortalCliente={sinMarco} />}
       <main className="flex-grow">
         <ScrollToHash />
@@ -113,7 +115,7 @@ function Rutas() {
           </Routes>
         </Suspense>
       </main>
-      {!sinMarco && !esPortada && !esRastreo && !esSolicitud && (pathname === '/login' ? <LandingFooter /> : <Footer />)}
+      {!sinMarco && !esPortada && !esRastreo && !esSolicitud && (esAcceso ? <LandingFooter /> : <Footer />)}
     </div>
   );
 }
