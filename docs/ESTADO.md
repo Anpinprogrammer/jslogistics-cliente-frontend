@@ -1,3 +1,7 @@
+## Inicio compacto en celular — 2026-11-14
+
+- Bajo 960 px (el ancho del shell móvil) el Inicio muestra el saldo como franja horizontal con "Ver cuenta >", los tres contadores (En ruta, Entregados, Devueltos) en una fila y "Últimos pedidos" justo debajo; después van Efectividad, Tus envíos entregados y Últimos movimientos. Es el mismo HTML de escritorio: solo CSS (`.inicio-flujo`, `display:contents` y `order` al final de `clasico.css`) y textos cortos (`solo-mov`/`solo-esc`) en `Inicio.tsx`. Desde 960 px nada cambia.
+
 # Estado del proyecto y memoria para agentes de IA
 
 ## La API se configura con VITE_API_URL, no con vercel.json — 2026-11-13

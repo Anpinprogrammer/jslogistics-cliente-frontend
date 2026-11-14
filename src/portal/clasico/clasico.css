@@ -1196,3 +1196,33 @@ dialog.dialogo-nuevo[open]{animation:np-entra .2s ease-out}
 .ini-esq-foto{width:42px;height:42px;flex:none;border-radius:10px}
 .ini-esq-info{display:grid;gap:8px}
 .ini-esq-importe{width:20%;max-width:80px}
+
+/* Inicio en celular (< 960 px): saldo en franja, tres contadores en una fila y "Últimos pedidos" arriba de las gráficas.
+   Es el mismo HTML que el de escritorio; solo cambian el orden y las medidas, así que escritorio no se toca. */
+.solo-mov{display:none}
+.kpi-ver{display:none}
+@media (max-width:959px){
+  .solo-esc{display:none}
+  .solo-mov{display:inline}
+  .inicio-flujo{display:flex;flex-direction:column;gap:12px}
+  .inicio-flujo>.kpis{order:0;margin-bottom:0}
+  .inicio-flujo>.dash{display:contents}
+  .inicio-flujo .in-ped{order:1}.inicio-flujo .in-efec{order:2}.inicio-flujo .in-env{order:3}.inicio-flujo .in-mov{order:4}
+  .inicio-flujo .tarjeta{padding:16px;border-radius:24px}
+  .inicio-flujo>.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .inicio-flujo .kpi{padding:12px 8px;border-radius:16px;align-items:center;text-align:center;gap:0}
+  .inicio-flujo .kpi:hover{transform:none}
+  .inicio-flujo .kpi:active{transform:scale(.97)}
+  .inicio-flujo .kpi .lbl{font-size:.72rem;font-weight:700;gap:0}
+  .inicio-flujo .kpi .lbl svg{display:none}
+  .inicio-flujo .kpi b{font-size:1.35rem;font-weight:900;line-height:1.2;margin-top:4px}
+  .inicio-flujo .kpi small{font-size:.62rem;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .inicio-flujo .k-ruta b{color:#0284C7}.inicio-flujo .k-ent b{color:var(--verde)}.inicio-flujo .k-dev b{color:var(--rojo)}
+  :root[data-theme="dark"] .inicio-flujo .k-ruta b{color:#38BDF8}
+  .inicio-flujo .kpi.k-saldo{grid-column:1/-1;order:-1;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto auto;column-gap:12px;align-items:center;text-align:left;padding:14px 16px;border-radius:24px}
+  .inicio-flujo .k-saldo .lbl{grid-column:1;font-size:.72rem}
+  .inicio-flujo .k-saldo b{grid-column:1;font-size:1.4rem;margin-top:2px}
+  .inicio-flujo .k-saldo small{grid-column:1;font-size:.72rem;white-space:normal;line-height:1.25}
+  .inicio-flujo .k-saldo .kpi-ver{display:inline-flex;grid-column:2;grid-row:1/4;align-items:center;gap:2px;padding:6px 10px;border-radius:12px;background:var(--papel);color:var(--marca);font-size:.78rem;font-weight:800;border:1px solid var(--linea)}
+  .inicio-flujo .kpi-ver svg{width:14px;height:14px}
+}
