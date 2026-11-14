@@ -7,7 +7,7 @@ import { useSesion } from '../auth/AuthProvider';
 import { clientToast } from '../utils/clientToast';
 import {
   MarcoAcceso, BotonAcceso, AvisoError,
-  ETIQUETA, ENTRADA, ICONO, ENLACE, IcCandado, IcOjo, IcOjoTachado, IcCheck, IcVolver,
+  ETIQUETA, ENTRADA, ICONO, ENLACE, BOTON_OJO, TITULO_TARJETA, TEXTO_TARJETA, RESALTADO, PIE, IcCandado, IcOjo, IcOjoTachado, IcCheck, IcVolver,
 } from '../components/acceso';
 
 const CLAVE_MINIMA = 10;
@@ -74,7 +74,7 @@ export default function Restablecer() {
     'group relative mt-2 flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-[#0284c7] to-[#38bdf8] px-5 py-3 font-bold sm:py-3.5 text-white shadow-[0_8px_24px_-8px_rgba(56,189,248,0.6)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_-8px_rgba(56,189,248,0.85)] active:translate-y-0';
 
   const pie = (
-    <p className="mt-4 text-center text-sm text-slate-400 sm:mt-6">
+    <p className={PIE}>
       <Link to="/login" className={`inline-flex items-center gap-1.5 ${ENLACE}`}>
         <IcVolver /> Volver al ingreso
       </Link>
@@ -84,8 +84,8 @@ export default function Restablecer() {
   if (revisando) {
     return (
       <MarcoAcceso>
-        <h2 className="font-display text-lg font-700 text-white sm:text-xl">Revisando el enlace</h2>
-        <p className="mt-1 text-sm text-slate-400">Un momento, estamos comprobando que el enlace siga sirviendo.</p>
+        <h2 className={TITULO_TARJETA}>Revisando el enlace</h2>
+        <p className={`mt-1 ${TEXTO_TARJETA}`}>Un momento, estamos comprobando que el enlace siga sirviendo.</p>
         <div className="flex justify-center py-4">
           <svg className="h-8 w-8 animate-spin text-sky-400" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <circle cx="12" cy="12" r="9" stroke="currentColor" strokeOpacity=".25" strokeWidth="3" />
@@ -99,8 +99,8 @@ export default function Restablecer() {
   if (errorEnlace || !enlace) {
     return (
       <MarcoAcceso pie={pie}>
-        <h2 className="font-display text-lg font-700 text-white sm:text-xl">Este enlace no sirve</h2>
-        <p className="mb-4 mt-1 text-sm text-slate-400 sm:mb-6">
+        <h2 className={TITULO_TARJETA}>Este enlace no sirve</h2>
+        <p className={`mb-4 mt-1 sm:mb-6 ${TEXTO_TARJETA}`}>
           Puede que ya se haya usado o que lo haya reemplazado un correo más reciente. Usa el último que te llegó o pide uno nuevo.
         </p>
         {errorEnlace && <AvisoError>{errorEnlace}</AvisoError>}
@@ -112,10 +112,10 @@ export default function Restablecer() {
   if (listo) {
     return (
       <MarcoAcceso>
-        <h2 className="font-display text-lg font-700 text-white sm:text-xl">Contraseña lista</h2>
-        <p className="mb-4 mt-1 text-sm text-slate-400 sm:mb-6">Ya puedes entrar con tu contraseña nueva.</p>
+        <h2 className={TITULO_TARJETA}>Contraseña lista</h2>
+        <p className={`mb-4 mt-1 sm:mb-6 ${TEXTO_TARJETA}`}>Ya puedes entrar con tu contraseña nueva.</p>
         <div className="mb-4 flex justify-center py-1">
-          <span className="grid h-14 w-14 place-items-center rounded-full border border-sky-400/40 bg-sky-400/10 text-sky-400">
+          <span className="grid h-14 w-14 place-items-center rounded-full border border-sky-500/40 bg-sky-500/10 text-sky-600 dark:border-sky-400/40 dark:bg-sky-400/10 dark:text-sky-400">
             <IcCheck />
           </span>
         </div>
@@ -127,12 +127,12 @@ export default function Restablecer() {
   const activacion = enlace.tipo === 'activacion';
   return (
     <MarcoAcceso pie={pie}>
-      <h2 className="font-display text-lg font-700 text-white sm:text-xl">
+      <h2 className={TITULO_TARJETA}>
         {activacion ? 'Activa tu cuenta' : 'Cambia tu contraseña'}
       </h2>
-      <p className="mb-4 mt-1 text-sm text-slate-400 sm:mb-6">
+      <p className={`mb-4 mt-1 sm:mb-6 ${TEXTO_TARJETA}`}>
         {activacion ? 'Crea la contraseña con la que entrarás' : 'Escribe una contraseña nueva'} para{' '}
-        <b className="font-semibold text-slate-100">{enlace.email}</b>.
+        <b className={RESALTADO}>{enlace.email}</b>.
       </p>
 
       {error && <AvisoError>{error}</AvisoError>}
@@ -147,7 +147,7 @@ export default function Restablecer() {
             />
             <span className={ICONO}><IcCandado /></span>
             <button type="button" onClick={() => setVer(v => !v)} aria-label={ver ? 'Ocultar contraseña' : 'Mostrar contraseña'} aria-pressed={ver}
-              className="absolute right-2 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-lg text-slate-500 transition hover:bg-slate-700/50 hover:text-sky-400">
+              className={BOTON_OJO}>
               {ver ? <IcOjoTachado /> : <IcOjo />}
             </button>
           </div>
@@ -162,13 +162,13 @@ export default function Restablecer() {
             />
             <span className={ICONO}><IcCandado /></span>
             <button type="button" onClick={() => setVer(v => !v)} aria-label={ver ? 'Ocultar contraseñas' : 'Mostrar contraseñas'} aria-pressed={ver}
-              className="absolute right-2 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-lg text-slate-500 transition hover:bg-slate-700/50 hover:text-sky-400">
+              className={BOTON_OJO}>
               {ver ? <IcOjoTachado /> : <IcOjo />}
             </button>
           </div>
         </div>
 
-        <p className="text-xs leading-relaxed text-slate-400">Mínimo {CLAVE_MINIMA} caracteres.</p>
+        <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400">Mínimo {CLAVE_MINIMA} caracteres.</p>
 
         <BotonAcceso cargando={enviando} cargandoTexto="Guardando…">
           {activacion ? 'Crear contraseña' : 'Guardar contraseña'}
