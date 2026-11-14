@@ -4,6 +4,10 @@
 
 # Estado del proyecto y memoria para agentes de IA
 
+## Recuperar contraseña con código de 6 dígitos (2026-11-14)
+
+- `pages/Recuperar.tsx` ya no pide un enlace: pide el correo, luego el código de 6 números con la contraseña nueva (`authApi.restablecerConCodigo` → `POST /auth/restablecer-con-codigo`). Todo fallo del código llega como `CODIGO_INVALIDO` con el mismo texto. `Restablecer.tsx` sigue para activar cuentas y para el enlace que manda administración. Necesita el cambio de `js-logistics` (mismo nombre de rama).
+
 ## La API se configura con VITE_API_URL, no con vercel.json — 2026-11-13
 
 - `vercel.json` ya no reescribe `/api`: el portal llama directo a `VITE_API_URL` (producción `https://api.jslogistics.pro`, demo `https://api.ingenieroandrespineda.dev`), que se define en cada proyecto de Vercel. `src/api/http.ts` (`direccionApi`) le agrega `/api` igual que la app de oficina, y `services/api.ts` usa el mismo `BASE`.
