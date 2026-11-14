@@ -1,69 +1,65 @@
 import { useEffect, useLayoutEffect, useState, type FormEvent } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { CheckCircle2, FileText, MapPin, Navigation, Search, Truck, Warehouse } from 'lucide-react';
-import { ordersAPI } from '../services/api';
+import { Link, useSearchParams } from 'react-router-dom';
+import { AlertTriangle, CheckCircle2, ClipboardList, FileText, LogIn, PackageCheck, Search, Truck, type LucideIcon } from 'lucide-react';
 import { DEMO } from '../api/http';
-// Los datos de prueba solo se descargan en el modo demo.
-const pedidosDemo = () => import('../demo/datos').then(m => m.demo.pedidos());
-import type { Pedido } from '../types/dominio';
-import type { Order } from '../types';
-import { serviceLabel, statusLabel } from '../utils/format';
+import { rastrearGuia } from '../api/rastreo';
+import type { Pedido, PasoRastreo, Rastreo } from '../types/dominio';
 import { hora } from '../lib/formato';
-import { ESTADO_PEDIDO } from '../lib/negocio';
 import Navbar from '../components/layout/Navbar';
 import LandingFooter from '../components/layout/LandingFooter';
+import { WhatsAppIcon } from '../components/icons/WhatsAppIcon';
 import { clientToast } from '../utils/clientToast';
 
-interface Paso {
-  titulo: string;
-  lugar?: string;
-  fecha: string | null;
-  completado: boolean;
-}
-interface Resultado {
-  guia: string;
-  estado: string;
-  origen?: string;
-  destino?: string;
-  servicio?: string;
-  creado?: string;
-  entregado?: string | null;
-  pasos: Paso[];
-}
+// Los datos de prueba solo se descargan en el modo demo.
+const pedidosDemo = () => import('../demo/datos').then(m => m.demo.pedidos());
 
-const dePedidoDemo = (pedido: Pedido): Resultado => ({
-  guia: pedido.guia,
-  estado: ESTADO_PEDIDO[pedido.estado].texto,
-  origen: pedido.clienteNombre || undefined,
-  destino: pedido.destinatario || undefined,
-  creado: pedido.creado,
-  entregado: pedido.entregado,
-  pasos: [
-    { titulo: 'Aceptado', fecha: pedido.creado, completado: true },
-    { titulo: 'En ruta', fecha: pedido.estado === 'aceptado' ? null : pedido.creado, completado: pedido.estado !== 'aceptado' },
-    { titulo: pedido.estado === 'devuelto' ? 'Devuelto' : 'Entregado', fecha: pedido.entregado, completado: pedido.estado === 'entregado' || pedido.estado === 'devuelto' },
-  ],
-});
-
-const deOrden = (orden: Order): Resultado => ({
-  guia: orden.trackingNumber,
-  estado: statusLabel[orden.status] || orden.status,
-  origen: orden.senderAddress || orden.senderCompany,
-  destino: orden.recipientCity || orden.recipientAddress,
-  servicio: serviceLabel[orden.serviceType],
-  creado: orden.createdAt,
-  entregado: orden.deliveredAt,
-  pasos: orden.timeline.map(evento => ({ titulo: evento.event, lugar: evento.location, fecha: evento.timestamp, completado: evento.completed })),
-});
-
-const iconos = [FileText, Warehouse, Truck, CheckCircle2];
+const iconos: Record<PasoRastreo['clave'], LucideIcon> = {
+  solicitado: ClipboardList, guia_generada: FileText, recogido: PackageCheck, en_ruta: Truck, entregado: CheckCircle2, devuelto: AlertTriangle,
+};
 const fecha = (valor?: string | null) => valor ? hora(valor) : 'Pendiente';
+
+/** Frase corta que explica en qué va el envío, para quien solo quiere saber "¿dónde está mi pedido?". */
+const resumen: Record<Rastreo['estado'], string> = {
+  guia_generada: 'Ya tiene guía y un mensajero lo recogerá pronto.',
+  en_ruta: 'Un mensajero ya lo recogió y va camino a su destino.',
+  entregado: 'El envío llegó a su destino.',
+  devuelto: 'Hubo una novedad con tu envío.',
+};
+
+/** Estado actual en grande y, debajo, los pasos: vertical en el celular y en fila en pantallas anchas. */
+function Pasos({ pasos }: { pasos: PasoRastreo[] }) {
+  const ultimo = pasos.findLastIndex(p => p.completado);
+  return (
+    <ol className="flex flex-col md:flex-row" aria-label="Pasos del envío">
+      {pasos.map((paso, i) => {
+        const Icono = iconos[paso.clave];
+        const actual = i === ultimo;
+        const novedad = paso.clave === 'devuelto';
+        const unido = paso.completado && pasos[i + 1]?.completado;
+        const circulo = novedad ? 'border-rose-500 bg-rose-500 text-white'
+          : actual ? 'border-sky-500 bg-sky-500 text-white ring-4 ring-sky-500/20'
+          : paso.completado ? 'border-emerald-500 bg-emerald-500 text-white'
+          : 'border-slate-300 bg-white text-slate-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-500';
+        return (
+          <li key={paso.clave} aria-current={actual ? 'step' : undefined} className="relative flex min-w-0 gap-4 pb-7 last:pb-0 md:flex-1 md:flex-col md:items-center md:gap-3 md:pb-0 md:text-center">
+            {i < pasos.length - 1 && <span aria-hidden="true" className={`absolute left-4 top-9 h-[calc(100%-1.5rem)] w-0.5 -translate-x-1/2 md:left-1/2 md:top-4 md:h-0.5 md:w-full md:translate-x-0 md:-translate-y-1/2 ${unido ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-700'}`} />}
+            <span className={`relative z-10 grid h-8 w-8 shrink-0 place-items-center rounded-full border-2 ${circulo}`}><Icono aria-hidden="true" className="h-4 w-4" /></span>
+            <div className="min-w-0 pt-1 md:px-2 md:pt-0">
+              <h4 className={`break-words text-sm font-bold ${novedad ? 'text-rose-700 dark:text-rose-300' : paso.completado ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}>{paso.titulo}</h4>
+              <span className="mt-0.5 block text-xs font-medium text-slate-600 dark:text-slate-400">{paso.completado ? fecha(paso.fecha) : 'Pendiente'}</span>
+            </div>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
 
 export default function Track() {
   const [params] = useSearchParams();
   useLayoutEffect(() => { window.scrollTo(0, 0); }, []);
   const [guia, setGuia] = useState(params.get('n') || '');
-  const [resultado, setResultado] = useState<Resultado | null>(null);
+  const [resultado, setResultado] = useState<Rastreo | null>(null);
   const [ejemplos, setEjemplos] = useState<string[]>([]);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState('');
@@ -94,23 +90,17 @@ export default function Track() {
     setError('');
     setCargando(true);
     try {
-      if (DEMO) {
-        const pedido = (await pedidosDemo()).find(p => p.guia.toUpperCase() === limpia);
-        if (!pedido) throw new Error('No encontramos esa guía en la demostración. Prueba uno de los ejemplos.');
-        setResultado(dePedidoDemo(pedido));
-      } else {
-        setResultado(deOrden(await ordersAPI.track(limpia)));
-      }
+      setResultado(await rastrearGuia(limpia));
     } catch (fallo) {
       clientToast.error(fallo instanceof Error ? fallo.message : 'No pudimos consultar esta guía. Intenta de nuevo.');
     } finally { setCargando(false); }
   }
 
   const enviar = (evento: FormEvent<HTMLFormElement>) => { evento.preventDefault(); void buscar(guia); };
-  const ultimoCompletado = resultado?.pasos.findLastIndex(paso => paso.completado) ?? -1;
-  const tonoEstado = resultado?.estado === 'Entregado'
+  const actual = resultado?.pasos.findLast(paso => paso.completado);
+  const tonoEstado = resultado?.estado === 'entregado'
     ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
-    : resultado?.estado === 'Devuelto' || resultado?.estado === 'Cancelado'
+    : resultado?.estado === 'devuelto'
       ? 'border-rose-500/20 bg-rose-500/10 text-rose-700 dark:text-rose-300'
       : 'border-sky-500/20 bg-sky-500/10 text-sky-700 dark:text-sky-300';
 
@@ -153,25 +143,22 @@ export default function Track() {
         {resultado && <div aria-live="polite" className="rounded-3xl border border-slate-200 bg-white p-5 shadow-2xl motion-safe:animate-[landing-arrive_.35s_ease-out_both] dark:border-slate-800 dark:bg-slate-900 sm:p-8">
           <div className="mb-6 flex flex-col gap-4 border-b border-slate-200 pb-6 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0"><span className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Guía de envío</span><h2 className="break-all font-mono text-xl font-black text-slate-900 dark:text-white sm:text-2xl">{resultado.guia}</h2></div>
-            <span className={`inline-flex w-fit items-center gap-2 rounded-full border px-3.5 py-1 text-xs font-bold uppercase tracking-wider ${tonoEstado}`}><span className="h-2 w-2 rounded-full bg-current" />{resultado.estado}</span>
+            <span className={`inline-flex w-fit items-center gap-2 rounded-full border px-3.5 py-1 text-xs font-bold uppercase tracking-wider ${tonoEstado}`}><span className="h-2 w-2 rounded-full bg-current" />{resultado.estadoTexto}</span>
           </div>
-          <div className="mb-8 grid grid-cols-1 gap-4 rounded-2xl border border-slate-200/80 bg-slate-50 p-4 dark:border-slate-800/80 dark:bg-slate-950/60 sm:grid-cols-2">
-            <div className="flex min-w-0 items-center gap-3"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400"><MapPin className="h-4 w-4" /></span><div className="min-w-0"><span className="block text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400">Origen</span><span className="break-words text-xs font-bold">{resultado.origen || 'No disponible'}</span></div></div>
-            <div className="flex min-w-0 items-center gap-3"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"><Navigation className="h-4 w-4" /></span><div className="min-w-0"><span className="block text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400">Destino</span><span className="break-words text-xs font-bold">{resultado.destino || 'No disponible'}</span></div></div>
-          </div>
-          <h3 className="mb-4 text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Evolución del envío</h3>
-          {resultado.pasos.length ? <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
-            {resultado.pasos.map((paso, indice) => { const Icono = iconos[Math.min(indice, iconos.length - 1)]; const activo = indice === ultimoCompletado; return <div key={`${paso.titulo}-${indice}`} className={`min-w-0 rounded-2xl border p-4 ${activo ? 'border-sky-500/40 bg-sky-500/10 text-sky-700 dark:text-sky-300' : paso.completado ? 'border-slate-200 bg-slate-50 text-slate-900 dark:border-slate-800 dark:bg-slate-950 dark:text-white' : 'border-slate-200/60 bg-slate-50/50 text-slate-500 dark:border-slate-800/60 dark:bg-slate-950/30 dark:text-slate-400'}`}>
-              <div className="mb-2 flex items-start gap-2"><Icono aria-hidden="true" className="h-4 w-4 shrink-0" /><h4 className="break-words text-xs font-bold">{paso.titulo}</h4></div>
-              {paso.lugar && <span className="block break-words text-[11px] text-slate-600 dark:text-slate-400">{paso.lugar}</span>}
-              <span className="mt-1 block text-[10px] font-medium text-slate-500 dark:text-slate-400">{fecha(paso.fecha)}</span>
-            </div>; })}
-          </div> : <p className="text-sm text-slate-600 dark:text-slate-400">Aún no hay movimientos registrados para esta guía.</p>}
-          <div className="mt-6 grid grid-cols-1 gap-3 border-t border-slate-200 pt-5 text-xs dark:border-slate-800 sm:grid-cols-3">
-            {resultado.servicio && <div><span className="block font-bold uppercase tracking-wide text-slate-500">Servicio</span><span className="font-semibold">{resultado.servicio}</span></div>}
-            {resultado.creado && <div><span className="block font-bold uppercase tracking-wide text-slate-500">Creado</span><span className="font-semibold">{fecha(resultado.creado)}</span></div>}
-            {resultado.entregado && <div><span className="block font-bold uppercase tracking-wide text-slate-500">Cierre</span><span className="font-semibold">{fecha(resultado.entregado)}</span></div>}
-          </div>
+          <p className="mb-8 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+            <strong className="font-bold text-slate-900 dark:text-white">{resumen[resultado.estado]}</strong>
+            {actual?.fecha && <span className="block text-xs text-slate-600 dark:text-slate-400">Desde el {fecha(actual.fecha)}</span>}
+          </p>
+          <h3 className="mb-5 text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Evolución del envío</h3>
+          <Pasos pasos={resultado.pasos} />
+          {resultado.novedad && <div role="note" className="mt-8 rounded-2xl border border-rose-300 bg-rose-50 p-4 text-sm text-rose-900 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-100">
+            <p className="font-bold">Hay una novedad con tu envío</p>
+            <p className="mt-1 leading-relaxed">Para ver el detalle inicia sesión en tu portal, o escríbenos por WhatsApp y te contamos qué pasó.</p>
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+              <Link to="/login" className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-sky-400 px-4 text-sm font-extrabold text-slate-950 transition-colors hover:bg-sky-300"><LogIn aria-hidden="true" className="h-4 w-4" />Iniciar sesión en mi portal</Link>
+              {resultado.whatsapp && <a href={resultado.whatsapp} target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 text-sm font-bold text-emerald-800 transition-colors hover:bg-emerald-500/20 dark:text-emerald-300"><WhatsAppIcon className="h-4 w-4 shrink-0" />Escribir por WhatsApp</a>}
+            </div>
+          </div>}
         </div>}
       </div>
     </div>

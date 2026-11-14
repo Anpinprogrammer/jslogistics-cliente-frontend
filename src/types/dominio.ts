@@ -142,3 +142,23 @@ export interface Movimiento {
   nota: string;
   fecha: string;
 }
+
+/** Un paso del rastreo público. `fecha` es cuándo empezó (ISO) o `null` si todavía no ocurre. */
+export interface PasoRastreo {
+  clave: 'solicitado' | 'guia_generada' | 'recogido' | 'en_ruta' | 'entregado' | 'devuelto';
+  titulo: string;
+  fecha: string | null;
+  completado: boolean;
+}
+
+/** Respuesta de GET /rastreo/:guia (sin sesión): solo pasos y fechas, nada del remitente, el destinatario ni el mensajero. */
+export interface Rastreo {
+  guia: string;
+  estado: 'guia_generada' | 'en_ruta' | 'entregado' | 'devuelto';
+  estadoTexto: string;
+  pasos: PasoRastreo[];
+  /** `true` si el pedido está devuelto: el último paso avisa de una novedad. */
+  novedad: boolean;
+  /** Enlace `wa.me` de la empresa para preguntar por la novedad (solo si `novedad`; `null` si no está configurado). */
+  whatsapp: string | null;
+}

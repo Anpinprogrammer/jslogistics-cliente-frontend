@@ -405,3 +405,10 @@ Por petición explícita del dueño, `Home.tsx` sustituye la composición anteri
 - **2026-11-09:** login: enlace “¿Olvidaste tu contraseña?” y páginas públicas `/recuperar`, `/restablecer` y `/activar`, con el mismo diseño del login (marco compartido en `components/acceso.tsx`). Revisadas a 390 px en modo demo.
 - **2026-11-09:** revisión de la documentación; se agregó este archivo y se corrigió en `AGENTS.md` la regla de la landing.
 - **2026-11-07/08:** rediseño de la portada (carrusel), del menú móvil y del login; fotos de ejemplo; corrección de desbordes laterales en móvil.
+
+## Rastreo público con pasos y fechas — 2026-11-14
+
+- `/track` ya no llama al `/track/:n` heredado (que el backend nuevo no tiene): usa `rastrearGuia()` de `src/api/rastreo.ts`, que pide `GET /api/rastreo/:guia` (contrato en `js-logistics/backend/README.md`). **Necesita ese endpoint desplegado en el backend**; sin él, el rastreo responde 404 en producción.
+- La vista muestra la guía, el estado actual con una frase y los 5 pasos (Solicitado, Guía generada, Recogido, En ruta, Entregado) con la fecha de inicio de cada uno: vertical en el celular y en fila desde `md`. Ya no muestra origen ni destino ni servicio: el rastreo público no debe dar nada del remitente, el destinatario ni el mensajero.
+- Si la guía está devuelta, el último paso se llama "Novedad con el envío" y debajo aparece un aviso con "Iniciar sesión en mi portal" (`/login`) y, si el backend trae el enlace (`CHATBOT_WHATSAPP`), "Escribir por WhatsApp".
+- Modo demo: `rastrearGuia()` arma los pasos desde los pedidos de prueba.

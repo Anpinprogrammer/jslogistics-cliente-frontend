@@ -27,7 +27,6 @@ export const ordersAPI = {
   getAll: () => api.get<Order[]>('/orders').then(r => r.data),
   getById: (id: string) => api.get<Order>(`/orders/${id}`).then(r => r.data),
   create: (payload: CreateOrderPayload) => api.post<Order>('/orders', payload).then(r => r.data),
-  track: (trackingNumber: string) => api.get<Order>(`/track/${trackingNumber}`).then(r => r.data),
 };
 
 export const financeAPI = {
