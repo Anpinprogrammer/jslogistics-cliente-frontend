@@ -1,5 +1,6 @@
 /* Inicio del portal (pintarInicioCliente de la app actual). Es la única pestaña que necesita la lista completa de pedidos. */
 import type { ReactNode } from 'react';
+import { ChevronRight } from 'lucide-react';
 import { useCuentaCliente } from '../../api/cliente';
 import { hora, hoy, moverDia, pct, pesos } from '../../lib/formato';
 import { cambioPendiente, entregasPorDia, resumenCliente, ultimaActividad } from '../../lib/negocio';
@@ -10,8 +11,16 @@ import { Columnas, Dona, EtqDash, Foto, lineaPedido } from './piezas';
 
 const VERDE = 'var(--verde)', ROJO = 'var(--rojo)';
 
-function Kpi({ ico, lbl, val, pie, alClic, cls = '' }: { ico: string; lbl: string; val: ReactNode; pie: string; alClic: () => void; cls?: string }) {
-  return <button className={'kpi ' + cls} onClick={alClic}><span className="lbl"><Icono n={ico} />{lbl}</span><b>{val}</b><small>{pie}</small></button>;
+/* En celular (< 960 px) el saldo es una franja horizontal y los otros tres van en una fila: `lblMov`/`pieMov` son los textos cortos de ese diseño. */
+function Kpi({ ico, lbl, lblMov, val, pie, pieMov, alClic, cls = '', ver }: { ico: string; lbl: string; lblMov?: string; val: ReactNode; pie: string; pieMov?: string; alClic: () => void; cls?: string; ver?: boolean }) {
+  return (
+    <button className={'kpi ' + cls} onClick={alClic}>
+      <span className="lbl"><Icono n={ico} />{lblMov ? <><span className="solo-esc">{lbl}</span><span className="solo-mov">{lblMov}</span></> : lbl}</span>
+      <b>{val}</b>
+      {pieMov ? <><small className="solo-esc">{pie}</small><small className="solo-mov">{pieMov}</small></> : <small>{pie}</small>}
+      {ver && <span className="kpi-ver solo-mov">Ver cuenta<ChevronRight aria-hidden="true" /></span>}
+    </button>
+  );
 }
 
 export default function Inicio({ d, ir, abrir }: { d: DatosCliente; ir: (k: string, f?: string) => void; abrir: (g: string) => void }) {
@@ -27,33 +36,35 @@ export default function Inicio({ d, ir, abrir }: { d: DatosCliente; ir: (k: stri
     <>
       <div className="dash-cab"><div><h1>Hola, {d.cliente!.nombre}</h1><p className="sub">Así van tus envíos con JS Logistics</p></div></div>
       {cambios.length > 0 && <div className="aviso alerta">Tienes {cambios.length === 1 ? '1 prenda de cambio' : cambios.length + ' prendas de cambio'} por recibir ({cambios.map(p => p.guia).join(', ')}). Cuando te la entreguen, ábrela y confirma que la recibiste.</div>}
+      <div className="inicio-flujo">
       <div className="kpis">
-        <Kpi ico="ruta" lbl="En ruta ahora" val={r.enRuta} pie={`${r.salieronHoy} salieron hoy`} alClic={() => ir('pedidos', 'ruta')} />
-        <Kpi ico="ok" lbl="Entregados hoy" val={r.entHoy} pie={`${r.entMes} en 30 días`} alClic={() => ir('pedidos', 'ent')} />
-        <Kpi ico="dev" lbl="Devueltos hoy" val={r.devHoy} pie={`${r.devMes} en 30 días`} alClic={() => ir('pedidos', 'dev')} />
-        <Kpi ico="plata" lbl="Tu saldo" val={pesos(Math.abs(s))} cls="oscuro" alClic={() => ir('cuenta')}
+        <Kpi ico="ruta" lbl="En ruta ahora" lblMov="En ruta" val={r.enRuta} pie={`${r.salieronHoy} salieron hoy`} alClic={() => ir('pedidos', 'ruta')} cls="k-ruta" />
+        <Kpi ico="ok" lbl="Entregados hoy" lblMov="Entregados" val={r.entHoy} pie={`${r.entMes} en 30 días`} pieMov={`${r.entMes} en 30d`} alClic={() => ir('pedidos', 'ent')} cls="k-ent" />
+        <Kpi ico="dev" lbl="Devueltos hoy" lblMov="Devueltos" val={r.devHoy} pie={`${r.devMes} en 30 días`} pieMov={`${r.devMes} en 30d`} alClic={() => ir('pedidos', 'dev')} cls="k-dev" />
+        <Kpi ico="plata" lbl="Tu saldo" val={pesos(Math.abs(s))} cls="oscuro k-saldo" ver alClic={() => ir('cuenta')}
           pie={s > 0 ? 'JS Logistics te debe este valor' : s < 0 ? 'Pendiente por pagar a JS Logistics' : 'Cuenta a paz y salvo'} />
       </div>
       <div className="dash">
-        <section className="tarjeta c4"><h3>Efectividad <small>Últimos 30 días</small></h3>
+        <section className="tarjeta c4 in-efec"><h3>Efectividad <small>Últimos 30 días</small></h3>
           <Dona segs={[{ t: 'Entregados', n: r.entMes, c: VERDE }, { t: 'Devueltos', n: r.devMes, c: ROJO }]}
             centro={r.entMes + r.devMes ? pct(r.entMes, r.entMes + r.devMes) + '%' : '—'} sub="entregado" /></section>
-        <section className="tarjeta c8"><h3>Tus envíos entregados <small>Últimos 30 días · {tot30} en total</small></h3><Columnas datos={dias} /></section>
+        <section className="tarjeta c8 in-env"><h3>Tus envíos entregados <small>Últimos 30 días · {tot30} en total</small></h3><Columnas datos={dias} /></section>
       </div>
       <div className="dash">
-        <section className="tarjeta c6"><h3>Últimos pedidos <button className="btn sec chico" onClick={() => ir('pedidos', 'todos')}>Ver todos</button></h3>
+        <section className="tarjeta c6 in-ped"><h3>Últimos pedidos <button className="btn sec chico" onClick={() => ir('pedidos', 'todos')}>Ver todos</button></h3>
           {ultimos.length ? <div className="mini-lista">{ultimos.map(p => (
             <button key={p.guia} onClick={() => abrir(p.guia)}><Foto src={p.mini} />
               <span className="info"><span className="guia">{p.guia}</span> <EtqDash p={p} /><p>{lineaPedido(p)}</p></span>
               <span className="val">{p.estado === 'entregado' ? pesos(p.valorCobrado) : ''}</span></button>
           ))}</div> : <div className="vacio">Todavía no tienes envíos.</div>}
         </section>
-        <section className="tarjeta c6"><h3>Últimos movimientos <button className="btn sec chico" onClick={() => ir('cuenta')}>Mi cuenta</button></h3>
+        <section className="tarjeta c6 in-mov"><h3>Últimos movimientos <button className="btn sec chico" onClick={() => ir('cuenta')}>Mi cuenta</button></h3>
           {movs.length ? <div className="mini-lista">{movs.map((m, i) => (
             <div key={i}><span className="info"><b style={{ fontWeight: 600, fontSize: '.88rem' }}>{m.guia ? m.guia + (m.nom ? ' · ' + m.nom : '') : m.nom || m.det}</b><p>{hora(m.fecha)}</p></span>
               <span className={'val ' + (m.v < 0 ? 'neg' : 'pos')}>{pesos(m.v)}</span></div>
           ))}</div> : <div className="vacio">Sin movimientos.</div>}
         </section>
+      </div>
       </div>
     </>
   );
