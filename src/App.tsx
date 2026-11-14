@@ -9,6 +9,7 @@ import LandingFooter from './components/layout/LandingFooter';
 import { Spinner } from './components/ui';
 import Home from './pages/Home';
 import JSBot from './components/jsbot/JSBot';
+import FalloPantalla from './components/FalloPantalla';
 import { ApiError } from './api/http';
 import { FRESCO, EN_MEMORIA } from './utils/queryCache';
 
@@ -89,6 +90,8 @@ function Rutas() {
       {(esPortada || pathname === '/login' || esRastreo || esSolicitud || sinMarco) && <JSBot enPortalCliente={sinMarco} />}
       <main className="flex-grow">
         <ScrollToHash />
+        {/* Si una página falla al dibujarse, se ve un aviso en lugar de la pantalla en blanco. */}
+        <FalloPantalla key={pathname.split('/')[1]}>
         <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Spinner size="lg" /></div>}>
           <Routes>
             <Route path="/" element={<Home />} />
@@ -114,6 +117,7 @@ function Rutas() {
             } />
           </Routes>
         </Suspense>
+        </FalloPantalla>
       </main>
       {!sinMarco && !esPortada && !esRastreo && !esSolicitud && (esAcceso ? <LandingFooter /> : <Footer />)}
     </div>

@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useState, type FormEvent } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { AlertTriangle, CheckCircle2, ClipboardList, FileText, LogIn, PackageCheck, Search, Truck, type LucideIcon } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, CircleDot, ClipboardList, FileText, LogIn, PackageCheck, Search, Truck, type LucideIcon } from 'lucide-react';
 import { DEMO } from '../api/http';
 import { rastrearGuia } from '../api/rastreo';
 import type { Pedido, PasoRastreo, Rastreo } from '../types/dominio';
@@ -8,7 +8,6 @@ import { hora } from '../lib/formato';
 import Navbar from '../components/layout/Navbar';
 import LandingFooter from '../components/layout/LandingFooter';
 import { WhatsAppIcon } from '../components/icons/WhatsAppIcon';
-import { clientToast } from '../utils/clientToast';
 
 // Los datos de prueba solo se descargan en el modo demo.
 const pedidosDemo = () => import('../demo/datos').then(m => m.demo.pedidos());
@@ -17,6 +16,13 @@ const iconos: Record<PasoRastreo['clave'], LucideIcon> = {
   solicitado: ClipboardList, guia_generada: FileText, recogido: PackageCheck, en_ruta: Truck, entregado: CheckCircle2, devuelto: AlertTriangle,
 };
 const fecha = (valor?: string | null) => valor ? hora(valor) : 'Pendiente';
+
+/** Posición del último paso completado (o -1). No se usa `findLastIndex`/`findLast`: no existen en Safari antes de iOS 15.4
+ *  ni en navegadores viejos de Android, y ahí la página quedaba en blanco al mostrar el resultado. */
+function ultimoCompletado(pasos: PasoRastreo[]) {
+  for (let i = pasos.length - 1; i >= 0; i--) if (pasos[i].completado) return i;
+  return -1;
+}
 
 /** Frase corta que explica en qué va el envío, para quien solo quiere saber "¿dónde está mi pedido?". */
 const resumen: Record<Rastreo['estado'], string> = {
@@ -28,11 +34,11 @@ const resumen: Record<Rastreo['estado'], string> = {
 
 /** Estado actual en grande y, debajo, los pasos: vertical en el celular y en fila en pantallas anchas. */
 function Pasos({ pasos }: { pasos: PasoRastreo[] }) {
-  const ultimo = pasos.findLastIndex(p => p.completado);
+  const ultimo = ultimoCompletado(pasos);
   return (
     <ol className="flex flex-col md:flex-row" aria-label="Pasos del envío">
       {pasos.map((paso, i) => {
-        const Icono = iconos[paso.clave];
+        const Icono = iconos[paso.clave] ?? CircleDot;
         const actual = i === ultimo;
         const novedad = paso.clave === 'devuelto';
         const unido = paso.completado && pasos[i + 1]?.completado;
@@ -92,12 +98,14 @@ export default function Track() {
     try {
       setResultado(await rastrearGuia(limpia));
     } catch (fallo) {
-      clientToast.error(fallo instanceof Error ? fallo.message : 'No pudimos consultar esta guía. Intenta de nuevo.');
+      // El aviso queda en la página (no solo en un toast que se va), para que nunca se vea vacía después de buscar.
+      setError(fallo instanceof Error && fallo.message ? fallo.message : 'No pudimos consultar esta guía. Revisa tu conexión e intenta de nuevo.');
     } finally { setCargando(false); }
   }
 
   const enviar = (evento: FormEvent<HTMLFormElement>) => { evento.preventDefault(); void buscar(guia); };
-  const actual = resultado?.pasos.findLast(paso => paso.completado);
+  const pasos = resultado?.pasos ?? [];
+  const actual = pasos[ultimoCompletado(pasos)];
   const tonoEstado = resultado?.estado === 'entregado'
     ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
     : resultado?.estado === 'devuelto'
@@ -146,11 +154,11 @@ export default function Track() {
             <span className={`inline-flex w-fit items-center gap-2 rounded-full border px-3.5 py-1 text-xs font-bold uppercase tracking-wider ${tonoEstado}`}><span className="h-2 w-2 rounded-full bg-current" />{resultado.estadoTexto}</span>
           </div>
           <p className="mb-8 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
-            <strong className="font-bold text-slate-900 dark:text-white">{resumen[resultado.estado]}</strong>
+            <strong className="font-bold text-slate-900 dark:text-white">{resumen[resultado.estado] ?? resultado.estadoTexto}</strong>
             {actual?.fecha && <span className="block text-xs text-slate-600 dark:text-slate-400">Desde el {fecha(actual.fecha)}</span>}
           </p>
           <h3 className="mb-5 text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Evolución del envío</h3>
-          <Pasos pasos={resultado.pasos} />
+          <Pasos pasos={pasos} />
           {resultado.novedad && <div role="note" className="mt-8 rounded-2xl border border-rose-300 bg-rose-50 p-4 text-sm text-rose-900 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-100">
             <p className="font-bold">Hay una novedad con tu envío</p>
             <p className="mt-1 leading-relaxed">Para ver el detalle inicia sesión en tu portal, o escríbenos por WhatsApp y te contamos qué pasó.</p>
