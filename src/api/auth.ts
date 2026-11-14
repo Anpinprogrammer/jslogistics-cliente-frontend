@@ -25,7 +25,7 @@ export const authApi = {
     if (DEMO) return demo.cambiarClave(claveActual, claveNueva);
     await api('/auth/clave', { method: 'POST', json: { claveActual, claveNueva } });
   },
-  /** Pide el enlace. El backend responde 204 exista o no la cuenta, para no revelar correos. */
+  /** Pide el código de 6 dígitos por correo. El backend responde 204 exista o no la cuenta, para no revelar correos. */
   async recuperar(email: string): Promise<void> {
     if (DEMO) { await new Promise(r => setTimeout(r, 250)); return; }
     await api('/auth/recuperar', { method: 'POST', json: { email } });
@@ -41,6 +41,11 @@ export const authApi = {
       };
     }
     return (await api<{ enlace: EnlaceCorreo }>(`/auth/enlace/${encodeURIComponent(token)}`)).enlace;
+  },
+  /** Cambia la contraseña con el código del correo. Cualquier fallo llega como CODIGO_INVALIDO con el mismo texto. */
+  async restablecerConCodigo(email: string, codigo: string, clave: string): Promise<void> {
+    if (DEMO) { await new Promise(r => setTimeout(r, 250)); return; }
+    await api('/auth/restablecer-con-codigo', { method: 'POST', json: { email, codigo, clave } });
   },
   async restablecer(token: string, clave: string): Promise<void> {
     if (DEMO) { await new Promise(r => setTimeout(r, 250)); return; }
